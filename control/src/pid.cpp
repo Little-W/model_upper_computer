@@ -41,7 +41,7 @@ AngleControl::AngleControl(float kp, float kd, data_t max, data_t min) {
  */
 out_t AngleControl::output(data_t dist_error) {
 	data_t now_error = dist_error;
-	int out = round(this->pid.output(now_error)) + 125;//125:舵机中线值
+	int out = round(this->pid.output(now_error));  //舵机中线值为0，左转为正，右转为负
 	if (out > this->maximum) out = this->maximum;
 	else if (out < this->minimum) out = this->minimum;
 	return out_t(out);

@@ -22,8 +22,8 @@ SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.m
 float kp, kd;
 int dv;
 float deviation = 0;
-u_char angle_result, speed_result, run_set = 'r';
-
+schar speed_result, run_set = 'r';
+int angle_result = 0;
 int circle_inside_count = 0;
 int circle_last_y = IMGH - 2;
 long long circle_out_ag = 0;
@@ -39,6 +39,24 @@ int stop = false;
 void callback(int signum) {
 	cerr << "Sender received signal, quit!" << endl;
 	stop = true;
+}
+
+void encode_and_send(serial::Serial ser)
+{
+	vector<unsigned char> result;
+	uchar speed_code,servo_code_p1,servo_code_p2;
+	speed_code = speed_result & 0x1f;
+	if(speed_result < 0) speed_code |= 0x20;
+	servo_code_p1 = (angle_result >> 6) & 0x1f;
+	if(angle_result < 0) servo_code_p1 |= 0x20;
+	servo_code_p1 |= 0x80;
+	servo_code_p2 = angle_result & 0x3f;
+	servo_code_p2 |= 0xc0;
+	result.push_back(speed_code);
+	result.push_back(servo_code_p1);
+	result.push_back(servo_code_p2);	
+	ser.write(result);
+	cout << "Angle: " << angle_result * 0.028125 << "	Speed: " << (int)speed_result << endl;
 }
 
 int main()
@@ -623,14 +641,7 @@ int main()
 			circle_count++;
 		}
 
-		vector<unsigned char> result;
-		result.push_back('0');
-		result.push_back(speed_result + dv);
-		result.push_back(angle_result);
-		result.push_back(run_set);
-		ser.write(result);
-
-		cout << "Angle: " << 1.6 * result[2] + 550 << "	Speed: " << (int)result[1] << endl;
+		encode_and_send(ser);
 
 		switch (MI.state_out)
 		{
