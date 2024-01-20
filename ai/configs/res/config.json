@@ -1,0 +1,14 @@
+{	
+	"model_file_name":"__model__",
+	"params_file_name":"__params__",
+
+	"labels_file_name":"label_list.txt",
+
+	"format":"RGB",
+	"input_width":224,
+	"input_height":224,
+		
+	"mean":[123.675,116.28,103.53],
+    "scale":[0.017125, 0.017507, 0.017429],
+	"threshold":0.4
+}

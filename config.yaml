@@ -1,0 +1,222 @@
+#xihua:
+#校正中线
+#闭环入库
+
+set:
+    video_save: true
+    color: false
+    motor_use: true
+    zebra_detect: true
+    cut_point_x: 0
+    cut_point_y: 70
+    cut_w: 640
+    cut_h: 350
+    ai_cut_x: 20
+    ai_cut_y: 30
+    ai_w: 600
+    ai_h: 400
+
+#    
+main:
+    garage_start: true
+    kp: 2.19 #1.16
+    kd: 5.10 #4.54
+    dv: 0
+    max_ag: 250 
+    min_ag: 0
+    max_v: 130 #95
+    min_v: 85 #95
+    max_v_diff: 40 
+    min_v_diff: 3 
+    use_dv: false #false
+    second_lap: false
+    center_coef: 0.2
+    forward_dist: 45 #130给70 0.8  4 ；80给25 2.5 0.05
+    up_scope: 4
+    down_scope: 4
+    forward_coef1: 0.6
+    forward_coef2: 0.4
+    # 恒定速度与打角
+    v_right_circle: [60,90] #[60,70]
+    v_left_circle: [175,90] #[175,70]
+#
+right_circle:
+    kp: 1.5
+    kd: 4
+    dv: 0
+    speed: 10
+    circle_dist: 40
+    use: false 
+    big_circle: false 
+    count_start: 2
+    in_find:
+        kp: 1.5
+        kd: 4
+        dv: 0
+        ray_ag: 2
+    in_strai:
+        kp: 1.5
+        kd: 4
+        dv: 0
+        ray_ag1: -0.94
+        ray_ag2: -2.55 #-2.55
+    in_circle:
+        kp: 4
+        kd: 12
+        dv: 0
+        ray_ag1: 0.64 #0.84
+        ray_ag2: -0.94
+        ray_ag3: -2.45
+        ray_ag4: -2.45
+        ray_ag5: 0.44 #0.84
+    inside_before:
+        kp: 2.19
+        kd: 5.10
+        dv: 0
+        p: ['0','IMGH-5']
+    inside:
+        kp: 1.5
+        kd: 4
+        dv: 0 #2
+    out_find:
+        kp: 1.5
+        kd: 4
+        dv: 0 #2
+        p: ['2*IMGW/3','IMGH/2'] #['2*IMGW/3','IMGH/2-5']
+    out_strai: 
+        find_pos: 12
+        kp: 1.5
+        kd: 4
+        dv: 0
+    out:
+        kp: 1.5
+        kd: 4
+        dv: 0 #10
+        ray_ag: 1.9
+    out_out: 
+        kp: 1.5
+        kd: 4
+        dv: 0
+#
+left_circle:
+    kp: 1.5
+    kd: 4
+    dv: 0
+    speed: 85
+    circle_dist: 30
+    use: false ######
+    big_circle: false
+    count_start: 2
+    in_find:
+        kp: 1.5
+        kd: 4
+        dv: 0 #10
+        ray_ag: 1
+    in_strai:
+        kp: 1.5
+        kd: 4
+        dv: 0
+        ray_ag1: -2.1
+        ray_ag2: -0.55
+    in_circle:
+        kp: 4
+        kd: 12
+        dv: 0
+        ray_ag1: 2.5
+        ray_ag2: -2.2
+        ray_ag3: -0.6
+        ray_ag4: -0.6
+        ray_ag5: 2.7
+    inside_before:
+        kp: 2.19
+        kd: 5.10
+        dv: 0
+        p: ['IMGW-1','IMGH-5']
+    inside:
+        kp: 1.5
+        kd: 4
+        dv: 0 #2
+    out_find:
+        kp: 1.5
+        kd: 4
+        dv: 0 #2
+        p: ['IMGW/3','IMGH/2']
+    out_strai: 
+        find_pos: 12
+        kp: 1.5
+        kd: 4
+        dv: 0
+    out: 
+        kp: 1.5
+        kd: 4
+        dv: 0 #10
+        ray_ag: 1.24
+    out_out: 
+        kp: 1.5
+        kd: 4
+        dv: 0
+#
+repair:
+    kp: 2
+    kd: 4
+    dv: 0
+    speed: 30
+#
+farm:
+    kp: 1.3 #0.3 2.9高速80
+    kd: 2.6 #0.3 2低速50~70
+    dv: 0
+    speed: 120
+    speed_out: 100
+    dist: 35
+    up_scope: 15
+    down_scope: 25
+    out_find_line: 35
+    out_find_count: 30
+    out_line: 30
+    out_count: 70
+#
+hump:
+    kp: 2
+    kd: 4
+    dv: 0
+    speed: 110
+    mend_up_line: 50
+    on_line: 25
+#
+start:
+    kp: 2
+    kd: 4
+    dv: 0
+    left: false
+    start_dist: 4
+    x_thresh: 24
+    v_left: [ 200, 75 ]
+    v_right: [ 40, 75 ]
+#
+end:
+    kp: 2
+    kd: 4
+    dv: 0
+    end_dist: 55
+    end_whitecount: 20
+    v_left_garage: [220,50]
+    v_right_garage: [5,50]
+#
+zebra:
+    kp: 2
+    kd: 4
+    dv: 0
+    zebra_far_dist: 60 #50 # 最好大于巡线门槛
+    zebra_near_dist: 40 # 小于上一值  30
+    v_left_zebra: [125,50]
+    v_right_zebra: [125,50]
+#
+hill:
+    kp: 2 #2
+    kd: 4
+    dv: 0
+    speed: 120
+    mid_bot_y: 5
+    mid_top_y: 50
+    frame: 26

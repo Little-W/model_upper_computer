@@ -1,0 +1,6 @@
+background
+bridge
+tractor
+corn
+pig
+bump
