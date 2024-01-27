@@ -36,12 +36,15 @@ int zebra_count = 0;
 
 int stop = false;
 
+//通信端口
+serial::Serial ser;
+
 void callback(int signum) {
 	cerr << "Sender received signal, quit!" << endl;
 	stop = true;
 }
 
-void encode_and_send(serial::Serial ser)
+void encode_and_send(void)
 {
 	vector<unsigned char> result;
 	uchar speed_result_tmp;
@@ -81,8 +84,6 @@ int main()
 	addr[1] = 0;
 	addr[2] = 0;
 	void* image_addr = shmat(image_shm, NULL, 0);
-	//通信端口
-	serial::Serial ser;
 
 	// auto now = std::chrono::system_clock::now();
 	// std::time_t time = std::chrono::system_clock::to_time_t(now);
@@ -647,7 +648,7 @@ int main()
 			circle_count++;
 		}
 
-		encode_and_send(ser);
+		encode_and_send();
 
 		switch (MI.state_out)
 		{
