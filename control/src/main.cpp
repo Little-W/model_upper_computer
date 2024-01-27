@@ -44,13 +44,19 @@ void callback(int signum) {
 void encode_and_send(serial::Serial ser)
 {
 	vector<unsigned char> result;
+	uchar speed_result_tmp;
+	uint angle_result_tmp = 0;
+	speed_result_tmp = speed_result < 0 ? -speed_result : speed_result;
+	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
+	speed_result_tmp /= 5;
+	if(angle_result_tmp > 1200) angle_result_tmp = 1200;
 	uchar speed_code,servo_code_p1,servo_code_p2;
-	speed_code = speed_result & 0x1f;
+	speed_code = speed_result_tmp & 0x1f;
 	if(speed_result < 0) speed_code |= 0x20;
-	servo_code_p1 = (angle_result >> 6) & 0x1f;
+	servo_code_p1 = (angle_result_tmp >> 6) & 0x1f;
 	if(angle_result < 0) servo_code_p1 |= 0x20;
 	servo_code_p1 |= 0x80;
-	servo_code_p2 = angle_result & 0x3f;
+	servo_code_p2 = angle_result_tmp & 0x3f;
 	servo_code_p2 |= 0xc0;
 	result.push_back(speed_code);
 	result.push_back(servo_code_p1);
