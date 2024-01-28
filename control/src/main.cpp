@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -23,7 +23,7 @@ float kp, kd;
 int dv;
 float deviation = 0;
 schar speed_result, run_set = 'r';
-int angle_result = 0;
+float angle_result = 0;
 int circle_inside_count = 0;
 int circle_last_y = IMGH - 2;
 long long circle_out_ag = 0;
@@ -44,14 +44,19 @@ void callback(int signum) {
 	stop = true;
 }
 
+/*
+	下位机速度控制范围  +- 31
+	舵机控制范围       +- 1200
+*/
 void encode_and_send(void)
 {
 	vector<unsigned char> result;
 	uchar speed_result_tmp;
 	uint angle_result_tmp = 0;
+	angle_result *= 10;
 	speed_result_tmp = speed_result < 0 ? -speed_result : speed_result;
 	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
-	speed_result_tmp /= 5;
+	speed_result_tmp /= 20;
 	if(angle_result_tmp > 1200) angle_result_tmp = 1200;
 	uchar speed_code,servo_code_p1,servo_code_p2;
 	speed_code = speed_result_tmp & 0x1f;
@@ -65,7 +70,10 @@ void encode_and_send(void)
 	result.push_back(servo_code_p1);
 	result.push_back(servo_code_p2);	
 	ser.write(result);
-	cout << "Angle: " << angle_result * 0.028125 << "	Speed: " << (int)speed_result << endl;
+	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result / 20 << endl;
+	cout << "************************************************************************"<< endl;
+	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p1 << "	Speed: " << (uint)speed_code <<  endl;
+	cout << "************************************************************************"<< dec << endl;
 }
 
 int main()
@@ -114,6 +122,7 @@ int main()
 		MI.store.Writer_Exist = true;
 	}
 	//主循环
+	// ser.write("Hello World!");
 	while (!stop)
 	{
 		// now = std::chrono::system_clock::now();
@@ -734,13 +743,10 @@ int main()
 		//	break;
 	}
 	cout << "OUT!" << endl;
-	vector<unsigned char> result;
-	result.push_back('0');
-	result.push_back(0);
-	result.push_back(125);
-	result.push_back('s');
-	ser.write(result);
-
+	angle_result = 0;
+	speed_result = 0;
+	for(int i = 0; i < 10; i++)
+		encode_and_send();
 	shmdt(addr);
 	shmdt(image_addr);
 
