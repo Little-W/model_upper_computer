@@ -1,12 +1,15 @@
 #include <iostream>
 #include <stdlib.h>
 #include "process.h"
+#include <chrono>
+
+#define USE_VIDEO 1
 
 bool r_circle_use = true;
 bool l_circle_use = true;
 bool l_circle_big_circle = true;
 bool r_circle_big_circle = true;
-
+extern int stop;
 Mat get_frame(VideoCapture cap) {
 	Mat frame;
 	cap.read(frame);
@@ -62,8 +65,11 @@ float MainImage::MidlineDeviation()
 
 ImageStorage::ImageStorage()
 {
+#if USE_VIDEO == 1
 	cap.open("./sample.avi");//这个路径就是当前路径的意思
-	// cap.open("/dev/video0", cv::CAP_V4L2);
+#else
+	cap.open("/dev/video0", cv::CAP_V4L2);
+#endif
 	if (!cap.isOpened()) {
 		std::cout << "An error occured!!!" << std::endl;
 	}
@@ -78,15 +84,47 @@ ImageStorage::ImageStorage()
 void ImageStorage::get_image(int x, int y, int w, int h, int ai_x, int ai_y, int ai_w, int ai_h, bool f)
 {
 	bool success;
+	static std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_ts = std::chrono::high_resolution_clock::now();
 	cv::Mat frame, frame_tmp;
 	vector<cv::Mat> image_split;
+	auto start = std::chrono::high_resolution_clock::now();
 	do {
+		success = true;
+#if USE_VIDEO == 1
+		std::chrono::duration<double, std::milli> elapsed = std::chrono::high_resolution_clock::now() - last_frame_ts;
+		if(elapsed.count() > 1000.0 / 60.0)
+		{
+			std::cout << "Frame Elapsed Time: " << elapsed.count() << " ms" << std::endl;
+			frame = fut.get();
+			fut = async(launch::async, get_frame, cap);
+			if (frame.empty()) {
+				success = false;
+				cout << "frame is empty" << endl;
+				stop = true;
+				return;
+			}
+			else
+			{
+				last_frame_ts = std::chrono::high_resolution_clock::now();
+			}
+			if(elapsed.count() > 200)
+			{
+				stop = true;
+				return;
+			}
+		}
+		else
+		{
+			success = false;
+		}
+#else
 		success = true;
 		frame = fut.get();
 		fut = async(launch::async, get_frame, cap);
 		if (frame.empty()) {
 			success = false;
 		}
+#endif
 	} while (!success);
 	//cv::Rect roi(50, 180, 540, 280);
 	cv::Rect roi(x, y, w, h);
