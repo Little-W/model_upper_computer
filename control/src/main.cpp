@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -66,9 +66,11 @@ void encode_and_send(void)
 	servo_code_p1 |= 0x80;
 	servo_code_p2 = angle_result_tmp & 0x3f;
 	servo_code_p2 |= 0xc0;
+	result.push_back(0x55); //传输开始标志
 	result.push_back(speed_code);
 	result.push_back(servo_code_p1);
-	result.push_back(servo_code_p2);	
+	result.push_back(servo_code_p2);
+	result.push_back(0x6a);	//传输结束标志
 	ser.write(result);
 	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result / 20 << endl;
 	cout << "************************************************************************"<< endl;
