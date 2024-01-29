@@ -8,8 +8,8 @@
 
 // 使用 float 作为输入、误差类型
 typedef float data_t;
-// 使用 uint8 作为输出类型
-typedef unsigned char out_t;
+// 使用 float 作为输出类型
+typedef float out_t;
 
 class PartPdCtrl {
 private:

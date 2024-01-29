@@ -22,8 +22,8 @@ main:
     kp: 2.19 #1.16
     kd: 5.10 #4.54
     dv: 0
-    max_ag: 250 
-    min_ag: 0
+    max_ag: 200
+    min_ag: -200
     max_v: 130 #95
     min_v: 85 #95
     max_v_diff: 40 
