@@ -132,6 +132,9 @@ public:
     struct {
         bool garage_start;
         float dy_kp_threshold;
+        float dy_kp_coef;
+        float dy_kd_threshold;
+        float dy_kd_coef;
         float kp;
         float kd;
         float ki;

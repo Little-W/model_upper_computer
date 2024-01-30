@@ -19,7 +19,12 @@ set:
 #    
 main:
     garage_start: false
-    dy_kp_threshold: 40 #62
+    dy_kp_threshold: 55 #62
+    dy_kp_coef: 0.2
+
+    dy_kd_threshold: 55 #62
+    dy_kd_coef: 0.2
+
     kp: 0.78 #1.6
     ki: 0
     kd: 3 #4.54
@@ -27,15 +32,15 @@ main:
     max_ag: 200 ## 250
     min_ag: -200 ## 0
     max_v: 10 #95
-    min_v: 4 #95
+    min_v: 2 #95
     max_v_diff: 40 
     min_v_diff: 3 
     use_dv: false #false
     second_lap: false
     center_coef: 0.2
     forward_dist: 45 #130给70 0.8  4 ；80给25 2.5 0.05
-    up_scope: 6 #4
-    down_scope: 6 #4
+    up_scope: 10 #4
+    down_scope: 10 #4
     forward_coef1: 0.6
     forward_coef2: 0.4
     # 恒定速度与打角

@@ -162,6 +162,9 @@ Reader::Reader(string path) {
     //main
     main.garage_start = n_main.get<bool>("garage_start");
     main.dy_kp_threshold = n_main.get<float>("dy_kp_threshold");
+    main.dy_kp_coef = n_main.get<float>("dy_kp_coef");
+    main.dy_kd_threshold = n_main.get<float>("dy_kd_threshold");
+    main.dy_kd_coef = n_main.get<float>("dy_kd_coef");
     main.kp = n_main.get<float>("kp");
     main.kd = n_main.get<float>("kd");
     main.ki = n_main.get<float>("ki");

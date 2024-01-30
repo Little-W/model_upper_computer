@@ -17,7 +17,19 @@ PartPdCtrl::PartPdCtrl(float kp_, float kd_, float ki_) {
 data_t PartPdCtrl::output(data_t error) {
 	static data_t integrade;
 	data_t now_out_diff;
-	now_out_diff = kd * (error - last_error);//微分部分
+
+	if (abs(error) > Re.main.dy_kd_threshold) {
+		this->count++;
+		// out += (1 + count * 0.05) * kp * error;//偏差过大增大kp
+		now_out_diff += (1 + count * Re.main.dy_kd_coef) * kd * (error - last_error);//偏差过大增大kp
+	}
+	else {
+		this->count = 0;
+		now_out_diff = kd * (error - last_error);//微分部分
+	}
+
+	
+	// now_out_diff = kd * (error - last_error);//微分部分
 	data_t out;
 	last_error = error;
 	out = now_out_diff;
@@ -27,7 +39,7 @@ data_t PartPdCtrl::output(data_t error) {
 	if (abs(error) > Re.main.dy_kp_threshold) {
 		this->count++;
 		// out += (1 + count * 0.05) * kp * error;//偏差过大增大kp
-		out += (1 + count * 0.1) * kp * error;//偏差过大增大kp
+		out += (1 + count * Re.main.dy_kp_coef) * kp * error;//偏差过大增大kp
 	}
 	else {
 		this->count = 0;
