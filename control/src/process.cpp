@@ -146,7 +146,8 @@ void ImageStorage::get_image(int x, int y, int w, int h, int ai_x, int ai_y, int
 	}
 }
 
-MainImage::MainImage() : re("./config.yaml")                     //构造函数，进行初始化操作
+//构造函数，进行初始化操作
+MainImage::MainImage() : re("./config.yaml")
 {
 	init(true);
 	left_end_point.reserve(16);
@@ -163,8 +164,15 @@ MainImage::MainImage() : re("./config.yaml")                     //构造函数�
 	count_circle = 0;
 	zebra_far_find = false;
 	zebra_near_find = false;
+	
+	ai_bridge = false;
+	ai_tractor = false;
+	ai_corn = false;
+	ai_pig = false;
 }
-
+/**
+ * @brief 初始化特征点
+*/
 void MainImage::init(bool complete = true)
 {
 	for (int i = 0; i < IMGH; i++)
@@ -193,7 +201,9 @@ void MainImage::init(bool complete = true)
 		center_lost = -1;
 	}
 }
-
+/**
+ * @brief 更新处理后的图像和特征点查询结果
+*/
 void MainImage::update_image()
 {
 	if (state_out == straight)
@@ -1102,7 +1112,9 @@ void MainImage::end_filter(int side) {
 	}
 
 }
-
+/**
+ * @brief 保存图像
+*/
 void MainImage::show(float dev, bool c, bool l, bool r, bool l_e, bool r_e, bool l_c, bool r_c, bool c_c)
 {
 	Mat channels[3];
@@ -1935,5 +1947,5 @@ void MainImage::find_near_zebra() {
 		}
 	}
 	zebra_near_find = false;
-	
+
 }

@@ -48,6 +48,7 @@ out_t AngleControl::output(data_t dist_error) {
 }
 
 // SpeedControl 类
+// 对应config.yaml: Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v
 SpeedControl::SpeedControl(data_t start_error_, data_t end_error_, data_t max_, data_t min_) {
 	this->start_error = start_error_;
 	this->end_error = end_error_;
@@ -56,7 +57,13 @@ SpeedControl::SpeedControl(data_t start_error_, data_t end_error_, data_t max_, 
 	this->minimum = min_;
 }
 
-//输入中线偏离
+
+/**
+ * @brief 速度控制
+ * @param input 输入中线偏离
+ * @return unsigned char 返回速度绝对值
+ * @note 根据偏移量来决定速度，偏移量越大速度越小，范围为[start_error,end_error]
+ */
 out_t SpeedControl::output(data_t input) {
 	input = abs(input);
 	data_t out;
