@@ -1,6 +1,11 @@
 .*
+.gitignore
+*.o
+*.cmake
+control/build
 *.avi
 *.mp4
+result.txt
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/settings.json
