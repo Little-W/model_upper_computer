@@ -22,7 +22,7 @@ SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.m
 float kp, kd;
 int dv;
 float deviation = 0;
-schar speed_result, run_set = 'r';
+float speed_result;
 float angle_result = 0;
 int circle_inside_count = 0;
 int circle_last_y = IMGH - 2;
