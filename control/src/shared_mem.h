@@ -1,3 +1,8 @@
+/**
+ * @brief 共享内存和信号量方法的声明，在已经编译好的libshared_mem.os中实现
+ * @note  目的让control进程和ai进程共享数据：图像IMAGE_ID和结果RESULT_ID
+ * @note  注意访问需互斥
+*/
 #ifndef _COMM_H__
 #define _COMM_H__
  

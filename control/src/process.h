@@ -14,10 +14,10 @@ public:
 	int save_num = 1;
 	cv::VideoCapture cap;
 	cv::VideoWriter wri;
-  bool Writer_Exist=false;
+ 	bool Writer_Exist=false;
 	future<cv::Mat> fut;
-  Mat image_BGR;  //彩色图
-  Mat image_R;    //红色图
+	Mat image_BGR;  //彩色图
+	Mat image_R;    //红色图
 	Mat image_mat;	//处理图
 	Mat image_show;	//展示图
 	ImageStorage();
@@ -44,8 +44,8 @@ public:
 	bool right_continue;				//右连续
 	int count_circle;					//圈数
 
-  bool zebra_far_find;
-  bool zebra_near_find;
+	bool zebra_far_find;
+	bool zebra_near_find;
 
 	vector<Point> left_cone;
 	vector<Point> right_cone;
@@ -53,11 +53,12 @@ public:
 	int last_center_in_cone;
 
 	Point repair_cone;
-  
-  bool ai_bridge;
-  bool ai_tractor;
-  bool ai_corn;
-  bool ai_pig;
+	
+	//ai元素
+	bool ai_bridge;
+	bool ai_tractor;
+	bool ai_corn;
+	bool ai_pig;
   
 	uchar state_out;
 	uchar state_l_circle;
@@ -65,13 +66,13 @@ public:
 	uchar state_farm;
 	uchar state_repair;
 	uchar state_barn;
-  uchar state_hump;
+  	uchar state_hump;
 	uchar state_in_garage;
 	uchar state_last;
 	uchar state_hill;
 
-  Reader re;
-  ImageStorage store;
+	Reader re;
+	ImageStorage store;
 
 	MainImage();
 	void init(bool complete);           //初始化
@@ -96,14 +97,14 @@ public:
 	void mend_farm_in_find();
 	void mend_farm_inside();
 	void mend_farm_out_find();
-  void mend_in_hump_on();
+  	void mend_in_hump_on();
 
 	void refind_edge_point();
 	void find_center();
 	void find_center_in_farm(int begin = IMGH - 5);
 	void refind_edge_in_farm_out(Point start);
-   void find_far_zebra();
-   void find_near_zebra();
+	void find_far_zebra();
+	void find_near_zebra();
 
 	void produce_dv(int deviation);
 

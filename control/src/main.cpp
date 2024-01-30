@@ -56,10 +56,12 @@ void encode_and_send(void)
 	vector<unsigned char> result;
 	uchar speed_result_tmp;
 	uint angle_result_tmp = 0;
-	angle_result *= 6;
+	//使用18th的[0,250]调出来的pid，拓展到+-1250
+	angle_result *= 10;
+	speed_result /= 20;
 	speed_result_tmp = speed_result < 0 ? -speed_result : speed_result;
 	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
-	speed_result_tmp /= 20;
+
 	if(angle_result_tmp > 1200) angle_result_tmp = 1200;
 	uchar speed_code,servo_code_p1,servo_code_p2;
 	speed_code = speed_result_tmp & 0x1f;
@@ -69,11 +71,13 @@ void encode_and_send(void)
 	servo_code_p1 |= 0x80;
 	servo_code_p2 = angle_result_tmp & 0x3f;
 	servo_code_p2 |= 0xc0;
+
 	result.push_back(0x55); //传输开始标志
 	result.push_back(speed_code);
 	result.push_back(servo_code_p1);
 	result.push_back(servo_code_p2);
 	result.push_back(0x6a);	//传输结束标志
+
 	ser.write(result);
 	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result / 20 << endl;
 	cout << "************************************************************************"<< endl;
@@ -83,29 +87,48 @@ void encode_and_send(void)
 
 int main()
 {
+	#pragma region 共享内存和信号
+	//ctrl-z操作对应SIGTSTP信号，触发回调函数，停止程序
 	signal(SIGTSTP, callback);
-	//共享内存
+	//互斥信号量
 	int image_sem = GetSem(IMAGE_ID);
 	InitSem(image_sem);
 	int result_sem = GetSem(RESULT_ID);
 	InitSem(result_sem);
+
+	//初始化两块共享内存
 	int result_shm = GetShm(RESULT_SHM, 4096);
 	int image_shm = GetShm(IMAGE_SHM, 44 * 4096);
 	usleep(1000);
+	//-存储结果的一块共享内存数组
 	int* addr = (int*)shmat(result_shm, NULL, 0);
+	//--AI元素识别标记（18th，待更新）
+	//---'N'->none
+	//---'B'->bridge
+	//---'T'->tractor
+	//---'C'->corn
+	//---'P'->pig
 	addr[0] = 'N';
+	//--AI识别使能，0时AI冷却0.02s，1时识别AI元素
 	addr[1] = 0;
+	//--计数器：当前处理的图像数，主循环次数
 	addr[2] = 0;
-	void* image_addr = shmat(image_shm, NULL, 0);
 
+	//-存储当前相机图像的一块共享内存二维数组
+	void* image_addr = shmat(image_shm, NULL, 0);
+	#pragma endregion
 	// auto now = std::chrono::system_clock::now();
 	// std::time_t time = std::chrono::system_clock::to_time_t(now);
 	// std::tm* start_tm;
 	// start_tm = std::localtime(&time);
 
+	//状态初始化，否则state_out初始化为garage_out
 	if (!Re.main.garage_start) {
 		MI.state_out = straight;
 	}
+
+	#pragma region 串口
+	//尝试开启串口
 	try {
 		ser.setPort("/dev/ttyUSB0");
 		ser.setBaudrate(115200);
@@ -117,15 +140,16 @@ int main()
 		cerr << "Unable to open port!" << endl;
 		return -1;
 	}
-	printf("test_p1\n");
-	//保存视频
-	Re.set.video_save = false;
+	#pragma endregion
+	
+	//初始化保存的视频文件Open操作
 	if (Re.set.video_save)
 	{
 		if (Re.set.color)MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 25, cv::Size(300, 200));
 		else MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 25, cv::Size(320, 240));
 		MI.store.Writer_Exist = true;
 	}
+
 	//主循环
 	// ser.write("Hello World!");
 	while (!stop)
@@ -139,13 +163,18 @@ int main()
 		
 		cout << " " << endl;
 		cout << MI.store.save_num << endl;
+
+		//更新处理后的图像和特征点查询结果
 		MI.update_image();
 		semP(image_sem);
 		matWrite(image_addr, MI.store.image_BGR);
 		semV(image_sem);
+
+		//只有在straight状态下识别AI元素
 		if (MI.state_out == straight)
 		{
 			semP(result_sem);
+			//开启AI识别
 			addr[1] = 1;
 			addr[2] = MI.store.save_num;
 			MI.ai_bridge = false;
@@ -161,11 +190,13 @@ int main()
 		else
 		{
 			semP(result_sem);
+			//在特殊路段关闭AI识别
 			addr[0] = 'N';
 			addr[1] = 0;
 			semV(result_sem);
 		}
 
+		//更新当前状态
 		MI.state_judge();
 		MI.update_control(kp, kd, dv);
 
@@ -564,6 +595,7 @@ int main()
 		{
 			if (MI.state_r_circle == right_circle_out_strai)
 			{
+				//取circle_inside时的速度和角度的平均值作为结果
 				angle_result = circle_out_ag / float(circle_count - Re.r_circle.count_start);
 				speed_result = circle_out_sp / float(circle_count - Re.r_circle.count_start);
 			}
@@ -647,6 +679,8 @@ int main()
 		//环岛计数
 		if (MI.state_out == left_circle && MI.state_l_circle == left_circle_inside &&
 			circle_count < (100 + Re.l_circle.count_start)) {
+			//做了两帧的延时
+			//盲猜是为了防止记录到进环岛时的转向动作 by reverie 24/1/30
 			if (circle_count >= Re.l_circle.count_start) {
 				circle_out_ag += angle_result;
 				circle_out_sp += speed_result;
@@ -664,82 +698,84 @@ int main()
 
 		encode_and_send();
 
+		#pragma region 打印当前状态
 		switch (MI.state_out)
 		{
-		case straight: cout << "straight" << endl; break;
-		case garage_out: cout << "garage_out" << endl; break;
-		case hill_find: cout << "hill_find" << endl; break;
-		case right_circle:
-		{
-			switch (MI.state_r_circle)
+			case straight: cout << "straight" << endl; break;
+			case garage_out: cout << "garage_out" << endl; break;
+			case hill_find: cout << "hill_find" << endl; break;
+			case right_circle:
 			{
-			case right_circle_in_find: {cout << "right_circle_in_find" << endl; break; }
-			case right_circle_in_strai: {cout << "right_circle_in_strai" << endl; break; }
-			case right_circle_in_circle: {cout << "right_circle_in_circle" << endl; break; }
-			case right_circle_inside_before: {cout << "right_circle_inside_before" << endl; break; }
-			case right_circle_inside: {cout << "right_circle_inside" << endl; break; }
-			case right_circle_out_find: {cout << "right_circle_out_find" << endl; break; }
-			case right_circle_out_strai: {cout << "right_circle_out_strai" << endl; break; }
-			case right_circle_out: {cout << "right_circle_out" << endl; break; }
-			case right_circle_out_out: {cout << "right_circle_out_out" << endl; break; }
+				switch (MI.state_r_circle)
+				{
+				case right_circle_in_find: {cout << "right_circle_in_find" << endl; break; }
+				case right_circle_in_strai: {cout << "right_circle_in_strai" << endl; break; }
+				case right_circle_in_circle: {cout << "right_circle_in_circle" << endl; break; }
+				case right_circle_inside_before: {cout << "right_circle_inside_before" << endl; break; }
+				case right_circle_inside: {cout << "right_circle_inside" << endl; break; }
+				case right_circle_out_find: {cout << "right_circle_out_find" << endl; break; }
+				case right_circle_out_strai: {cout << "right_circle_out_strai" << endl; break; }
+				case right_circle_out: {cout << "right_circle_out" << endl; break; }
+				case right_circle_out_out: {cout << "right_circle_out_out" << endl; break; }
+				}
+				break;
 			}
-			break;
-		}
-		case left_circle:
-		{
-			switch (MI.state_l_circle)
+			case left_circle:
 			{
-			case left_circle_in_find: {cout << "left_circle_in_find" << endl; break; }
-			case left_circle_in_strai: {cout << "left_circle_in_strai" << endl; break; }
-			case left_circle_in_circle: {cout << "left_circle_in_circle" << endl; break; }
-			case left_circle_inside_before: {cout << "left_circle_inside_before" << endl; break; }
-			case left_circle_inside: {cout << "left_circle_inside" << endl; break; }
-			case left_circle_out_find: {cout << "left_circle_out_find" << endl; break; }
-			case left_circle_out_strai: {cout << "left_circle_out_strai" << endl; break; }
-			case left_circle_out: {cout << "left_circle_out" << endl; break; }
-			case left_circle_out_out: {cout << "left_circle_out_out" << endl; break; }
+				switch (MI.state_l_circle)
+				{
+				case left_circle_in_find: {cout << "left_circle_in_find" << endl; break; }
+				case left_circle_in_strai: {cout << "left_circle_in_strai" << endl; break; }
+				case left_circle_in_circle: {cout << "left_circle_in_circle" << endl; break; }
+				case left_circle_inside_before: {cout << "left_circle_inside_before" << endl; break; }
+				case left_circle_inside: {cout << "left_circle_inside" << endl; break; }
+				case left_circle_out_find: {cout << "left_circle_out_find" << endl; break; }
+				case left_circle_out_strai: {cout << "left_circle_out_strai" << endl; break; }
+				case left_circle_out: {cout << "left_circle_out" << endl; break; }
+				case left_circle_out_out: {cout << "left_circle_out_out" << endl; break; }
+				}
+				break;
 			}
-			break;
-		}
-		case repair_find:
-		{
-			break;
-		}
-		case farm_find:
-		{
-			switch (MI.state_farm)
+			case repair_find:
 			{
-			case farm_in_find: {cout << "farm_in_find" << endl; break; }
-			case farm_inside: {cout << "farm_inside" << endl; break; }
-			case farm_out_find: {cout << "farm_out_find" << endl; break; }
-			case farm_out: {cout << "farm_out" << endl; break; }
+				break;
 			}
-			break;
-		}
-		case hump_find:
-		{
-			switch (MI.state_hump)
+			case farm_find:
 			{
-			case hump_in_find: {cout << "hump_in_find" << endl; break; }
-			case hump_on: {cout << "hump_on" << endl; break; }
-			case hump_out: {cout << "hump_out" << endl; break; }
+				switch (MI.state_farm)
+				{
+				case farm_in_find: {cout << "farm_in_find" << endl; break; }
+				case farm_inside: {cout << "farm_inside" << endl; break; }
+				case farm_out_find: {cout << "farm_out_find" << endl; break; }
+				case farm_out: {cout << "farm_out" << endl; break; }
+				}
+				break;
 			}
-			break;
-		}
-		case garage_find:
-		{
-			switch (MI.state_in_garage)
+			case hump_find:
 			{
-			case garage_in_find: {cout << "garage_in_find" << endl; break; }
-			case garage_in_before: {cout << "garage_in_before" << endl; break; }
-			case garage_in: {cout << "garage_in" << endl; break; }
-			case garage_inside: {cout << "garage_inside" << endl; break; }
+				switch (MI.state_hump)
+				{
+				case hump_in_find: {cout << "hump_in_find" << endl; break; }
+				case hump_on: {cout << "hump_on" << endl; break; }
+				case hump_out: {cout << "hump_out" << endl; break; }
+				}
+				break;
 			}
-			break;
+			case garage_find:
+			{
+				switch (MI.state_in_garage)
+				{
+				case garage_in_find: {cout << "garage_in_find" << endl; break; }
+				case garage_in_before: {cout << "garage_in_before" << endl; break; }
+				case garage_in: {cout << "garage_in" << endl; break; }
+				case garage_inside: {cout << "garage_inside" << endl; break; }
+				}
+				break;
+			}
 		}
-		}
+		#pragma endregion
 
-
+		//保存图像
 		if (Re.set.video_save) MI.show(deviation);
 
 		MI.store.save_num++;
