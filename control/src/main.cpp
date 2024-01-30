@@ -81,7 +81,7 @@ void encode_and_send(void)
 	ser.write(result);
 	std::chrono::duration<double, std::milli> elapsed = std::chrono::high_resolution_clock::now() - start_time_stamp;
 	cout << "now: " << elapsed.count() << "ms" <<endl;
-	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result / 20 << endl;
+	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result<< endl;
 	cout << "************************************************************************"<< endl;
 	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p1 << "	Speed: " << (uint)speed_code <<  endl;
 	cout << "************************************************************************"<< dec << endl;
@@ -147,8 +147,8 @@ int main()
 	//初始化保存的视频文件Open操作
 	if (Re.set.video_save)
 	{
-		if (Re.set.color)MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 25, cv::Size(300, 200));
-		else MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 25, cv::Size(320, 240));
+		if (Re.set.color)MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(300, 200));
+		else MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(320, 240));
 		MI.store.Writer_Exist = true;
 	}
 
@@ -164,8 +164,8 @@ int main()
 		// cout << "test" << endl;
 		// std::cout << "运行时间："<< tm->tm_hour - start_tm->tm_hour << ":" << tm->tm_min - start_tm->tm_min << ":" << tm->tm_sec - start_tm->tm_sec << std::flush;
 		
-		cout << " " << endl;
-		cout << MI.store.save_num << endl;
+		// cout << " " << endl;
+		// cout << "time:" << MI.store.save_num  << endl;
 
 		//更新处理后的图像和特征点查询结果
 		MI.update_image();
