@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -19,6 +19,7 @@ MainImage MI;
 AngleControl AC(Re.main.kp, Re.main.kd, Re.main.max_ag, Re.main.min_ag);
 SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v);
 
+std::chrono::time_point<std::chrono::high_resolution_clock> start_time_stamp;
 float kp, kd;
 int dv;
 float deviation = 0;
@@ -78,6 +79,8 @@ void encode_and_send(void)
 	result.push_back(0x6a);	//传输结束标志
 
 	ser.write(result);
+	std::chrono::duration<double, std::milli> elapsed = std::chrono::high_resolution_clock::now() - start_time_stamp;
+	cout << "now: " << elapsed.count() << "ms" <<endl;
 	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result / 20 << endl;
 	cout << "************************************************************************"<< endl;
 	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p1 << "	Speed: " << (uint)speed_code <<  endl;
@@ -151,6 +154,7 @@ int main()
 
 	//主循环
 	// ser.write("Hello World!");
+	start_time_stamp = std::chrono::high_resolution_clock::now();
 	while (!stop)
 	{
 		// now = std::chrono::system_clock::now();
