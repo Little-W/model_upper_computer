@@ -10,24 +10,24 @@ PartPdCtrl::PartPdCtrl(float kp_, float kd_) {
 
 data_t PartPdCtrl::output(data_t error) {
 	data_t now_out_diff;
-	now_out_diff = kd * (error - last_error);//Î¢·Ö²¿·Ö
+	now_out_diff = kd * (error - last_error);//å¾®åˆ†éƒ¨åˆ†
 	data_t out;
 	last_error = error;
 	out = now_out_diff;
 
 	if (abs(error) > 62) {
 		this->count++;
-		out += (1 + count * 0.05) * kp * error;//Æ«²î¹ı´óÔö´ókp
+		out += (1 + count * 0.05) * kp * error;//åå·®è¿‡å¤§å¢å¤§kp
 	}
 	else {
 		this->count = 0;
-		out += kp * error;//Î¢·Ö+±ÈÀı²¿·Ö£¬out=kd*(error-lasterror)+(kp - delta)*error
+		out += kp * error;//å¾®åˆ†+æ¯”ä¾‹éƒ¨åˆ†ï¼Œout=kd*(error-lasterror)+(kp - delta)*error
 	}
 
 	return out;
 }
 
-// AngleControl Àà
+// AngleControl ç±»
 
 AngleControl::AngleControl(float kp, float kd, data_t max, data_t min) {
 	this->pid = PartPdCtrl(kp, kd);
@@ -35,19 +35,19 @@ AngleControl::AngleControl(float kp, float kd, data_t max, data_t min) {
 	this->minimum = min;
 }
 /**
- *·µ»Ø¸ù¾İPIDµÄÊä³öÖµ
- * ÊäÈë½Ç¶È
- * @return uint8_t Êä³öÁ¿£¬Î´Ó³Éä£¬ÒÑÏŞÖÆ·¶Î§£¬¿ÉÖ±½Ó·¢ËÍµ½ÏÂÎ»»ú
+ *è¿”å›æ ¹æ®PIDçš„è¾“å‡ºå€¼
+ * è¾“å…¥è§’åº¦
+ * @return uint8_t è¾“å‡ºé‡ï¼Œæœªæ˜ å°„ï¼Œå·²é™åˆ¶èŒƒå›´ï¼Œå¯ç›´æ¥å‘é€åˆ°ä¸‹ä½æœº
  */
 out_t AngleControl::output(data_t dist_error) {
 	data_t now_error = dist_error;
-	int out = round(this->pid.output(now_error));  //¶æ»úÖĞÏßÖµÎª0£¬×ó×ªÎªÕı£¬ÓÒ×ªÎª¸º
+	int out = round(this->pid.output(now_error));  //èˆµæœºä¸­çº¿å€¼ä¸º0ï¼Œå·¦è½¬ä¸ºæ­£ï¼Œå³è½¬ä¸ºè´Ÿ
 	if (out > this->maximum) out = this->maximum;
 	else if (out < this->minimum) out = this->minimum;
 	return out_t(out);
 }
 
-// SpeedControl Àà
+// SpeedControl ç±»
 SpeedControl::SpeedControl(data_t start_error_, data_t end_error_, data_t max_, data_t min_) {
 	this->start_error = start_error_;
 	this->end_error = end_error_;
@@ -56,7 +56,7 @@ SpeedControl::SpeedControl(data_t start_error_, data_t end_error_, data_t max_, 
 	this->minimum = min_;
 }
 
-//ÊäÈëÖĞÏßÆ«Àë
+//è¾“å…¥ä¸­çº¿åç¦»
 out_t SpeedControl::output(data_t input) {
 	input = abs(input);
 	data_t out;

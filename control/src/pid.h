@@ -1,22 +1,22 @@
 #ifndef PID
 #define PID
 
-// ÒıÈë uint_8
+// å¼•å…¥ uint_8
 //#include <bits/stdint-uintn.h>
 #include <cmath>
 #include <iostream>
 
-// Ê¹ÓÃ float ×÷ÎªÊäÈë¡¢Îó²îÀàĞÍ
+// ä½¿ç”¨ float ä½œä¸ºè¾“å…¥ã€è¯¯å·®ç±»å‹
 typedef float data_t;
-// Ê¹ÓÃ float ×÷ÎªÊä³öÀàĞÍ
+// ä½¿ç”¨ float ä½œä¸ºè¾“å‡ºç±»å‹
 typedef float out_t;
 
 class PartPdCtrl {
 private:
-	float kp;//¶ÁÈ¡
-	float kd;//¶ÁÈ¡
-	data_t last_error;//ÉÏÒ»Æ«²î
-	int count;//Æ«²î¹ı´óÊ±¸Äkp
+	float kp;//è¯»å–
+	float kd;//è¯»å–
+	data_t last_error;//ä¸Šä¸€åå·®
+	int count;//åå·®è¿‡å¤§æ—¶æ”¹kp
 public:
 	PartPdCtrl(float kp_ = 0, float kd_ = 0);
 	data_t output(data_t error);
@@ -26,38 +26,38 @@ public:
 
 
 /**
- * ¶æ»ú½Ç¶ÈµÄ¿ØÖÆ£¬»ùÓÚÁ½²¿·Ö£º
- * Ğ¡³µ·½ÏòÓëÖĞÏßÖ®¼äµÄ¼Ğ½Ç£¬Ä¿±êÊÇÊ¹ÆäÎª0£¬±ÜÃâ×óÓÒÂÒ°Ú;
- * Ğ¡³µÓëÖĞÏßÖ®¼äµÄ¾àÀë£¬Ä¿±êÊÇÊ¹ÆäÎª0£¬±ÜÃâÆ«ÀëÈüµÀ
+ * èˆµæœºè§’åº¦çš„æ§åˆ¶ï¼ŒåŸºäºä¸¤éƒ¨åˆ†ï¼š
+ * å°è½¦æ–¹å‘ä¸ä¸­çº¿ä¹‹é—´çš„å¤¹è§’ï¼Œç›®æ ‡æ˜¯ä½¿å…¶ä¸º0ï¼Œé¿å…å·¦å³ä¹±æ‘†;
+ * å°è½¦ä¸ä¸­çº¿ä¹‹é—´çš„è·ç¦»ï¼Œç›®æ ‡æ˜¯ä½¿å…¶ä¸º0ï¼Œé¿å…åç¦»èµ›é“
  */
 class AngleControl {
 private:
 	PartPdCtrl pid;
-	data_t maximum;	// Êä³öµÄ×î´óÖµ
-	data_t minimum;	// Êä³öµÄ×îĞ¡Öµ
+	data_t maximum;	// è¾“å‡ºçš„æœ€å¤§å€¼
+	data_t minimum;	// è¾“å‡ºçš„æœ€å°å€¼
 
 public:
-	//@param kp ±ÈÀıÏµÊı	@param kd Î¢·ÖÏµÊı	@param a_c ¼Ğ½ÇÎó²îÏµÊı	@param d_c ¾àÀëÎó²îÏµÊı	@param max Êä³ö×î´óÖµ	@param min Êä³ö×îĞ¡Öµ
+	//@param kp æ¯”ä¾‹ç³»æ•°	@param kd å¾®åˆ†ç³»æ•°	@param a_c å¤¹è§’è¯¯å·®ç³»æ•°	@param d_c è·ç¦»è¯¯å·®ç³»æ•°	@param max è¾“å‡ºæœ€å¤§å€¼	@param min è¾“å‡ºæœ€å°å€¼
 	AngleControl(float kp, float kd, data_t max, data_t min);
-	//@brief ¼ÆËãÊä³öÖµ	@param angel_error Ğ¡³µ·½ÏòÓëÖĞÏßÖ®¼äµÄ¼Ğ½Ç	@param dist_error Ğ¡³µÓëÖĞÏßÖ®¼äµÄ¾àÀë	@return out_t Êä³öÖµ£¬¿ÉÖ±½Ó·¢ÖÁÏÂÎ»»ú
+	//@brief è®¡ç®—è¾“å‡ºå€¼	@param angel_error å°è½¦æ–¹å‘ä¸ä¸­çº¿ä¹‹é—´çš„å¤¹è§’	@param dist_error å°è½¦ä¸ä¸­çº¿ä¹‹é—´çš„è·ç¦»	@return out_t è¾“å‡ºå€¼ï¼Œå¯ç›´æ¥å‘è‡³ä¸‹ä½æœº
 	out_t output(data_t dist_error);
 	void reset(float kp, float kd) { this->pid.reset(kp, kd); }
   float show(){return this->pid.show();}
 };
 
-// ÏßËÙ¶È¿ØÖÆ
+// çº¿é€Ÿåº¦æ§åˆ¶
 class SpeedControl {
 private:
 
-	data_t start_error;//×îĞ¡ÔÊĞíÎó²î
-	data_t end_error;//×î´óÔÊĞíÎó²î
-	float k;		// ËÙ¶ÈµÄ±ÈÀıÏµÊı£¬Ğ±ÆÂ
-	data_t minimum;// Êä³öµÄ×îĞ¡Öµ	
-	data_t maximum;// Êä³öµÄ×î´óÖµ
+	data_t start_error;//æœ€å°å…è®¸è¯¯å·®
+	data_t end_error;//æœ€å¤§å…è®¸è¯¯å·®
+	float k;		// é€Ÿåº¦çš„æ¯”ä¾‹ç³»æ•°ï¼Œæ–œå¡
+	data_t minimum;// è¾“å‡ºçš„æœ€å°å€¼	
+	data_t maximum;// è¾“å‡ºçš„æœ€å¤§å€¼
 public:
-	//@param k ËÙ¶ÈµÄ±ÈÀıÏµÊı	@param max Êä³öµÄ×î´óÖµ	@param min Êä³öµÄ×îĞ¡Öµ
+	//@param k é€Ÿåº¦çš„æ¯”ä¾‹ç³»æ•°	@param max è¾“å‡ºçš„æœ€å¤§å€¼	@param min è¾“å‡ºçš„æœ€å°å€¼
 	SpeedControl(data_t start_error, data_t end_error, data_t max, data_t min);
-	//@brief ¼ÆËãÊä³öÖµ	@param input £¿@return out_t Êä³öÖµ£¬¿ÉÖ±½Ó·¢ÖÁÏÂÎ»»ú
+	//@brief è®¡ç®—è¾“å‡ºå€¼	@param input ï¼Ÿ@return out_t è¾“å‡ºå€¼ï¼Œå¯ç›´æ¥å‘è‡³ä¸‹ä½æœº
 	out_t output(data_t input);
 };
 

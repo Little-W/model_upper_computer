@@ -66,8 +66,8 @@
 
 typedef std::pair<int, int> pii;
 
-float expr2f(const std::string& expr);//×Ö·û´®×ª¸¡µã
-int inline expr2i(const std::string& expr);//×Ö·û´®×ªÕûÐÍ
+float expr2f(const std::string& expr);//å­—ç¬¦ä¸²è½¬æµ®ç‚¹
+int inline expr2i(const std::string& expr);//å­—ç¬¦ä¸²è½¬æ•´åž‹
 
 class BaseReader {
 public:
