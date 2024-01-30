@@ -59,7 +59,6 @@ void encode_and_send(void)
 	angle_result *= 6;
 	speed_result_tmp = speed_result < 0 ? -speed_result : speed_result;
 	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
-	speed_result_tmp /= 20;
 	if(angle_result_tmp > 1200) angle_result_tmp = 1200;
 	uchar speed_code,servo_code_p1,servo_code_p2;
 	speed_code = speed_result_tmp & 0x1f;

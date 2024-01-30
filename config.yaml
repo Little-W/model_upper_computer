@@ -24,8 +24,8 @@ main:
     dv: 0
     max_ag: 200
     min_ag: -200
-    max_v: 130 #95
-    min_v: 85 #95
+    max_v: 25 #95
+    min_v: 2 #95
     max_v_diff: 40 
     min_v_diff: 3 
     use_dv: false #false
@@ -44,7 +44,7 @@ right_circle:
     kp: 1.5
     kd: 4
     dv: 0
-    speed: 10
+    speed: 4
     circle_dist: 40
     use: false 
     big_circle: false 
@@ -102,7 +102,7 @@ left_circle:
     kp: 1.5
     kd: 4
     dv: 0
-    speed: 85
+    speed: 4
     circle_dist: 30
     use: false ######
     big_circle: false
@@ -160,14 +160,14 @@ repair:
     kp: 2
     kd: 4
     dv: 0
-    speed: 30
+    speed: -5
 #
 farm:
     kp: 1.3 #0.3 2.9高速80
     kd: 2.6 #0.3 2低速50~70
     dv: 0
-    speed: 120
-    speed_out: 100
+    speed: 14
+    speed_out: 10
     dist: 35
     up_scope: 15
     down_scope: 25
