@@ -1935,4 +1935,5 @@ void MainImage::find_near_zebra() {
 		}
 	}
 	zebra_near_find = false;
+	
 }

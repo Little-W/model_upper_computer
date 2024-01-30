@@ -55,6 +55,7 @@ SpeedControl::SpeedControl(data_t start_error_, data_t end_error_, data_t max_, 
 	this->maximum = max_;
 	this->minimum = min_;
 }
+
 //ÊäÈëÖĞÏßÆ«Àë
 out_t SpeedControl::output(data_t input) {
 	input = abs(input);

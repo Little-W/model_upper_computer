@@ -44,9 +44,12 @@ void callback(int signum) {
 	stop = true;
 }
 
-/*
-	下位机速度控制范围  +- 31
-	舵机控制范围       +- 1200
+
+/**
+ * @brief 编码器
+ * @note  将上位机数据参考编码方案编码并发送给下位机 
+ * @note  下位机速度控制范围:  +- 31
+ * @note  舵机控制范围:       +- 1200
 */
 void encode_and_send(void)
 {
