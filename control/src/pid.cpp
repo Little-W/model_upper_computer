@@ -1,23 +1,33 @@
 #include "pid.h"
 #include<iostream>
+#include "process.h"
 using namespace std;
-PartPdCtrl::PartPdCtrl(float kp_, float kd_) {
+
+#define Re MI.re
+extern MainImage MI;
+
+PartPdCtrl::PartPdCtrl(float kp_, float kd_, float ki_) {
 	this->last_error = 0;
 	this->kp = kp_;
 	this->kd = kd_;
+	this->ki = ki_;
 	this->count = 0;
 }
 
 data_t PartPdCtrl::output(data_t error) {
+	static data_t integrade;
 	data_t now_out_diff;
 	now_out_diff = kd * (error - last_error);//微分部分
 	data_t out;
 	last_error = error;
 	out = now_out_diff;
-
-	if (abs(error) > 62) {
+	integrade = integrade * 0.9 + error * 0.1;
+	out += ki * integrade;
+	// if (abs(error) > 62) {
+	if (abs(error) > Re.main.dy_kp_threshold) {
 		this->count++;
-		out += (1 + count * 0.05) * kp * error;//偏差过大增大kp
+		// out += (1 + count * 0.05) * kp * error;//偏差过大增大kp
+		out += (1 + count * 0.1) * kp * error;//偏差过大增大kp
 	}
 	else {
 		this->count = 0;
@@ -29,8 +39,8 @@ data_t PartPdCtrl::output(data_t error) {
 
 // AngleControl 类
 
-AngleControl::AngleControl(float kp, float kd, data_t max, data_t min) {
-	this->pid = PartPdCtrl(kp, kd);
+AngleControl::AngleControl(float kp, float kd, float ki, data_t max, data_t min) {
+	this->pid = PartPdCtrl(kp, kd, ki);
 	this->maximum = max;
 	this->minimum = min;
 }

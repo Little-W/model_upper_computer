@@ -21,6 +21,7 @@ float MainImage::MidlineDeviation()
 	int i, j;
 	float deviation = 0;
 	int center = IMGW / 2;
+	// center += 10;
 	//int center=(IMGW/2+last_center)/2;
 	long long sum;
 	int thresh;
@@ -56,6 +57,7 @@ float MainImage::MidlineDeviation()
 			sum += center_point[i];
 		}
 		deviation += re.main.forward_coef2 * (center - float(sum) / re.main.down_scope);
+		// deviation += 18.0;
 		//if (deviation < -15) deviation -= 4;
 		//else if (deviation > 15) deviation += 4;
 		cout << "deviation: " << deviation << endl;
@@ -282,60 +284,69 @@ void MainImage::state_judge()
 	}
 }
 
-void MainImage::update_control(float& kp, float& kd, int& dv)
+void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 {
 	switch (state_out) {
 	case garage_out: {
 		kp = re.start.kp;
 		kd = re.start.kd;
+		ki = re.start.ki;
 		dv = re.start.dv;
 		return;
 	}
 	case straight: {
 		kp = re.main.kp;
 		kd = re.main.kd;
+		ki = re.main.ki;
 		dv = re.main.dv;
 		return;
 	}
 	case right_circle: {
 		kp = re.r_circle.kp;
 		kd = re.r_circle.kd;
+		ki = re.r_circle.ki;
 		dv = re.r_circle.dv;
 		return;
 	}
 	case left_circle: {
 		kp = re.l_circle.kp;
 		kd = re.l_circle.kd;
+		ki = re.l_circle.ki;
 		dv = re.l_circle.dv;
 		return;
 	}
 	case repair_find: {
 		kp = re.repair.kp;
 		kd = re.repair.kd;
+		ki = re.repair.ki;
 		dv = re.repair.dv;
 		return;
 	}
 	case farm_find: {
 		kp = re.farm.kp;
 		kd = re.farm.kd;
+		ki = re.farm.ki;
 		dv = re.farm.dv;
 		return;
 	}
 	case hump_find: {
 		kp = re.hump.kp;
 		kd = re.hump.kd;
+		ki = re.hump.ki;
 		dv = re.hump.dv;
 		return;
 	}
 	case garage_find: {
 		kp = re.zebra.kp;
 		kd = re.zebra.kd;
+		ki = re.zebra.ki;
 		dv = re.zebra.dv;
 		return;
 	}
 	case hill_find: {
 		kp = re.hill.kp;
 		kd = re.hill.kd;
+		ki = re.hill.ki;
 		dv = re.hill.dv;
 		return;
 	}

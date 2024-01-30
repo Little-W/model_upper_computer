@@ -19,21 +19,23 @@ set:
 #    
 main:
     garage_start: false
-    kp: 2.19 #1.16
-    kd: 5.10 #4.54
+    dy_kp_threshold: 40 #62
+    kp: 0.78 #1.6
+    ki: 0
+    kd: 3 #4.54
     dv: 0
     max_ag: 200 ## 250
     min_ag: -200 ## 0
-    max_v: 25 #95
-    min_v: 2 #95
+    max_v: 10 #95
+    min_v: 4 #95
     max_v_diff: 40 
     min_v_diff: 3 
     use_dv: false #false
     second_lap: false
     center_coef: 0.2
     forward_dist: 45 #130给70 0.8  4 ；80给25 2.5 0.05
-    up_scope: 4
-    down_scope: 4
+    up_scope: 6 #4
+    down_scope: 6 #4
     forward_coef1: 0.6
     forward_coef2: 0.4
     # 恒定速度与打角
@@ -41,8 +43,9 @@ main:
     v_left_circle: [175,90] #[175,70]
 #
 right_circle:
-    kp: 1.5
-    kd: 4
+    kp: 1.4 #1.6
+    ki: 0
+    kd: 0 #4.54
     dv: 0
     speed: 4
     circle_dist: 40
@@ -50,19 +53,22 @@ right_circle:
     big_circle: false 
     count_start: 2
     in_find:
-        kp: 1.5
-        kd: 4
+        kp: 1.4 #1.6
+        ki: 0
+        kd: 0 #4.54
         dv: 0
         ray_ag: 2
     in_strai:
-        kp: 1.5
-        kd: 4
+        kp: 1.4 #1.6
+        ki: 0
+        kd: 0 #4.54
         dv: 0
         ray_ag1: -0.94
         ray_ag2: -2.55 #-2.55
     in_circle:
-        kp: 4
-        kd: 12
+        kp: 1.4 #1.6
+        ki: 0
+        kd: 0 #4.54
         dv: 0
         ray_ag1: 0.64 #0.84
         ray_ag2: -0.94
@@ -71,35 +77,41 @@ right_circle:
         ray_ag5: 0.44 #0.84
     inside_before:
         kp: 2.19
-        kd: 5.10
+        ki: 0
+        kd: 0 # 5.10
         dv: 0
         p: ['0','IMGH-5']
     inside:
-        kp: 1.5
-        kd: 4
+        kp: 1.4 #1.6
+        ki: 0
+        kd: 0 #4.54
         dv: 0 #2
     out_find:
-        kp: 1.5
-        kd: 4
+        kp: 0.78 #1.6
+        ki: 0
+        kd: 3 #4.54
         dv: 0 #2
         p: ['2*IMGW/3','IMGH/2'] #['2*IMGW/3','IMGH/2-5']
     out_strai: 
         find_pos: 12
-        kp: 1.5
-        kd: 4
+        kp: 1.4 #1.6
+        ki: 0
+        kd: 0 #4.54
         dv: 0
     out:
-        kp: 1.5
-        kd: 4
-        dv: 0 #10
+        kp: 1.4 #1.6
+        ki: 0
+        kd: 0 #4.54
         ray_ag: 1.9
     out_out: 
-        kp: 1.5
-        kd: 4
+        kp: 1.4 #1.6
+        ki: 0
+        kd: 0 #4.54
         dv: 0
 #
 left_circle:
     kp: 1.5
+    ki: 0
     kd: 4
     dv: 0
     speed: 4
@@ -109,17 +121,20 @@ left_circle:
     count_start: 2
     in_find:
         kp: 1.5
+        ki: 0
         kd: 4
         dv: 0 #10
         ray_ag: 1
     in_strai:
         kp: 1.5
+        ki: 0
         kd: 4
         dv: 0
         ray_ag1: -2.1
         ray_ag2: -0.55
     in_circle:
         kp: 4
+        ki: 0
         kd: 12
         dv: 0
         ray_ag1: 2.5
@@ -129,41 +144,49 @@ left_circle:
         ray_ag5: 2.7
     inside_before:
         kp: 2.19
+        ki: 0
         kd: 5.10
         dv: 0
         p: ['IMGW-1','IMGH-5']
     inside:
         kp: 1.5
+        ki: 0
         kd: 4
         dv: 0 #2
     out_find:
         kp: 1.5
+        ki: 0
         kd: 4
         dv: 0 #2
         p: ['IMGW/3','IMGH/2']
     out_strai: 
         find_pos: 12
         kp: 1.5
+        ki: 0
         kd: 4
         dv: 0
     out: 
         kp: 1.5
+        ki: 0
         kd: 4
         dv: 0 #10
         ray_ag: 1.24
     out_out: 
         kp: 1.5
+        ki: 0
         kd: 4
         dv: 0
 #
 repair:
     kp: 2
+    ki: 0
     kd: 4
     dv: 0
     speed: -5
 #
 farm:
     kp: 1.3 #0.3 2.9高速80
+    ki: 0
     kd: 2.6 #0.3 2低速50~70
     dv: 0
     speed: 14
@@ -178,6 +201,7 @@ farm:
 #
 hump:
     kp: 2
+    ki: 0
     kd: 4
     dv: 0
     speed: 110
@@ -186,6 +210,7 @@ hump:
 #
 start:
     kp: 2
+    ki: 0
     kd: 4
     dv: 0
     left: false
@@ -196,6 +221,7 @@ start:
 #
 end:
     kp: 2
+    ki: 0
     kd: 4
     dv: 0
     end_dist: 55
@@ -205,6 +231,7 @@ end:
 #
 zebra:
     kp: 2
+    ki: 0
     kd: 4
     dv: 0
     zebra_far_dist: 60 #50 # 最好大于巡线门槛
@@ -214,6 +241,7 @@ zebra:
 #
 hill:
     kp: 2 #2
+    ki: 0
     kd: 4
     dv: 0
     speed: 120

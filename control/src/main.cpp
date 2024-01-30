@@ -16,11 +16,11 @@ using namespace cv;
 #define Re MI.re
 
 MainImage MI;
-AngleControl AC(Re.main.kp, Re.main.kd, Re.main.max_ag, Re.main.min_ag);
+AngleControl AC(Re.main.kp, Re.main.kd, Re.main.ki, Re.main.max_ag, Re.main.min_ag);
 SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v);
 
 std::chrono::time_point<std::chrono::high_resolution_clock> start_time_stamp;
-float kp, kd;
+float kp, kd, ki;
 int dv;
 float deviation = 0;
 float speed_result;
@@ -201,9 +201,9 @@ int main()
 
 		//更新当前状态
 		MI.state_judge();
-		MI.update_control(kp, kd, dv);
+		MI.update_control(kp, kd, ki, dv);
 
-		AC.reset(kp, kd);
+		AC.reset(kp, kd, ki);
 
 		switch (MI.state_out)
 		{

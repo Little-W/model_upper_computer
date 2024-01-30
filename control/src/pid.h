@@ -15,12 +15,13 @@ class PartPdCtrl {
 private:
 	float kp;//读取
 	float kd;//读取
+	float ki;//读取
 	data_t last_error;//上一偏差
 	int count;//偏差过大时改kp
 public:
-	PartPdCtrl(float kp_ = 0, float kd_ = 0);
+	PartPdCtrl(float kp_ = 0, float kd_ = 0, float ki_ = 0);
 	data_t output(data_t error);
-	void reset(float kp, float kd) { this->kp = kp; this->kd = kd; }
+	void reset(float kp, float kd, float ki) { this->kp = kp; this->kd = kd; this->ki = ki;}
   float show(){return this->kp;}
 };
 
@@ -38,10 +39,10 @@ private:
 
 public:
 	//@param kp 比例系数	@param kd 微分系数	@param a_c 夹角误差系数	@param d_c 距离误差系数	@param max 输出最大值	@param min 输出最小值
-	AngleControl(float kp, float kd, data_t max, data_t min);
+	AngleControl(float kp, float kd, float ki, data_t max, data_t min);
 	//@brief 计算输出值	@param angel_error 小车方向与中线之间的夹角	@param dist_error 小车与中线之间的距离	@return out_t 输出值，可直接发至下位机
 	out_t output(data_t dist_error);
-	void reset(float kp, float kd) { this->pid.reset(kp, kd); }
+	void reset(float kp, float kd, float ki) { this->pid.reset(kp, kd, ki); }
   float show(){return this->pid.show();}
 };
 

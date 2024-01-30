@@ -161,8 +161,10 @@ Reader::Reader(string path) {
     set.ai_h=n_set.get<int>("ai_h");
     //main
     main.garage_start = n_main.get<bool>("garage_start");
+    main.dy_kp_threshold = n_main.get<float>("dy_kp_threshold");
     main.kp = n_main.get<float>("kp");
     main.kd = n_main.get<float>("kd");
+    main.ki = n_main.get<float>("ki");
     main.dv = n_main.get<int>("dv");
     main.max_ag = n_main.get<int>("max_ag");
     main.min_ag = n_main.get<int>("min_ag");
@@ -280,8 +282,8 @@ Reader::Reader(string path) {
     hill.frame = n_hill.get<int>("frame");
 }
 
-struct Reader::pdv Reader::get_pdv(int state_out, int state_in) {
-    float kp, kd;
+struct Reader::pidv Reader::get_pidv(int state_out, int state_in) {
+    float kp, kd, ki;
     int dv;
     switch (state_out)
     {
@@ -291,54 +293,63 @@ struct Reader::pdv Reader::get_pdv(int state_out, int state_in) {
         {
         case left_circle_out_out: {
             kp = n_left_circle.get_bi<float>("out_out", "kp");
+            ki = n_left_circle.get_bi<float>("out_out", "ki");
             kd = n_left_circle.get_bi<float>("out_out", "kd");
             dv = n_left_circle.get_bi<int>("out_out", "dv");
             break;
         }
         case left_circle_out: {
             kp = n_left_circle.get_bi<float>("out", "kp");
+            ki = n_left_circle.get_bi<float>("out", "ki");
             kd = n_left_circle.get_bi<float>("out", "kd");
             dv = n_left_circle.get_bi<int>("out", "dv");
             break;
         }
         case left_circle_out_strai: {
             kp = n_left_circle.get_bi<float>("out_strai", "kp");
+            ki = n_left_circle.get_bi<float>("out_strai", "ki");
             kd = n_left_circle.get_bi<float>("out_strai", "kd");
             dv = n_left_circle.get_bi<int>("out_strai", "dv");
             break;
         }
         case left_circle_out_find: {
             kp = n_left_circle.get_bi<float>("out_find", "kp");
+            ki = n_left_circle.get_bi<float>("out_find", "ki");
             kd = n_left_circle.get_bi<float>("out_find", "kd");
             dv = n_left_circle.get_bi<int>("out_find", "dv");
             break;
         }
         case left_circle_inside: {
             kp = n_left_circle.get_bi<float>("inside", "kp");
+            ki = n_left_circle.get_bi<float>("inside", "ki");
             kd = n_left_circle.get_bi<float>("inside", "kd");
             dv = n_left_circle.get_bi<int>("inside", "dv");
             break;
         }
         case left_circle_inside_before: {
             kp = n_left_circle.get_bi<float>("inside_before", "kp");
+            ki = n_left_circle.get_bi<float>("inside_before", "ki");
             kd = n_left_circle.get_bi<float>("inside_before", "kd");
             dv = n_left_circle.get_bi<int>("inside_before", "dv");
             break;
         }
         case left_circle_in_circle: {
             kp = n_left_circle.get_bi<float>("in_circle", "kp");
+            ki = n_left_circle.get_bi<float>("in_circle", "ki");
             kd = n_left_circle.get_bi<float>("in_circle", "kd");
             dv = n_left_circle.get_bi<int>("in_circle", "dv");
             break;
         }
         case left_circle_in_strai: {
             kp = n_left_circle.get_bi<float>("in_strai", "kp");
+            ki = n_left_circle.get_bi<float>("in_strai", "ki");
             kd = n_left_circle.get_bi<float>("in_strai", "kd");
             dv = n_left_circle.get_bi<int>("in_strai", "dv");
             break;
         }
         case left_circle_in_find: {
             kp = n_left_circle.get_bi<float>("in_find", "kp");
+            ki = n_left_circle.get_bi<float>("in_find", "ki");
             kd = n_left_circle.get_bi<float>("in_find", "kd");
             dv = n_left_circle.get_bi<int>("in_find", "dv");
             break;
@@ -352,54 +363,63 @@ struct Reader::pdv Reader::get_pdv(int state_out, int state_in) {
         {
         case right_circle_out_out: {
             kp = n_right_circle.get_bi<float>("out_out", "kp");
+            ki = n_right_circle.get_bi<float>("out_out", "ki");
             kd = n_right_circle.get_bi<float>("out_out", "kd");
             dv = n_right_circle.get_bi<int>("out_out", "dv");
             break;
         }
         case right_circle_out: {
             kp = n_right_circle.get_bi<float>("out", "kp");
+            ki = n_right_circle.get_bi<float>("out", "ki");
             kd = n_right_circle.get_bi<float>("out", "kd");
             dv = n_right_circle.get_bi<int>("out", "dv");
             break;
         }
         case right_circle_out_strai: {
             kp = n_right_circle.get_bi<float>("out_strai", "kp");
+            ki = n_right_circle.get_bi<float>("out_strai", "ki");
             kd = n_right_circle.get_bi<float>("out_strai", "kd");
             dv = n_right_circle.get_bi<int>("out_strai", "dv");
             break;
         }
         case right_circle_out_find: {
             kp = n_right_circle.get_bi<float>("out_find", "kp");
+            ki = n_right_circle.get_bi<float>("out_find", "ki");
             kd = n_right_circle.get_bi<float>("out_find", "kd");
             dv = n_right_circle.get_bi<int>("out_find", "dv");
             break;
         }
         case right_circle_inside: {
             kp = n_right_circle.get_bi<float>("inside", "kp");
+            ki = n_right_circle.get_bi<float>("inside", "ki");
             kd = n_right_circle.get_bi<float>("inside", "kd");
             dv = n_right_circle.get_bi<int>("inside", "dv");
             break;
         }
         case right_circle_inside_before: {
             kp = n_right_circle.get_bi<float>("inside_before", "kp");
+            ki = n_right_circle.get_bi<float>("inside_before", "ki");
             kd = n_right_circle.get_bi<float>("inside_before", "kd");
             dv = n_right_circle.get_bi<int>("inside_before", "dv");
             break;
         }
         case right_circle_in_circle: {
             kp = n_right_circle.get_bi<float>("in_circle", "kp");
+            ki = n_right_circle.get_bi<float>("in_circle", "ki");
             kd = n_right_circle.get_bi<float>("in_circle", "kd");
             dv = n_right_circle.get_bi<int>("in_circle", "dv");
             break;
         }
         case right_circle_in_strai: {
             kp = n_right_circle.get_bi<float>("in_strai", "kp");
+            ki = n_right_circle.get_bi<float>("in_strai", "ki");
             kd = n_right_circle.get_bi<float>("in_strai", "kd");
             dv = n_right_circle.get_bi<int>("in_strai", "dv");
             break;
         }
         case right_circle_in_find: {
             kp = n_right_circle.get_bi<float>("in_find", "kp");
+            ki = n_right_circle.get_bi<float>("in_find", "ki");
             kd = n_right_circle.get_bi<float>("in_find", "kd");
             dv = n_right_circle.get_bi<int>("in_find", "dv");
             break;
@@ -410,14 +430,16 @@ struct Reader::pdv Reader::get_pdv(int state_out, int state_in) {
     default: 
     {
         kp = n_main.get<float>("kp");
+        ki = n_main.get<float>("ki");
         kd = n_main.get<float>("kd");
         dv = n_main.get<int>("dv");
         break;
     }
     }
-    struct pdv PDV;
-    PDV.kp = kp;
-    PDV.kd = kd;
-    PDV.dv = dv;
-    return PDV;
+    struct pidv PIDV;
+    PIDV.kp = kp;
+    PIDV.ki = ki;
+    PIDV.kd = kd;
+    PIDV.dv = dv;
+    return PIDV;
 }

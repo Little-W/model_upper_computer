@@ -104,16 +104,17 @@ private:
     BaseReader n_zebra;
     BaseReader n_hill;
 public:
-    struct pdv
+    struct pidv
     {
         float kp;
         float kd;
+        float ki;
         int dv;
     };
 
     Reader(std::string path);
     Reader() : Reader("./config.yaml") {}
-    struct pdv get_pdv(int state_out, int state_in);
+    struct pidv get_pidv(int state_out, int state_in);
     struct {
         bool video_save;
         bool color;
@@ -130,8 +131,10 @@ public:
     }set;
     struct {
         bool garage_start;
+        float dy_kp_threshold;
         float kp;
         float kd;
+        float ki;
         int dv;
         int max_ag;
         int min_ag;
@@ -152,6 +155,7 @@ public:
     }main;
     struct {
         float kp;
+        float ki;
         float kd;
         int dv;
         int speed;
@@ -174,6 +178,7 @@ public:
     }r_circle, l_circle;
     struct {
         float kp;
+        float ki;
         float kd;
         int dv;
         int speed;
@@ -181,6 +186,7 @@ public:
     struct {
         float kp;
         float kd;
+        float ki;
         int dv;
         int speed;
         int speed_out;
@@ -195,6 +201,7 @@ public:
     struct {
         float kp;
         float kd;
+        float ki;
         int dv;
         int speed;
         int mend_up_line;
@@ -202,6 +209,7 @@ public:
     }hump;
     struct {
         float kp;
+        float ki;
         float kd;
         int dv;
         bool left;
@@ -219,6 +227,7 @@ public:
     struct {
         float kp;
         float kd;
+        float ki;
         int dv;
         int zebra_far_dist;
         int zebra_near_dist;
@@ -228,6 +237,7 @@ public:
     struct {
         float kp;
         float kd;
+        float ki;
         int dv;
         int speed;
         int mid_bot_y;
