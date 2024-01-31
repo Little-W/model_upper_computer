@@ -173,6 +173,30 @@ int main()
 		matWrite(image_addr, MI.store.image_BGR);
 		semV(image_sem);
 
+	    string data;
+		int real_speed_enc;
+		if(ser.available())
+		{
+			data = ser.read(ser.available()); // 读取串口数据
+			cout << "data lenth: " << data.size() << endl;
+			for (auto i = data.size() - 1; i >= 0 ; i-- )
+			{
+				if((data[i] & 0xc0) == 0xc0)
+				{
+					if((data[i-1] & 0x40) == 0x40)
+					{
+						real_speed_enc = (data[i-1] & 0x1f) << 6;
+						real_speed_enc |= data[i] & 0x3f;
+						if((data[i-1] & 0x20) == 0x20)
+						{
+							real_speed_enc = -real_speed_enc;
+						}
+						break;
+					}
+				}
+			}
+			cout << "true_speed_enc: " << real_speed_enc << endl;
+		}
 		//只有在straight状态下识别AI元素
 		if (MI.state_out == straight)
 		{
