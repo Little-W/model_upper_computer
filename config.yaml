@@ -23,7 +23,10 @@ main:
     dy_kp_coef: 0.2
 
     dy_kd_threshold: 55 #62
-    dy_kd_coef: 0.2
+    enc_forward_dist_coef: 0 #0.0015
+    enc_forward_dist_exp: 1.5 #1
+    enc_up_scope_coef: 0.1 #0.0015
+    enc_up_scope_exp: 2 #1
 
     kp: 0.78 #1.6
     ki: 0

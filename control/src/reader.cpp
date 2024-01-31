@@ -161,6 +161,10 @@ Reader::Reader(string path) {
     set.ai_h=n_set.get<int>("ai_h");
     //main
     main.garage_start = n_main.get<bool>("garage_start");
+    main.enc_forward_dist_coef = n_main.get<float>("enc_forward_dist_coef");
+    main.enc_forward_dist_exp = n_main.get<float>("enc_forward_dist_exp");
+    main.enc_up_scope_coef = n_main.get<float>("enc_up_scope_coef");
+    main.enc_up_scope_exp = n_main.get<float>("enc_up_scope_exp");
     main.dy_kp_threshold = n_main.get<float>("dy_kp_threshold");
     main.dy_kp_coef = n_main.get<float>("dy_kp_coef");
     main.dy_kd_threshold = n_main.get<float>("dy_kd_threshold");

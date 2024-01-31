@@ -16,7 +16,7 @@ Mat get_frame(VideoCapture cap) {
 	return frame;
 }
 
-float MainImage::MidlineDeviation()
+float MainImage::MidlineDeviation(int enc_speed)
 {
 	int i, j;
 	float deviation = 0;
@@ -40,7 +40,20 @@ float MainImage::MidlineDeviation()
 		cout << "deviation: " << deviation << endl;
 	}
 	else {
-		thresh = IMGH - re.main.forward_dist;
+		double speed_error;
+		speed_error = (double)enc_speed - 100;
+		if(speed_error <= 5 )
+		{
+			speed_error = 5;
+		}
+		double new_forward_dist;
+		new_forward_dist = re.main.forward_dist + re.main.enc_forward_dist_coef * pow(speed_error,re.main.enc_forward_dist_exp) / 1000.0;
+		if(new_forward_dist > 30)
+		{
+			new_forward_dist = 20;
+		}
+		cout << "forward_dist is: " << new_forward_dist << endl;
+		thresh = IMGH - new_forward_dist;
 		if (state_out == right_circle) {
 			thresh = IMGH - re.r_circle.circle_dist;
 		}
@@ -48,7 +61,20 @@ float MainImage::MidlineDeviation()
 			thresh = IMGH - re.l_circle.circle_dist;
 		}
 		sum = 0;
-		for (i = thresh; i > thresh - re.main.up_scope; i--) {
+		double speed_error;
+		speed_error = (double)enc_speed - 100;
+		if(speed_error <= 5 )
+		{
+			speed_error = 5;
+		}
+		double new_up_scope;
+		new_up_scope = re.main.up_scope + re.main.enc_up_scope_coef * pow(speed_error,re.main.enc_up_scope_exp) / 1000.0;
+		if(new_up_scope > 30)
+		{
+			new_up_scope = 30;
+		}
+		cout << "up_scope is: " << new_up_scope << endl;
+		for (i = thresh; i > thresh - new_up_scope; i--) {
 			sum += center_point[i];
 		}
 		deviation = re.main.forward_coef1 * (center - float(sum) / re.main.up_scope);

@@ -1,4 +1,4 @@
-﻿#ifndef __TANGENT_HEADER__
+#ifndef __TANGENT_HEADER__
 #define __TANGENT_HEADER__
 
 #include <opencv2/opencv.hpp>
@@ -110,7 +110,7 @@ public:
 
 	void show(float dev, bool c = true, bool l = false, bool r = false, bool l_e = true, bool r_e = true, bool l_c = false, bool r_c = false, bool c_c = false);//总显示方案
 
-	float MidlineDeviation();
+	float MidlineDeviation(int enc_speed);
 };
 
 bool j_right_circle_in_circle(const MainImage& mi, uchar& state_in);

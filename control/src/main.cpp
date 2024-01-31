@@ -616,7 +616,7 @@ int main()
 			MI.find_center();
 		}
 		//运动控制
-		deviation = MI.MidlineDeviation();
+		deviation = MI.MidlineDeviation(real_speed_enc);
 
 		if (MI.state_out == right_circle)
 		{
