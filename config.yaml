@@ -19,16 +19,16 @@ set:
 #    
 main:
     garage_start: false
-    dy_kp_threshold: 70 #62
-    dy_kp_coef: 0.04
+    dy_kp_threshold: 75 #62
+    dy_kp_coef: 0.08
     dy_kd_threshold: 55 #62
     dy_kd_coef: 0
-    enc_forward_dist_coef: 14.1 #0.0015
-    enc_forward_dist_exp: 1.87 #1
-    enc_up_scope_coef: 8 #0.0015
-    enc_up_scope_exp: 1.7 #1
-    enc_forward_coef1_coef: 0.071
-    enc_forward_coef1_exp: 1.85
+    enc_forward_dist_coef: 14.12 #0.0015
+    enc_forward_dist_exp: 1.878 #1
+    enc_up_scope_coef: 7.2 #0.0015
+    enc_up_scope_exp: 1.88 #1
+    enc_forward_coef1_coef: 0.07
+    enc_forward_coef1_exp: 1.5
     right_ray: -1.2
     left_ray: 1.0
     kp: 0.78 #1.6
@@ -38,15 +38,15 @@ main:
     max_ag: 200 ## 250
     min_ag: -200 ## 0
     max_v: 11 #95
-    min_v: 4 #95
+    min_v: 3 #95
     max_v_diff: 40
-    min_v_diff: 8
+    min_v_diff: 3
     use_dv: false #false
     second_lap: false
     center_coef: 0.2
     forward_dist: 45 #130给70 0.8  4 ；80给25 2.5 0.05
     up_scope: 6 #4
-    down_scope: 10 #4
+    down_scope: 12 #4
     forward_coef1: 0.6
     forward_coef2: 0.4
     # 恒定速度与打角
@@ -64,9 +64,9 @@ right_circle:
     big_circle: false 
     count_start: 2
     in_find:
-        kp: 1.1 #1.6
+        kp: 0.9 #1.6
         ki: 0
-        kd: 3 #4.54
+        kd: 0 #4.54
         dv: 0
         ray_ag: 2
     in_strai:
@@ -77,7 +77,7 @@ right_circle:
         ray_ag1: -0.94
         ray_ag2: -2.55 #-2.55
     in_circle:
-        kp: 1.2 #1.6
+        kp: 1.1 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0
@@ -87,7 +87,7 @@ right_circle:
         ray_ag4: -2.45
         ray_ag5: 0.44 #0.84
     inside_before:
-        kp: 1.4
+        kp: 1.1
         ki: 0
         kd: 0 # 5.10
         dv: 0
@@ -110,9 +110,9 @@ right_circle:
         kd: 3 #4.54
         dv: 0
     out:
-        kp: 1.1 #1.6
+        kp: 1.2 #1.6
         ki: 0
-        kd: 3 #4.54
+        kd: 0 #4.54
         ray_ag: 1.9
     out_out: 
         kp: 1.1 #1.6
