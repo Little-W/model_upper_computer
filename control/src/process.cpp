@@ -48,9 +48,9 @@ float MainImage::MidlineDeviation(int enc_speed)
 		}
 		double new_forward_dist;
 		new_forward_dist = re.main.forward_dist + re.main.enc_forward_dist_coef * pow(speed_error,re.main.enc_forward_dist_exp) / 1000.0;
-		if(new_forward_dist > 30)
+		if(new_forward_dist > 75)
 		{
-			new_forward_dist = 20;
+			new_forward_dist = 75;
 		}
 		cout << "forward_dist is: " << new_forward_dist << endl;
 		thresh = IMGH - new_forward_dist;
@@ -63,9 +63,9 @@ float MainImage::MidlineDeviation(int enc_speed)
 		sum = 0;
 		double new_up_scope;
 		new_up_scope = re.main.up_scope + re.main.enc_up_scope_coef * pow(speed_error,re.main.enc_up_scope_exp) / 1000.0;
-		if(new_up_scope > 30)
+		if(new_up_scope > 6)
 		{
-			new_up_scope = 30;
+			new_up_scope = 6;
 		}
 		cout << "up_scope is: " << new_up_scope << endl;
 		for (i = thresh; i > thresh - new_up_scope; i--) {
