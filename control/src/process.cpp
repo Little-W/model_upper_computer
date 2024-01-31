@@ -9,7 +9,10 @@ bool r_circle_use = true;
 bool l_circle_use = true;
 bool l_circle_big_circle = true;
 bool r_circle_big_circle = true;
-extern int stop;
+
+MainImage MI;
+int stop = false;
+
 Mat get_frame(VideoCapture cap) {
 	Mat frame;
 	cap.read(frame);

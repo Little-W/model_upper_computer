@@ -1,5 +1,6 @@
-﻿#ifndef __TANGENT_HEADER__
+#ifndef __TANGENT_HEADER__
 #define __TANGENT_HEADER__
+#define Re MI.re
 
 #include <opencv2/opencv.hpp>
 #include <future>
@@ -139,4 +140,6 @@ int count_wid(const Mat& src, Point seed);
 void line(Mat& img, Point A, Point B, int color = 0);	//补线段
 void ray(Mat& img, Point start, float angle, int color = 0);	//补射线
 
+extern MainImage MI;
+extern int stop;
 #endif

@@ -3,8 +3,6 @@
 #include "process.h"
 using namespace std;
 
-#define Re MI.re
-extern MainImage MI;
 
 PartPdCtrl::PartPdCtrl(float kp_, float kd_, float ki_) {
 	this->last_error = 0;
