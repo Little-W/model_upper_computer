@@ -34,6 +34,7 @@ int hill_count = 0;//坡道中计数
 int circle_count = 0;//环岛中计数
 int zebra_count = 0;
 
+int real_speed_enc = 0;
 
 int stop = false;
 
@@ -174,7 +175,7 @@ int main()
 		semV(image_sem);
 
 	    string data;
-		int real_speed_enc;
+		int real_speed_enc_tmp;
 		if(ser.available())
 		{
 			data = ser.read(ser.available()); // 读取串口数据
@@ -185,17 +186,25 @@ int main()
 				{
 					if((data[i-1] & 0x40) == 0x40)
 					{
-						real_speed_enc = (data[i-1] & 0x1f) << 6;
-						real_speed_enc |= data[i] & 0x3f;
+						real_speed_enc_tmp = (data[i-1] & 0x1f) << 6;
+						real_speed_enc_tmp |= data[i] & 0x3f;
 						if((data[i-1] & 0x20) == 0x20)
 						{
-							real_speed_enc = -real_speed_enc;
+							real_speed_enc_tmp = -real_speed_enc_tmp;
 						}
+						if(!(abs(real_speed_enc_tmp) > 600 || abs(real_speed_enc_tmp - real_speed_enc) > 300))
+						{
+							real_speed_enc = real_speed_enc_tmp;
+							cout << "true_speed_enc: " << real_speed_enc << endl;
 						break;
+						}			
+						else
+						{
+							i--;
+						}
 					}
 				}
 			}
-			cout << "true_speed_enc: " << real_speed_enc << endl;
 		}
 		//只有在straight状态下识别AI元素
 		if (MI.state_out == straight)
