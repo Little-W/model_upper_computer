@@ -71,7 +71,14 @@ float MainImage::MidlineDeviation(int enc_speed)
 		for (i = thresh; i > thresh - new_up_scope; i--) {
 			sum += center_point[i];
 		}
-		deviation = re.main.forward_coef1 * (center - float(sum) / re.main.up_scope);
+		double new_forward_coef1;
+		new_forward_coef1 = re.main.forward_coef1 + re.main.enc_forward_coef1_coef * pow(speed_error,re.main.enc_forward_coef1_exp) / 1000.0;
+		if(new_forward_coef1 > 2)
+		{
+			new_forward_coef1 = 2;
+		}
+		cout << "new_forward_coef1 is: " << new_forward_coef1 << endl;	
+  		deviation = new_forward_coef1 * (center - float(sum) / new_up_scope);
 		sum = 0;
 		for (i = thresh + re.main.down_scope; i > thresh; i--) {
 			sum += center_point[i];

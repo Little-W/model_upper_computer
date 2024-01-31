@@ -135,6 +135,8 @@ public:
         float enc_forward_dist_exp;
         float enc_up_scope_coef;
         float enc_up_scope_exp;
+        float enc_forward_coef1_coef;
+        float enc_forward_coef1_exp;
         float dy_kp_threshold;
         float dy_kp_coef;
         float dy_kd_threshold;

@@ -165,6 +165,8 @@ Reader::Reader(string path) {
     main.enc_forward_dist_exp = n_main.get<float>("enc_forward_dist_exp");
     main.enc_up_scope_coef = n_main.get<float>("enc_up_scope_coef");
     main.enc_up_scope_exp = n_main.get<float>("enc_up_scope_exp");
+    main.enc_forward_coef1_coef = n_main.get<float>("enc_forward_coef1_coef");
+    main.enc_forward_coef1_exp = n_main.get<float>("enc_forward_coef1_exp");
     main.dy_kp_threshold = n_main.get<float>("dy_kp_threshold");
     main.dy_kp_coef = n_main.get<float>("dy_kp_coef");
     main.dy_kd_threshold = n_main.get<float>("dy_kd_threshold");
