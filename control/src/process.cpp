@@ -41,7 +41,7 @@ float MainImage::MidlineDeviation(int enc_speed)
 	}
 	else {
 		double speed_error;
-		speed_error = (double)enc_speed - 100;
+		speed_error = (double)enc_speed - re.main.min_v;
 		if(speed_error <= 5 )
 		{
 			speed_error = 5;
