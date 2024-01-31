@@ -131,12 +131,16 @@ public:
     }set;
     struct {
         bool garage_start;
+        int enc_forward_threshold;
         float enc_forward_dist_coef;
         float enc_forward_dist_exp;
+        int max_enc_forward_dist;
         float enc_up_scope_coef;
         float enc_up_scope_exp;
+        int max_enc_up_scope;
         float enc_forward_coef1_coef;
         float enc_forward_coef1_exp;
+        float max_enc_forward_coef1;
         float dy_kp_threshold;
         float dy_kp_coef;
         float dy_kd_threshold;

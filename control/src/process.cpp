@@ -44,17 +44,18 @@ float MainImage::MidlineDeviation(int enc_speed)
 		cout << "deviation: " << deviation << endl;
 	}
 	else {
+		//速度大于阈值时对前瞻进行动态调整:forward_dist up_scope forward_coef1
 		double speed_error;
-		speed_error = (double)enc_speed - 120;
+		speed_error = enc_speed - re.main.enc_forward_threshold;
 		if(speed_error <= 0 )
 		{
 			speed_error = 0;
 		}
 		double new_forward_dist;
 		new_forward_dist = re.main.forward_dist + re.main.enc_forward_dist_coef * pow(speed_error,re.main.enc_forward_dist_exp) / 1000.0;
-		if(new_forward_dist > 80)
+		if(new_forward_dist > re.main.max_enc_forward_dist)
 		{
-			new_forward_dist = 80;
+			new_forward_dist = re.main.max_enc_forward_dist;
 		}
 		cout << "forward_dist is: " << new_forward_dist << endl;
 		thresh = IMGH - new_forward_dist;
@@ -65,21 +66,23 @@ float MainImage::MidlineDeviation(int enc_speed)
 			thresh = IMGH - re.l_circle.circle_dist;
 		}
 		sum = 0;
+		//根据速度动态调整上半部分采样点个数
 		int new_up_scope;
 		new_up_scope = re.main.up_scope + re.main.enc_up_scope_coef * pow(speed_error,re.main.enc_up_scope_exp) / 1000.0;
-		if(new_up_scope > 12)
+		if(new_up_scope > re.main.max_enc_up_scope)
 		{
-			new_up_scope = 12;
+			new_up_scope = re.main.max_enc_up_scope;
 		}
 		cout << "up_scope is: " << new_up_scope << endl;
 		for (i = thresh; i > thresh - new_up_scope; i--) {
 			sum += center_point[i];
 		}
+		//根据速度动态调整权重
 		double new_forward_coef1;
 		new_forward_coef1 = re.main.forward_coef1 + re.main.enc_forward_coef1_coef * pow(speed_error,re.main.enc_forward_coef1_exp) / 1000.0;
-		if(new_forward_coef1 > 1.2)
+		if(new_forward_coef1 > re.main.max_enc_forward_coef1)
 		{
-			new_forward_coef1 = 1.2;
+			new_forward_coef1 = re.main.max_enc_forward_coef1;
 		}
 		cout << "new_forward_coef1 is: " << new_forward_coef1 << endl;	
   		deviation = new_forward_coef1 * (center - float(sum) / new_up_scope);

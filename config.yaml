@@ -24,15 +24,23 @@ main:
     dy_kp_coef: 0.08
     dy_kd_threshold: 55 #62
     dy_kd_coef: 0
-    #根据速度动态调整中线位置
+
+    #根据速度动态调整前瞻的参数，幂函数形式
+    #-速度动态调整前瞻的阈值
+    enc_forward_threshold: 120
+    #-动态调整中线位置
     enc_forward_dist_coef: 14.12 #0.0015
     enc_forward_dist_exp: 1.879 #1
-    #根据速度动态调整上半部分像素点数量
+    max_enc_forward_dist: 75
+    #-动态调整上半部分像素点数量
     enc_up_scope_coef: 7.2 #0.0015
     enc_up_scope_exp: 1.884 #1
-    #根据速度动态调整上半部分权重
+    max_enc_up_scope: 12
+    #-动态调整上半部分权重
     enc_forward_coef1_coef: 0.07
     enc_forward_coef1_exp: 1.5
+    max_enc_forward_coef1: 1.2
+
     right_ray: -1.2
     left_ray: 1.0
     kp: 0.78 #1.6
