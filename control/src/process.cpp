@@ -3,7 +3,7 @@
 #include "process.h"
 #include <chrono>
 
-#define USE_VIDEO 1
+#define USE_VIDEO 0
 
 bool r_circle_use = true;
 bool l_circle_use = true;
@@ -32,6 +32,7 @@ float MainImage::MidlineDeviation(int enc_speed)
 			sum += center_point[i];
 		}
 		deviation = re.main.forward_coef1 * (center - float(sum) / re.farm.up_scope);
+		
 		sum = 0;
 		for (i = thresh + re.farm.down_scope; i > thresh; i--) {
 			sum += center_point[i];
@@ -48,9 +49,9 @@ float MainImage::MidlineDeviation(int enc_speed)
 		}
 		double new_forward_dist;
 		new_forward_dist = re.main.forward_dist + re.main.enc_forward_dist_coef * pow(speed_error,re.main.enc_forward_dist_exp) / 1000.0;
-		if(new_forward_dist > 75)
+		if(new_forward_dist > 80)
 		{
-			new_forward_dist = 75;
+			new_forward_dist = 80;
 		}
 		cout << "forward_dist is: " << new_forward_dist << endl;
 		thresh = IMGH - new_forward_dist;
@@ -63,9 +64,9 @@ float MainImage::MidlineDeviation(int enc_speed)
 		sum = 0;
 		int new_up_scope;
 		new_up_scope = re.main.up_scope + re.main.enc_up_scope_coef * pow(speed_error,re.main.enc_up_scope_exp) / 1000.0;
-		if(new_up_scope > 6)
+		if(new_up_scope > 12)
 		{
-			new_up_scope = 6;
+			new_up_scope = 12;
 		}
 		cout << "up_scope is: " << new_up_scope << endl;
 		for (i = thresh; i > thresh - new_up_scope; i--) {
@@ -73,9 +74,9 @@ float MainImage::MidlineDeviation(int enc_speed)
 		}
 		double new_forward_coef1;
 		new_forward_coef1 = re.main.forward_coef1 + re.main.enc_forward_coef1_coef * pow(speed_error,re.main.enc_forward_coef1_exp) / 1000.0;
-		if(new_forward_coef1 > 2)
+		if(new_forward_coef1 > 1.2)
 		{
-			new_forward_coef1 = 2;
+			new_forward_coef1 = 1.2;
 		}
 		cout << "new_forward_coef1 is: " << new_forward_coef1 << endl;	
   		deviation = new_forward_coef1 * (center - float(sum) / new_up_scope);
@@ -88,6 +89,7 @@ float MainImage::MidlineDeviation(int enc_speed)
 		//if (deviation < -15) deviation -= 4;
 		//else if (deviation > 15) deviation += 4;
 		cout << "deviation: " << deviation << endl;
+	
 	}
 	return deviation;
 }
@@ -396,7 +398,16 @@ void MainImage::mend_trunk()
 				line(store.image_mat, right_end_point[i], right_end_point[i + 1]);
 			}
 			if (right_end_point[0].y < IMGH - 5)
+
 				ray(store.image_mat, right_end_point[0], -1.4f);
+		}
+		if (right_end_point.size() == 1 && left_end_point.size() == 1){
+			if(right_end_point[0].y < left_end_point[0].y){
+				ray(store.image_mat, right_end_point[0], re.main.right_ray);
+			}
+			if(left_end_point[0].y < left_end_point[0].y){
+				ray(store.image_mat, right_end_point[0], re.main.left_ray);
+			}
 		}
 	}
 	if (lost_left) {
@@ -438,6 +449,11 @@ void MainImage::mend_right_circle_in_straight()
 	}
 	ray(store.image_mat, p, re.r_circle.in_strai_ray_ag1);
 	ray(store.image_mat, right_end_point[2], re.r_circle.in_strai_ray_ag2);
+	for (int j = right_end_point[2].y; j > 0; j--){
+		exist_left_edge_point[j] = false;
+		exist_right_edge_point[j] = false;
+
+	}
 }
 
 void MainImage::mend_right_circle_in_circle()

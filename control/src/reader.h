@@ -161,6 +161,8 @@ public:
         float forward_coef2;
         pii v_right_circle;
         pii v_left_circle;
+        float left_ray;
+        float right_ray;
     }main;
     struct {
         float kp;

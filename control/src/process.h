@@ -1,4 +1,4 @@
-#ifndef __TANGENT_HEADER__
+﻿#ifndef __TANGENT_HEADER__
 #define __TANGENT_HEADER__
 
 #include <opencv2/opencv.hpp>

@@ -19,30 +19,33 @@ set:
 #    
 main:
     garage_start: false
-    dy_kp_threshold: 55 #62
-    dy_kp_coef: 0.2
-
+    dy_kp_threshold: 70 #62
+    dy_kp_coef: 0.04
     dy_kd_threshold: 55 #62
-    enc_forward_dist_coef: 0 #0.0015
-    enc_forward_dist_exp: 1.5 #1
-    enc_up_scope_coef: 0.1 #0.0015
-    enc_up_scope_exp: 2 #1
-
+    dy_kd_coef: 0
+    enc_forward_dist_coef: 14.1 #0.0015
+    enc_forward_dist_exp: 1.87 #1
+    enc_up_scope_coef: 8 #0.0015
+    enc_up_scope_exp: 1.7 #1
+    enc_forward_coef1_coef: 0.071
+    enc_forward_coef1_exp: 1.85
+    right_ray: -1.2
+    left_ray: 1.0
     kp: 0.78 #1.6
     ki: 0
     kd: 3 #4.54
     dv: 0
     max_ag: 200 ## 250
     min_ag: -200 ## 0
-    max_v: 10 #95
-    min_v: 2 #95
-    max_v_diff: 40 
-    min_v_diff: 3 
+    max_v: 11 #95
+    min_v: 4 #95
+    max_v_diff: 40
+    min_v_diff: 8
     use_dv: false #false
     second_lap: false
     center_coef: 0.2
     forward_dist: 45 #130给70 0.8  4 ；80给25 2.5 0.05
-    up_scope: 10 #4
+    up_scope: 6 #4
     down_scope: 10 #4
     forward_coef1: 0.6
     forward_coef2: 0.4
@@ -51,9 +54,9 @@ main:
     v_left_circle: [175,90] #[175,70]
 #
 right_circle:
-    kp: 1.4 #1.6
+    kp: 1 #1.6
     ki: 0
-    kd: 0 #4.54
+    kd: 3 #4.54
     dv: 0
     speed: 4
     circle_dist: 40
@@ -61,20 +64,20 @@ right_circle:
     big_circle: false 
     count_start: 2
     in_find:
-        kp: 1.4 #1.6
+        kp: 1.1 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 3 #4.54
         dv: 0
         ray_ag: 2
     in_strai:
-        kp: 1.4 #1.6
+        kp: 1 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0
         ray_ag1: -0.94
         ray_ag2: -2.55 #-2.55
     in_circle:
-        kp: 1.4 #1.6
+        kp: 1.2 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0
@@ -84,13 +87,13 @@ right_circle:
         ray_ag4: -2.45
         ray_ag5: 0.44 #0.84
     inside_before:
-        kp: 2.19
+        kp: 1.4
         ki: 0
         kd: 0 # 5.10
         dv: 0
         p: ['0','IMGH-5']
     inside:
-        kp: 1.4 #1.6
+        kp: 1.1 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0 #2
@@ -102,17 +105,17 @@ right_circle:
         p: ['2*IMGW/3','IMGH/2'] #['2*IMGW/3','IMGH/2-5']
     out_strai: 
         find_pos: 12
-        kp: 1.4 #1.6
+        kp: 1.1 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 3 #4.54
         dv: 0
     out:
-        kp: 1.4 #1.6
+        kp: 1.1 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 3 #4.54
         ray_ag: 1.9
     out_out: 
-        kp: 1.4 #1.6
+        kp: 1.1 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0

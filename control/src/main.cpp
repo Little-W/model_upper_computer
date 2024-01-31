@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -173,7 +173,7 @@ int main()
 		semP(image_sem);
 		matWrite(image_addr, MI.store.image_BGR);
 		semV(image_sem);
-
+		
 	    string data;
 		int real_speed_enc_tmp;
 		if(ser.available())
@@ -196,7 +196,7 @@ int main()
 						{
 							real_speed_enc = real_speed_enc_tmp;
 							cout << "true_speed_enc: " << real_speed_enc << endl;
-						break;
+							break;
 						}			
 						else
 						{

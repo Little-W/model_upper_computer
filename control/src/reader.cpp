@@ -192,6 +192,9 @@ Reader::Reader(string path) {
     main.forward_coef2 = n_main.get<float>("forward_coef2");
     main.v_right_circle = n_main.get<pii>("v_right_circle");
     main.v_left_circle = n_main.get<pii>("v_left_circle");
+    main.left_ray = n_main.get<float>("left_ray");
+    main.right_ray = n_main.get<float>("right_ray");
+
     //right_circle
     r_circle.kp = n_right_circle.get<float>("kp");
     r_circle.kd = n_right_circle.get<float>("kd");

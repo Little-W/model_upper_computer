@@ -10,6 +10,7 @@
 #define RESULT_ID 0x123457
 #define IMAGE_SHM 0x654322
 #define RESULT_SHM 0x654321
+#define SPEED_SHM 0x123123
 
 #include <string>
 #include <opencv2/opencv.hpp>
