@@ -175,6 +175,13 @@ Reader::Reader(string path) {
     main.dy_kp_coef = n_main.get<float>("dy_kp_coef");
     main.dy_kd_threshold = n_main.get<float>("dy_kd_threshold");
     main.dy_kd_coef = n_main.get<float>("dy_kd_coef");
+    main.dy_speed_coef = n_main.get<float>("dy_speed_coef");
+    main.dy_speed_exp = n_main.get<float>("dy_speed_exp");
+    main.dy_speed_bezier_p0_ctrl_x = n_main.get<float>("dy_speed_bezier_p0_ctrl_x");
+    main.dy_speed_bezier_p0_ctrl_y = n_main.get<float>("dy_speed_bezier_p0_ctrl_y");
+    main.dy_speed_bezier_p1_ctrl_x = n_main.get<float>("dy_speed_bezier_p1_ctrl_x");
+    main.dy_speed_bezier_p1_ctrl_y = n_main.get<float>("dy_speed_bezier_p1_ctrl_y")    ;
+    
     main.kp = n_main.get<float>("kp");
     main.kd = n_main.get<float>("kd");
     main.ki = n_main.get<float>("ki");

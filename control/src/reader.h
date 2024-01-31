@@ -145,6 +145,12 @@ public:
         float dy_kp_coef;
         float dy_kd_threshold;
         float dy_kd_coef;
+        float dy_speed_coef;
+        float dy_speed_exp;
+        float dy_speed_bezier_p0_ctrl_x;
+        float dy_speed_bezier_p0_ctrl_y;
+        float dy_speed_bezier_p1_ctrl_x;
+        float dy_speed_bezier_p1_ctrl_y;
         float kp;
         float kd;
         float ki;

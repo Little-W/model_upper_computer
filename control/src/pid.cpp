@@ -55,9 +55,9 @@ AngleControl::AngleControl(float kp, float kd, float ki, data_t max, data_t min)
 	this->minimum = min;
 }
 /**
- *返回根据PID的输出值
+ * 返回根据PID的输出值
  * 输入角度
- * @return uint8_t 输出量，未映射，已限制范围，可直接发送到下位机
+ * @return float 输出量，未映射，已限制范围，可直接发送到下位机
  */
 out_t AngleControl::output(data_t dist_error) {
 	data_t now_error = dist_error;
@@ -75,14 +75,34 @@ SpeedControl::SpeedControl(data_t start_error_, data_t end_error_, data_t max_, 
 	this->k = float(max_ - min_) / (end_error_ - start_error_);
 	this->maximum = max_;
 	this->minimum = min_;
+
+	this->p0_x = start_error_;
+	this->p0_y = max_;
+	this->p1_x = end_error_;
+	this->p1_y = min_;
+	this->p0_ctrl_x = Re.main.dy_speed_bezier_p0_ctrl_x;
+	this->p0_ctrl_y = Re.main.dy_speed_bezier_p0_ctrl_y;
+	this->p1_ctrl_x = Re.main.dy_speed_bezier_p1_ctrl_x;
+	this->p1_ctrl_y = Re.main.dy_speed_bezier_p1_ctrl_y;
 }
-
-
+//二分查找解出三阶贝塞尔曲线当前x对应的参数t
+float SpeedControl::bezier_get_t(float x, float t_head, float t_tail) {
+	float t = (t_head + t_tail) / 2.0;
+	float t2x = (pow(1.0 - t, 3) * p0_x) + (3.0 * t * pow(1.0 - t, 2) * p0_ctrl_x) + (3.0 * pow(t, 2) * (1 - t) * p1_ctrl_x) + (pow(t, 3) * p1_x);
+	//可接受误差范围内返回结果
+	if (abs(t2x - x) < 0.001) return t;
+	if (t2x < x) return bezier_get_t(x,t, t_tail);
+	return bezier_get_t(x,t_head, t);
+}
+float limit2range(float target,float head,float tail){
+	target = max(head,target);
+	return min(tail,target);
+}
 /**
  * @brief 速度控制
  * @param input 输入中线偏离
- * @return unsigned char 返回速度绝对值
- * @note 根据偏移量来决定速度，偏移量越大速度越小，范围为[start_error,end_error]
+ * @return float 返回速度绝对值
+ * @note 根据偏移量来决定速度，在范围内偏移量越大速度越小，并随偏移量增大减速幅度增加
  */
 out_t SpeedControl::output(data_t input) {
 	input = abs(input);
@@ -94,7 +114,28 @@ out_t SpeedControl::output(data_t input) {
 		out = minimum;
 	}
 	else {
-		out = maximum - k * (input - start_error);
+		//18th使用线性变化，过弯时减速效果并不好
+		//this->k = float(max_ - min_) / (end_error_ - start_error_);
+		// out = maximum - k * (input - start_error);
+
+		//幂函数deviation-speed曲线
+		//out = maximum - dy_speed_coef * pow(input - start_error,dy_speed_exp);
+
+		//为保证曲线在边界处连续，并且可以更加自由调节曲线形状，
+		//使用三阶贝塞尔曲线限制条件来拟合一条斜率逐渐增加的deviation-speed曲线
+		//限制范围，确保配置文件中赋值符合规定
+		p0_ctrl_x = limit2range(p0_ctrl_x,start_error,end_error);
+		p1_ctrl_x = limit2range(p1_ctrl_x,start_error,end_error);
+		//限制p1_ctrl_x不小于p0_ctrl_x
+		p1_ctrl_x = max(p0_ctrl_x,p1_ctrl_x);
+
+		p0_ctrl_y = limit2range(p0_ctrl_y,minimum,maximum);
+		p1_ctrl_y = limit2range(p1_ctrl_y,minimum,maximum);
+		//限制p1_ctrl_y不超过p0_ctrl_y
+		p1_ctrl_y = min(p0_ctrl_y,p1_ctrl_y);
+
+		float t = bezier_get_t(input,0,1);
+		out = (pow(1.0 - t, 3) * p0_y) + (3.0 * t * pow(1.0 - t, 2) * p0_ctrl_y) + (3.0 * pow(t, 2) * (1 - t) * p1_ctrl_y) + (pow(t, 3) * p1_y);
 	}
 	return out_t(out);
 }

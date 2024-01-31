@@ -55,11 +55,15 @@ private:
 	float k;		// 速度的比例系数，斜坡
 	data_t minimum;// 输出的最小值	
 	data_t maximum;// 输出的最大值
+
+	float p0_x;float p0_y;float p1_x;float p1_y;
+	float p0_ctrl_x;float p0_ctrl_y;float p1_ctrl_x;float p1_ctrl_y;
 public:
 	//@param k 速度的比例系数	@param max 输出的最大值	@param min 输出的最小值
 	SpeedControl(data_t start_error, data_t end_error, data_t max, data_t min);
 	//@brief 计算输出值	@param input ？@return out_t 输出值，可直接发至下位机
 	out_t output(data_t input);
+	float bezier_get_t(float t_head,float t_tail,float x);
 };
 
 #endif
