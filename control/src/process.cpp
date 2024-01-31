@@ -61,7 +61,7 @@ float MainImage::MidlineDeviation(int enc_speed)
 			thresh = IMGH - re.l_circle.circle_dist;
 		}
 		sum = 0;
-		double new_up_scope;
+		int new_up_scope;
 		new_up_scope = re.main.up_scope + re.main.enc_up_scope_coef * pow(speed_error,re.main.enc_up_scope_exp) / 1000.0;
 		if(new_up_scope > 6)
 		{
