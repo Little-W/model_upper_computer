@@ -41,10 +41,10 @@ float MainImage::MidlineDeviation(int enc_speed)
 	}
 	else {
 		double speed_error;
-		speed_error = (double)enc_speed - re.main.min_v;
-		if(speed_error <= 5 )
+		speed_error = (double)enc_speed - 120;
+		if(speed_error <= 0 )
 		{
-			speed_error = 5;
+			speed_error = 0;
 		}
 		double new_forward_dist;
 		new_forward_dist = re.main.forward_dist + re.main.enc_forward_dist_coef * pow(speed_error,re.main.enc_forward_dist_exp) / 1000.0;
@@ -61,12 +61,6 @@ float MainImage::MidlineDeviation(int enc_speed)
 			thresh = IMGH - re.l_circle.circle_dist;
 		}
 		sum = 0;
-		double speed_error;
-		speed_error = (double)enc_speed - 100;
-		if(speed_error <= 5 )
-		{
-			speed_error = 5;
-		}
 		double new_up_scope;
 		new_up_scope = re.main.up_scope + re.main.enc_up_scope_coef * pow(speed_error,re.main.enc_up_scope_exp) / 1000.0;
 		if(new_up_scope > 30)
