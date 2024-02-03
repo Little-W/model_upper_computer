@@ -10,8 +10,6 @@ bool l_circle_use = true;
 bool l_circle_big_circle = true;
 bool r_circle_big_circle = true;
 
-int stop = false;
-
 Mat get_frame(VideoCapture cap) {
 	Mat frame;
 	cap.read(frame);
@@ -180,10 +178,6 @@ void ImageStorage::get_image(int x, int y, int w, int h, int ai_x, int ai_y, int
 		Mat kernel = getStructuringElement(MORPH_RECT, Size(3, 3));
 		morphologyEx(image_mat, image_mat, MORPH_CLOSE, kernel);//腐蚀膨胀
 	}
-}
-MainImage& MainImage::getInstance(){
-	static MainImage instance;
-	return instance;
 }
 //构造函数，进行初始化操作
 MainImage::MainImage() : re("./config.yaml")
