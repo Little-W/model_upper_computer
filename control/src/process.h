@@ -1,5 +1,6 @@
 ﻿#ifndef __TANGENT_HEADER__
 #define __TANGENT_HEADER__
+#define MI MainImage::getInstance()
 #define Re MI.re
 
 #include <opencv2/opencv.hpp>
@@ -27,6 +28,8 @@ public:
 
 class MainImage    //寻线
 {
+private:
+	MainImage();
 public:
 	uchar left_edge_point[IMGH];        //左边界
 	uchar right_edge_point[IMGH];       //右边界
@@ -75,7 +78,7 @@ public:
 	Reader re;
 	ImageStorage store;
 
-	MainImage();
+	static MainImage& getInstance(); //单例模式
 	void init(bool complete);           //初始化
 	void update_image();	//帧处理
 	void state_judge();		//状态判断
@@ -140,6 +143,5 @@ int count_wid(const Mat& src, Point seed);
 void line(Mat& img, Point A, Point B, int color = 0);	//补线段
 void ray(Mat& img, Point start, float angle, int color = 0);	//补射线
 
-extern MainImage MI;
 extern int stop;
 #endif

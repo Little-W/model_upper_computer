@@ -98,12 +98,7 @@ float limit2range(float target,float head,float tail){
 	target = max(head,target);
 	return min(tail,target);
 }
-/**
- * @brief 速度控制
- * @param input 输入中线偏离
- * @return float 返回速度绝对值
- * @note 根据偏移量来决定速度，在范围内偏移量越大速度越小，并随偏移量增大减速幅度增加
- */
+
 out_t SpeedControl::output(data_t input) {
 	input = abs(input);
 	data_t out;

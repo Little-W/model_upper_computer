@@ -40,10 +40,14 @@ private:
 public:
 	//@param kp 比例系数	@param kd 微分系数	@param a_c 夹角误差系数	@param d_c 距离误差系数	@param max 输出最大值	@param min 输出最小值
 	AngleControl(float kp, float kd, float ki, data_t max, data_t min);
-	//@brief 计算输出值	@param angel_error 小车方向与中线之间的夹角	@param dist_error 小车与中线之间的距离	@return out_t 输出值，可直接发至下位机
+	/**
+	 * @brief 计算输出值	
+	 * @param dist_error 小车与中线之间的距离	
+	 * @return out_t 输出值，可直接发至下位机
+	*/
 	out_t output(data_t dist_error);
 	void reset(float kp, float kd, float ki) { this->pid.reset(kp, kd, ki); }
-  float show(){return this->pid.show();}
+  	float show(){return this->pid.show();}
 };
 
 // 线速度控制
@@ -61,7 +65,12 @@ private:
 public:
 	//@param k 速度的比例系数	@param max 输出的最大值	@param min 输出的最小值
 	SpeedControl(data_t start_error, data_t end_error, data_t max, data_t min);
-	//@brief 计算输出值	@param input ？@return out_t 输出值，可直接发至下位机
+	/**
+	 * @brief 速度控制
+	 * @param input 输入中线偏离deviation
+	 * @return float 返回速度绝对值
+	 * @note 根据偏移量来决定速度，在范围内偏移量越大速度越小，并随偏移量增大减速幅度增加
+	*/
 	out_t output(data_t input);
 	float bezier_get_t(float t_head,float t_tail,float x);
 };
