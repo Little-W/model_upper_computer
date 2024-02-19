@@ -36,7 +36,7 @@ data_t PartPdCtrl::output(data_t error) {
 	out += ki * integrade;
 	// if (abs(error) > 62) {
 	if (abs(error) > Re.main.dy_kp_threshold) {
-		cur_kp = Re.main.dy_kp_coef * pow(abs(error),Re.main.dy_kp_exp) + kp;
+		cur_kp = Re.main.dy_kp_coef / 100000 * pow(abs(error),Re.main.dy_kp_exp) + kp;
 		if(cur_kp > 15)
 		{
 			cur_kp = 15;
