@@ -712,7 +712,20 @@ int main()
 			}
 		}
 		else {
-			angle_result = AC.output(deviation);
+			float angle_result_tmp = 0;
+			angle_result_tmp = AC.output(deviation);
+			if((abs(angle_result - angle_result_tmp) > 500) && (angle_result * angle_result_tmp > 0))
+			{
+				angle_result = 0.9 * angle_result_tmp + 0.1 * angle_result;
+			}
+			else if( (abs(angle_result - angle_result_tmp) > 1000) && (angle_result * angle_result_tmp < 0))
+			{
+				angle_result = 0.4 * angle_result_tmp + 0.6 * angle_result;
+			}
+			else
+			{
+				angle_result = angle_result_tmp;
+			}
 			speed_result = SC.output(deviation);
 		}
 
