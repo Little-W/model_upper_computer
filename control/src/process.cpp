@@ -44,17 +44,21 @@ float MainImage::MidlineDeviation(int enc_speed)
 	else {
 		//速度大于阈值时对前瞻进行动态调整:forward_dist up_scope forward_coef1
 		double speed_error;
-		speed_error = enc_speed - re.main.enc_forward_threshold;
-		if(speed_error <= 0 )
-		{
-			speed_error = 0;
-		}
 		double new_forward_dist;
-		new_forward_dist = re.main.forward_dist + re.main.enc_forward_dist_coef * pow(speed_error,re.main.enc_forward_dist_exp) / 1000.0;
-		if(new_forward_dist > re.main.max_enc_forward_dist)
+		if(enc_speed > re.main.enc_forward_threshold)
 		{
-			new_forward_dist = re.main.max_enc_forward_dist;
+			speed_error = enc_speed - re.main.enc_forward_threshold;
+			new_forward_dist = re.main.forward_dist + re.main.enc_forward_dist_coef * pow(speed_error,re.main.enc_forward_dist_exp) / 1000.0;
+			if(new_forward_dist > re.main.max_enc_forward_dist)
+			{
+				new_forward_dist = re.main.max_enc_forward_dist;
 		}
+		}
+		else
+		{
+			new_forward_dist = re.main.forward_dist;
+		}
+		
 		cout << "forward_dist is: " << new_forward_dist << endl;
 		MainImage::deviation_thresh = IMGH - new_forward_dist;
 		if (state_out == right_circle) {
