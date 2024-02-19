@@ -1,4 +1,4 @@
-﻿#ifndef __TANGENT_HEADER__
+#ifndef __TANGENT_HEADER__
 #define __TANGENT_HEADER__
 #define Re MI.re
 
@@ -109,7 +109,7 @@ public:
 
 	void produce_dv(int deviation);
 
-	void show(float dev, bool c = true, bool l = false, bool r = false, bool l_e = true, bool r_e = true, bool l_c = false, bool r_c = false, bool c_c = false);//总显示方案
+	void show(float dev, float angle_result, float speed, int current_speed, bool c = true, bool l = false, bool r = false, bool l_e = true, bool r_e = true, bool l_c = false, bool r_c = false, bool c_c = false);//总显示方案
 
 	float MidlineDeviation(int enc_speed);
 };

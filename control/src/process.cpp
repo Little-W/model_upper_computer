@@ -1171,31 +1171,67 @@ void MainImage::end_filter(int side) {
 /**
  * @brief 保存图像
 */
-void MainImage::show(float dev, bool c, bool l, bool r, bool l_e, bool r_e, bool l_c, bool r_c, bool c_c)
-{
-	Mat channels[3];
-	store.image_mat += 128;
-	store.image_mat.copyTo(channels[0]);
-	store.image_mat.copyTo(channels[1]);
-	store.image_mat.copyTo(channels[2]);
-	merge(channels, 3, store.image_show);
-	for (int i = 0; i < IMGH; i++) {
-		if (exist_left_edge_point[i] || exist_right_edge_point[i])
-		{
-			if (exist_left_edge_point[i]) store.image_show.at<Vec3b>(i, left_edge_point[i]) = Vec3b(255, 0, 0);
-			if (exist_right_edge_point[i]) store.image_show.at<Vec3b>(i, right_edge_point[i]) = Vec3b(0, 255, 0);
-			store.image_show.at<Vec3b>(i, center_point[i]) = Vec3b(0, 255, 255);
-		}
-	}
-	if (l_e) for (int i = 0; i < left_end_point.size(); i++) store.image_show.at<Vec3b>(left_end_point[i].y, left_end_point[i].x) = Vec3b(0, 0, 255);
-	if (r_e) for (int i = 0; i < right_end_point.size(); i++) store.image_show.at<Vec3b>(right_end_point[i].y, right_end_point[i].x) = Vec3b(255, 0, 255);
-	if (l_c) for (int i = 0; i < left_cone.size(); i++) store.image_show.at<Vec3b>(left_cone[i].y, left_cone[i].x) = Vec3b(19, 78, 39);
-	if (l_c) for (int i = 0; i < right_cone.size(); i++) store.image_show.at<Vec3b>(right_cone[i].y, right_cone[i].x) = Vec3b(121, 77, 166);
-	if (c_c) for (int i = 0; i < center_cone.size(); i++) store.image_show.at<Vec3b>(center_cone[i].y, center_cone[i].x) = Vec3b(0, 153, 255);
 
-	resize(store.image_show, store.image_show, cv::Size(IMGW * 2, IMGH * 2));
-	if (re.set.color)store.wri << store.image_BGR;
-	else store.wri << store.image_show;
+void MainImage::show(float dev, float angle_result, float speed, int current_speed, bool c, bool l, bool r, bool l_e, bool r_e, bool l_c, bool r_c, bool c_c)
+{
+    Mat channels[3];
+    store.image_mat += 128;
+    store.image_mat.copyTo(channels[0]);
+    store.image_mat.copyTo(channels[1]);
+    store.image_mat.copyTo(channels[2]);
+
+    // 在图像上添加边缘、端点和圆锥标记
+    merge(channels, 3, store.image_show);
+
+    // 在图像上添加边缘、端点和圆锥标记
+    for (int i = 0; i < IMGH; i++) {
+        if (exist_left_edge_point[i] || exist_right_edge_point[i])
+        {
+            if (exist_left_edge_point[i]) store.image_show.at<Vec3b>(i, left_edge_point[i]) = Vec3b(255, 0, 0);
+            if (exist_right_edge_point[i]) store.image_show.at<Vec3b>(i, right_edge_point[i]) = Vec3b(0, 255, 0);
+            store.image_show.at<Vec3b>(i, center_point[i]) = Vec3b(0, 255, 255);
+        }
+    }
+    if (l_e) for (int i = 0; i < left_end_point.size(); i++) store.image_show.at<Vec3b>(left_end_point[i].y, left_end_point[i].x) = Vec3b(0, 0, 255);
+    if (r_e) for (int i = 0; i < right_end_point.size(); i++) store.image_show.at<Vec3b>(right_end_point[i].y, right_end_point[i].x) = Vec3b(255, 0, 255);
+    if (l_c) for (int i = 0; i < left_cone.size(); i++) store.image_show.at<Vec3b>(left_cone[i].y, left_cone[i].x) = Vec3b(19, 78, 39);
+    if (r_c) for (int i = 0; i < right_cone.size(); i++) store.image_show.at<Vec3b>(right_cone[i].y, right_cone[i].x) = Vec3b(121, 77, 166);
+    if (c_c) for (int i = 0; i < center_cone.size(); i++) store.image_show.at<Vec3b>(center_cone[i].y, center_cone[i].x) = Vec3b(0, 153, 255);
+
+    // 在图像顶部添加变量文本
+    int fontFace = FONT_HERSHEY_SIMPLEX;
+    double fontScale = 0.25;
+    int thickness = 1;
+    int baseline = 0;
+    Size textSize = getTextSize("Text", fontFace, fontScale, thickness, &baseline);
+    baseline += thickness;
+
+    // 文本位置的起始点
+    Point textOrg(10, textSize.height + 5);
+    // 绘制每个变量
+    putText(store.image_show, "state: " + string(((state_out == straight) ? "straight" : "turn_left")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    textOrg.y += textSize.height + 10; // 调整下一行文本的y坐标
+    // putText(store.image_show, "C: " + string(((state_out == right_circle) ? "right_circle" : "not right_circle")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    // textOrg.y += textSize.height + 10;
+    // putText(store.image_show, "l st: " + string(((state_out == turn_left) ? "turn_left" : "not turn left")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    // textOrg.y += textSize.height + 10;
+    // putText(store.image_show, "R_E: " + string(((state_t_left == t_left_out) ? "t_left_out" : "not t_left_out")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    // textOrg.y += textSize.height + 10;
+    putText(store.image_show, "Angle: " + to_string(angle_result), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    textOrg.y += textSize.height + 10;
+    putText(store.image_show, "speed: " + to_string(speed), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    textOrg.y += textSize.height + 10;
+
+    putText(store.image_show, "current_speed: " + to_string(current_speed), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+	textOrg.y += textSize.height + 10;
+
+    putText(store.image_show, "right p h: " + to_string(right_end_point[1].y), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+	textOrg.y += textSize.height + 10;
+    putText(store.image_show, "end point size: " + to_string(right_end_point.size()), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+
+    resize(store.image_show, store.image_show, cv::Size(IMGW * 2, IMGH * 2));
+    if (re.set.color)store.wri << store.image_BGR;
+    else store.wri << store.image_show;
 }
 
 void MainImage::count_cone(int begin) {

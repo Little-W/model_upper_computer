@@ -818,7 +818,7 @@ int main()
 		#pragma endregion
 
 		//保存图像
-		if (Re.set.video_save) MI.show(deviation);
+		if (Re.set.video_save) MI.show(deviation, angle_result, speed_result, real_speed_enc);
 
 		MI.store.save_num++;
 
