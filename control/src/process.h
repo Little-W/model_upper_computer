@@ -44,6 +44,8 @@ public:
 	bool left_continue;					//左连续
 	bool right_continue;				//右连续
 	int count_circle;					//圈数
+
+	int deviation_thresh;
 	float cur_kp_show;
 
 	bool zebra_far_find;

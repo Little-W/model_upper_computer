@@ -25,17 +25,17 @@ float MainImage::MidlineDeviation(int enc_speed)
 	// center += 10;
 	//int center=(IMGW/2+last_center)/2;
 	long long sum;
-	int thresh;
+	
 	if (state_out == farm_find) {
-		thresh = IMGH - re.farm.dist;
+		MainImage::deviation_thresh = IMGH - re.farm.dist;
 		sum = 0;
-		for (i = thresh; i > thresh - re.farm.up_scope; i--) {
+		for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - re.farm.up_scope; i--) {
 			sum += center_point[i];
 		}
 		deviation = re.main.forward_coef1 * (center - float(sum) / re.farm.up_scope);
 		
 		sum = 0;
-		for (i = thresh + re.farm.down_scope; i > thresh; i--) {
+		for (i = MainImage::deviation_thresh + re.farm.down_scope; i > MainImage::deviation_thresh; i--) {
 			sum += center_point[i];
 		}
 		deviation += re.main.forward_coef2 * (center - float(sum) / re.farm.down_scope);
@@ -56,12 +56,12 @@ float MainImage::MidlineDeviation(int enc_speed)
 			new_forward_dist = re.main.max_enc_forward_dist;
 		}
 		cout << "forward_dist is: " << new_forward_dist << endl;
-		thresh = IMGH - new_forward_dist;
+		MainImage::deviation_thresh = IMGH - new_forward_dist;
 		if (state_out == right_circle) {
-			thresh = IMGH - re.r_circle.circle_dist;
+			MainImage::deviation_thresh = IMGH - re.r_circle.circle_dist;
 		}
 		if (state_out == left_circle) {
-			thresh = IMGH - re.l_circle.circle_dist;
+			MainImage::deviation_thresh = IMGH - re.l_circle.circle_dist;
 		}
 		sum = 0;
 		//根据速度动态调整上半部分采样点个数
@@ -72,7 +72,7 @@ float MainImage::MidlineDeviation(int enc_speed)
 			new_up_scope = re.main.max_enc_up_scope;
 		}
 		cout << "up_scope is: " << new_up_scope << endl;
-		for (i = thresh; i > thresh - new_up_scope; i--) {
+		for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - new_up_scope; i--) {
 			sum += center_point[i];
 		}
 		//根据速度动态调整权重
@@ -85,7 +85,7 @@ float MainImage::MidlineDeviation(int enc_speed)
 		cout << "new_forward_coef1 is: " << new_forward_coef1 << endl;	
   		deviation = new_forward_coef1 * (center - float(sum) / new_up_scope);
 		sum = 0;
-		for (i = thresh + re.main.down_scope; i > thresh; i--) {
+		for (i = MainImage::deviation_thresh + re.main.down_scope; i > MainImage::deviation_thresh; i--) {
 			sum += center_point[i];
 		}
 		deviation += re.main.forward_coef2 * (center - float(sum) / re.main.down_scope);
@@ -1198,6 +1198,10 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     if (l_c) for (int i = 0; i < left_cone.size(); i++) store.image_show.at<Vec3b>(left_cone[i].y, left_cone[i].x) = Vec3b(19, 78, 39);
     if (r_c) for (int i = 0; i < right_cone.size(); i++) store.image_show.at<Vec3b>(right_cone[i].y, right_cone[i].x) = Vec3b(121, 77, 166);
     if (c_c) for (int i = 0; i < center_cone.size(); i++) store.image_show.at<Vec3b>(center_cone[i].y, center_cone[i].x) = Vec3b(0, 153, 255);
+
+	store.image_show.at<Vec3b>(MainImage::deviation_thresh, 80) = Vec3b(0, 0, 255);
+	store.image_show.at<Vec3b>((MainImage::deviation_thresh - re.main.up_scope), 80) = Vec3b(0, 0, 255);
+	store.image_show.at<Vec3b>((MainImage::deviation_thresh + re.main.down_scope),80) = Vec3b(0, 0, 255);
 
     // 在图像顶部添加变量文本
     int fontFace = FONT_HERSHEY_SIMPLEX;
