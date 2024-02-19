@@ -67,6 +67,10 @@ public:
 	uchar state_out;
 	uchar state_l_circle;
 	uchar state_r_circle;
+
+	uchar state_t_right;
+	uchar state_t_left;
+	
 	uchar state_farm;
 	uchar state_repair;
 	uchar state_barn;

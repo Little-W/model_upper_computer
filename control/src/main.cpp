@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -213,6 +213,50 @@ int main()
 			}
 			break;
 		}
+
+		case turn_left: {
+			// int t_count = 0;
+			// cout<<"ready for turn"<<endl;
+			switch (MI.state_t_left){
+				
+			case t_left_slow_down: {
+				MI.mend_trunk();
+				if(MI.right_end_point[1].y > MI.re.main.turn_thresh - MI.re.main.adv_coef * real_speed_enc){
+					MI.state_t_left = t_inside;
+					cout<<"turning left"<<endl;
+			}
+			break;
+			}
+		    case t_inside: {
+
+				MI.mend_trunk();
+				cout<<"acce thresh is" << MI.right_end_point[1].y << endl;                
+				if ((MI.right_end_point.size() ==2 )&& (MI.right_end_point[1].y < Re.main.acce_thresh) && ((MI.right_end_point[1].x < IMGW/3)) && (MI.left_end_point[1].x < IMGW/2- 30 || MI.lost_left)){
+					MI.state_t_left = t_left_out;
+				}
+				if ((MI.right_end_point.size() > 2 ) && ((MI.right_end_point[1].y < Re.main.acce_thresh) || (MI.right_end_point[2].y < Re.main.acce_thresh) || (MI.right_end_point[3].y < Re.main.acce_thresh)) && ((MI.right_end_point[1].x < IMGW/3) || (MI.right_end_point[2].x < IMGW/3 || (MI.right_end_point[3].x < IMGW/3))) && (MI.left_end_point[1].x < IMGW/2- 30 || MI.lost_left)){
+					MI.state_t_left = t_left_out;
+				}
+				cout << "l_e_p_diff: " << abs(MI.left_end_point[0].y - MI.left_end_point[1].y) << endl;
+				if (abs(MI.left_end_point[0].y - MI.left_end_point[1].y) > 45){
+					MI.state_t_left = t_left_out;
+				}
+				break;
+			}
+
+			case t_left_out: {
+
+				MI.mend_trunk();
+				if (MI.left_end_point.size() != 0 && MI.right_end_point.size() != 0 && ((MI.left_end_point[1].y < IMGH/2 - 20 && MI.right_end_point[1].y < IMGH/2 - 20) || (MI.left_end_point[2].y < IMGH/2 - 20 && MI.right_end_point[2].y < IMGH/2 - 20) || (MI.right_end_point[2].y < IMGH))) {
+				    MI.state_out = straight;
+					MI.state_t_left = t_left_slow_down;
+			    }
+				break;
+	     	}
+			}
+			break;
+		}
+
 		case right_circle: {
 			switch (MI.state_r_circle)
 			{
@@ -561,6 +605,7 @@ int main()
 		}
 		//运动控制
 		deviation = MI.MidlineDeviation(real_speed_enc);
+		cout<<"ready for speed"<<endl;
 
 		if (MI.state_out == right_circle)
 		{
@@ -641,6 +686,25 @@ int main()
 				speed_result = Re.end.v_right_garage.second;
 			}
 		}
+		else if(MI.state_out == turn_left){
+			if (MI.state_t_left == t_left_slow_down){
+				angle_result = AC.output(deviation);
+				speed_result = Re.main.turn_speed - Re.main.slow_down_kd * ((real_speed_enc)-Re.main.turn_speed*22)/22 ;	
+				cout<<"calculate by t_left_slow_down"<<endl;			
+			}
+			else if (MI.state_t_left == t_inside){
+				angle_result = AC.output(deviation);
+				speed_result = Re.main.turn_speed;
+				
+				
+			}
+			else if(MI.state_t_left == t_left_out){
+				angle_result = AC.output(deviation);
+				speed_result = Re.main.turn_out_speed;
+				cout<<"calculate by t_left_out"<<endl;
+			}
+
+		}
 		else {
 			float angle_result_tmp = 0;
 			angle_result_tmp = AC.output(deviation);
@@ -688,6 +752,15 @@ int main()
 			case straight: cout << "straight" << endl; break;
 			case garage_out: cout << "garage_out" << endl; break;
 			case hill_find: cout << "hill_find" << endl; break;
+			case turn_left:{
+				switch(MI.state_t_left){
+					case t_left_slow_down: {cout << "t_left_slow_down" << endl; break;}
+					case t_inside: {cout << "t_inside" << endl; break;}
+					case t_left_out: {cout << "t_left_out" << endl; break;}
+
+				}
+				break;
+			} 
 			case right_circle:
 			{
 				switch (MI.state_r_circle)

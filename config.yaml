@@ -51,8 +51,23 @@ main:
     enc_forward_coef1_exp: 1.5
     max_enc_forward_coef1: 1.2
 
+    turn_thresh: 31 #转弯判断的端点高度
+    advanced_turn_thresh: 20 #转弯两个端点x的重合度
+    turn_speed: 7
+    turn_out_speed: 9
+    acce_thresh: 20
     right_ray: -1.2
     left_ray: 1.0
+
+    turn_kp: 13 #1.56 #6的入弯速度 1.58 #1.52 #2.2 #2.0
+    turn_ki: 0.0
+    turn_kd: 50 #3.44 #6.79 #7392 #6的入弯速度6.16 # 6.08 5.3 #4.0
+    turn_dv: 0
+    slow_down_kd: 0.1
+    adv_coef: 0.017
+    turn_forward_dist: 48 #47
+    straight_turn_thresh: 5
+    
     kp: 5.8 #1.6
     ki: 0
     kd: 42 #4.54
@@ -78,6 +93,8 @@ main:
     forward_coef1: 0.5
     forward_coef2: 0.6
 
+    turn_forward_coef1: 0.8
+    turn_forward_coef2: 0.6
     # 恒定速度与打角
     v_right_circle: [60,90] #[60,70]
     v_left_circle: [175,90] #[175,70]

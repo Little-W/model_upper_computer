@@ -37,10 +37,21 @@ data_t PartPdCtrl::output(data_t error) {
 	// if (abs(error) > 62) {
 	if (abs(error) > Re.main.dy_kp_threshold) {
 		cur_kp = Re.main.dy_kp_coef / 100000 * pow(abs(error),Re.main.dy_kp_exp) + kp;
-		if(cur_kp > Re.main.dy_kp_max)
+		if(MI.state_out == turn_left && MI.state_t_left == t_inside)
 		{
-			cur_kp = Re.main.dy_kp_max;
+			if(cur_kp > Re.main.turn_kp + 10)
+			{
+				cur_kp = Re.main.turn_kp + 10;
+			}
+		}	
+		else
+		{
+			if(cur_kp > Re.main.dy_kp_max)
+			{
+				cur_kp = Re.main.dy_kp_max;
+			}
 		}
+
 		// out += (1 + count * 0.05) * kp * error;//偏差过大增大kp
 		out +=  cur_kp * error;//偏差过大增大kp
 	}

@@ -171,6 +171,11 @@ Reader::Reader(string path) {
     main.enc_forward_coef1_coef = n_main.get<float>("enc_forward_coef1_coef");
     main.enc_forward_coef1_exp = n_main.get<float>("enc_forward_coef1_exp");
     main.max_enc_forward_coef1 = n_main.get<float>("max_enc_forward_coef1");
+    main.turn_thresh = n_main.get<int>("turn_thresh");
+    main.advanced_turn_thresh = n_main.get<int>("advanced_turn_thresh");
+    main.turn_speed = n_main.get<int>("turn_speed");
+    main.turn_out_speed = n_main.get<int>("turn_out_speed");
+    main.acce_thresh = n_main.get<int>("acce_thresh");
     main.dy_kp_threshold = n_main.get<float>("dy_kp_threshold");
     main.dy_kp_coef = n_main.get<float>("dy_kp_coef");
     main.dy_kp_exp = n_main.get<float>("dy_kp_exp");
@@ -203,10 +208,24 @@ Reader::Reader(string path) {
     main.down_scope = n_main.get<int>("down_scope");
     main.forward_coef1 = n_main.get<float>("forward_coef1");
     main.forward_coef2 = n_main.get<float>("forward_coef2");
+
+    main.turn_forward_coef1 = n_main.get<float>("turn_forward_coef1");
+    main.turn_forward_coef2 = n_main.get<float>("turn_forward_coef2");
+    main.straight_turn_thresh = n_main.get<int>("straight_turn_thresh");
+
     main.v_right_circle = n_main.get<pii>("v_right_circle");
     main.v_left_circle = n_main.get<pii>("v_left_circle");
     main.left_ray = n_main.get<float>("left_ray");
     main.right_ray = n_main.get<float>("right_ray");
+
+    main.turn_kp = n_main.get<float>("turn_kp");
+    main.turn_kd = n_main.get<float>("turn_kd");
+    main.turn_ki = n_main.get<float>("turn_ki");
+    main.turn_dv = n_main.get<int>("turn_dv");
+    main.slow_down_kd = n_main.get<float>("slow_down_kd");
+    main.adv_coef = n_main.get<float>("adv_coef");
+
+    main.turn_forward_dist = n_main.get<int>("turn_forward_dist");
 
     //right_circle
     r_circle.kp = n_right_circle.get<float>("kp");
