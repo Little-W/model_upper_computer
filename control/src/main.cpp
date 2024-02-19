@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -55,7 +55,6 @@ void encode_and_send(void)
 	uchar speed_result_tmp;
 	uint angle_result_tmp = 0;
 	//使用18th的[0,250]调出来的pid，拓展到+-1250
-	angle_result *= 10;
 	speed_result_tmp = speed_result < 0 ? -speed_result : speed_result;
 	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
 
