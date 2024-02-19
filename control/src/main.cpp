@@ -89,7 +89,7 @@ void encode_and_send(void)
 	cout << "now: " << elapsed.count() << "ms" <<endl;
 	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result<< endl;
 	cout << "************************************************************************"<< endl;
-	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p1 << "	Speed: " << (uint)speed_code <<  endl;
+	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p2 << "	Speed: " << (uint)speed_code <<  endl;
 	cout << "************************************************************************"<< dec << endl;
 }
 
