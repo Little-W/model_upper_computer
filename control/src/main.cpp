@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -70,9 +70,19 @@ void encode_and_send(void)
 	servo_code_p2 |= 0xc0;
 
 	result.push_back(0x55); //传输开始标志
+	result.push_back(0x55); //传输开始标志
+	for(int i = 0; i < 10; i++)
+	{
+		result.push_back(speed_code);
+		result.push_back(servo_code_p1);
+		result.push_back(servo_code_p2);
+		result.push_back(0x5b); //传输分割标志
+		result.push_back(0x5b); //传输分割标志
+	}
 	result.push_back(speed_code);
 	result.push_back(servo_code_p1);
 	result.push_back(servo_code_p2);
+	result.push_back(0x6a);	//传输结束标志
 	result.push_back(0x6a);	//传输结束标志
 
 	ser.write(result);
