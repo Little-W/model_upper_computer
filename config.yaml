@@ -29,10 +29,10 @@ main:
     dy_speed_coef: 0
     dy_speed_exp: 0
     #根据偏差[min_v_diff,max_v_diff]动态调整当前速度[min_v,max_v]，Bezier曲线形式,p0在左上角，p1在右下角
-    dy_speed_bezier_p0_ctrl_x: 25 #30.0 # [p0_x=start_error,p1_ctrl_x]
-    dy_speed_bezier_p0_ctrl_y: 12 #12.0 # [p1_ctrl_y,p0_y=max_v] 
-    dy_speed_bezier_p1_ctrl_x: 40 #40.0 # [p0_ctrl_x,p1_x=end_error]
-    dy_speed_bezier_p1_ctrl_y: 12 #7.0 # [p1_y=min_v,p0_ctrl_y]
+    dy_speed_bezier_p0_ctrl_x: 12 # 25 #30.0 # [p0_x=start_error,p1_ctrl_x]
+    dy_speed_bezier_p0_ctrl_y: 28 # 12 #12.0 # [p1_ctrl_y,p0_y=max_v] 
+    dy_speed_bezier_p1_ctrl_x: 4 # 40 #40.0 # [p0_ctrl_x,p1_x=end_error]
+    dy_speed_bezier_p1_ctrl_y: 40 # 12 #7.0 # [p1_y=min_v,p0_ctrl_y]
     
     #根据速度动态调整前瞻的参数，幂函数形式
     #-速度动态调整前瞻的阈值
