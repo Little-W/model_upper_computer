@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "process.h"
 #include <chrono>
+#include "pid.h"
 
 #define USE_VIDEO 0
 
@@ -1215,8 +1216,8 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     // textOrg.y += textSize.height + 10;
     // putText(store.image_show, "l st: " + string(((state_out == turn_left) ? "turn_left" : "not turn left")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
     // textOrg.y += textSize.height + 10;
-    // putText(store.image_show, "R_E: " + string(((state_t_left == t_left_out) ? "t_left_out" : "not t_left_out")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    // textOrg.y += textSize.height + 10;
+    putText(store.image_show, "kp: " + to_string(cur_kp), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    textOrg.y += textSize.height + 10;
     putText(store.image_show, "Angle: " + to_string(angle_result), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
     textOrg.y += textSize.height + 10;
     putText(store.image_show, "speed: " + to_string(speed), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);

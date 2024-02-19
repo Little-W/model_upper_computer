@@ -20,8 +20,9 @@ set:
 main:
     garage_start: false
     #舵机动态kp kd，根据偏差deviation调整
-    dy_kp_threshold: 75 #62
-    dy_kp_coef: 0.08
+    dy_kp_threshold: 20 #62
+    dy_kp_coef: 0.00005
+    dy_kp_exp: 2.7
     dy_kd_threshold: 55 #62
     dy_kd_coef: 0
     #根据偏差[min_v_diff,max_v_diff]动态调整当前速度[min_v,max_v]，幂函数形式

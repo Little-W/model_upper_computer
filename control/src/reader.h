@@ -143,6 +143,7 @@ public:
         float max_enc_forward_coef1;
         float dy_kp_threshold;
         float dy_kp_coef;
+        float dy_kp_exp;
         float dy_kd_threshold;
         float dy_kd_coef;
         float dy_speed_coef;

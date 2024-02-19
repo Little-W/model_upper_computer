@@ -3,6 +3,7 @@
 #include "process.h"
 using namespace std;
 
+float cur_kp;
 
 PartPdCtrl::PartPdCtrl(float kp_, float kd_, float ki_) {
 	this->last_error = 0;
@@ -35,12 +36,16 @@ data_t PartPdCtrl::output(data_t error) {
 	out += ki * integrade;
 	// if (abs(error) > 62) {
 	if (abs(error) > Re.main.dy_kp_threshold) {
-		this->count++;
+		cur_kp = Re.main.dy_kp_coef * pow(abs(error),Re.main.dy_kp_exp) + kp;
+		if(cur_kp > 15)
+		{
+			cur_kp = 15;
+		}
 		// out += (1 + count * 0.05) * kp * error;//偏差过大增大kp
-		out += (1 + count * Re.main.dy_kp_coef) * kp * error;//偏差过大增大kp
+		out +=  cur_kp * error;//偏差过大增大kp
 	}
 	else {
-		this->count = 0;
+		cur_kp = kp;
 		out += kp * error;//微分+比例部分，out=kd*(error-lasterror)+(kp - delta)*error
 	}
 

@@ -10,6 +10,7 @@
 typedef float data_t;
 // 使用 float 作为输出类型
 typedef float out_t;
+extern float cur_kp;
 
 class PartPdCtrl {
 private:

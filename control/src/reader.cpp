@@ -173,6 +173,7 @@ Reader::Reader(string path) {
     main.max_enc_forward_coef1 = n_main.get<float>("max_enc_forward_coef1");
     main.dy_kp_threshold = n_main.get<float>("dy_kp_threshold");
     main.dy_kp_coef = n_main.get<float>("dy_kp_coef");
+    main.dy_kp_exp = n_main.get<float>("dy_kp_exp");
     main.dy_kd_threshold = n_main.get<float>("dy_kd_threshold");
     main.dy_kd_coef = n_main.get<float>("dy_kd_coef");
     main.dy_speed_coef = n_main.get<float>("dy_speed_coef");
