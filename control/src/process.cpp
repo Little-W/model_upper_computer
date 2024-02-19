@@ -404,14 +404,14 @@ void MainImage::mend_trunk()
 
 				ray(store.image_mat, right_end_point[0], -1.4f);
 		}
-		if (right_end_point.size() == 1 && left_end_point.size() == 1){
-			if(right_end_point[0].y < left_end_point[0].y){
-				ray(store.image_mat, right_end_point[0], re.main.right_ray);
-			}
-			if(left_end_point[0].y < left_end_point[0].y){
-				ray(store.image_mat, right_end_point[0], re.main.left_ray);
-			}
-		}
+		// if (right_end_point.size() == 1 && left_end_point.size() == 1){
+		// 	if(right_end_point[0].y < left_end_point[0].y){
+		// 		ray(store.image_mat, right_end_point[0], re.main.right_ray);
+		// 	}
+		// 	if(left_end_point[0].y < left_end_point[0].y){
+		// 		ray(store.image_mat, right_end_point[0], re.main.left_ray);
+		// 	}
+		// }
 	}
 	if (lost_left) {
 		for (int k = right_end_point[1].y; k < IMGH - 2; k++) {
@@ -995,6 +995,14 @@ void MainImage::find_center()
 				center_point[i] = (left_edge_point[i] + IMGW - 1) / 2;
 			}
 			else center_point[i] = IMGW / 2;
+		    /*else if(exist_right_edge_point[i]) {
+				center_point[i] =((2*center_point[i-1]-center_point[i-2])+right_edge_point[i] / 2)/2;
+			}
+			else if (exist_left_edge_point[i]) {
+				center_point[i] =(2*center_point[i-1]-center_point[i-2]+_(left_edge_point[i] + IMGW - 1) / 2)/2;
+			}
+			else center_point[i] = (center_point[i-1]+IMGW / 2)/2;
+			*/
 		}
 	}
 	if (center_lost != -1) {
