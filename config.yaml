@@ -20,6 +20,7 @@ set:
 main:
     garage_start: false
     #舵机动态kp kd，根据偏差deviation调整
+    dy_kp_max: 10
     dy_kp_threshold: 20 #62
     dy_kp_coef: 0.5
     dy_kp_exp: 2.7
