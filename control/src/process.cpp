@@ -1212,8 +1212,8 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     if (c_c) for (int i = 0; i < center_cone.size(); i++) store.image_show.at<Vec3b>(center_cone[i].y, center_cone[i].x) = Vec3b(0, 153, 255);
 
 	store.image_show.at<Vec3b>(MainImage::deviation_thresh, 80) = Vec3b(0, 0, 255);
-	store.image_show.at<Vec3b>((MainImage::deviation_thresh - re.main.up_scope), 80) = Vec3b(0, 0, 255);
-	store.image_show.at<Vec3b>((MainImage::deviation_thresh + re.main.down_scope),80) = Vec3b(0, 0, 255);
+	store.image_show.at<Vec3b>((MainImage::deviation_thresh - re.main.up_scope), 80) = Vec3b(0, 255, 0);
+	store.image_show.at<Vec3b>((MainImage::deviation_thresh + re.main.down_scope),80) = Vec3b(255, 0, 0);
 
     // 在图像顶部添加变量文本
     int fontFace = FONT_HERSHEY_SIMPLEX;
