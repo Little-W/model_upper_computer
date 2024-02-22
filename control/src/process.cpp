@@ -1242,8 +1242,9 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     putText(store.image_show, "current_speed: " + to_string(current_speed), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
 	textOrg.y += textSize.height + 10;
 
-    putText(store.image_show, "right p h: " + to_string(right_end_point[1].y), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    putText(store.image_show, "deviation: " + to_string(deviation), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
 	textOrg.y += textSize.height + 10;
+	
     putText(store.image_show, "end point size: " + to_string(right_end_point.size()), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
 
     resize(store.image_show, store.image_show, cv::Size(IMGW * 2, IMGH * 2));
