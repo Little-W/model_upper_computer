@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -10,6 +10,8 @@
 #include"shared_mem.h"
 #include <chrono>
 #include <ctime>
+#include "comm.h"
+
 using namespace std;
 using namespace cv;
 int stop = false;
@@ -49,49 +51,6 @@ void callback(int signum) {
  * @note  下位机速度控制范围:  +- 31
  * @note  舵机控制范围:       +- 1200
 */
-void encode_and_send(void)
-{
-	vector<unsigned char> result;
-	uchar speed_result_tmp;
-	uint angle_result_tmp = 0;
-	//使用18th的[0,250]调出来的pid，拓展到+-1250
-	speed_result_tmp = speed_result < 0 ? -speed_result : speed_result;
-	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
-
-	if(angle_result_tmp > 1200) angle_result_tmp = 1200;
-	uchar speed_code,servo_code_p1,servo_code_p2;
-	speed_code = speed_result_tmp & 0x1f;
-	if(speed_result < 0) speed_code |= 0x20;
-	servo_code_p1 = (angle_result_tmp >> 6) & 0x1f;
-	if(angle_result < 0) servo_code_p1 |= 0x20;
-	servo_code_p1 |= 0x80;
-	servo_code_p2 = angle_result_tmp & 0x3f;
-	servo_code_p2 |= 0xc0;
-
-	result.push_back(0x55); //传输开始标志
-	result.push_back(0x55); //传输开始标志
-	for(int i = 0; i < 10; i++)
-	{
-		result.push_back(speed_code);
-		result.push_back(servo_code_p1);
-		result.push_back(servo_code_p2);
-		result.push_back(0x5b); //传输分割标志
-		result.push_back(0x5b); //传输分割标志
-	}
-	result.push_back(speed_code);
-	result.push_back(servo_code_p1);
-	result.push_back(servo_code_p2);
-	result.push_back(0x6a);	//传输结束标志
-	result.push_back(0x6a);	//传输结束标志
-
-	ser.write(result);
-	std::chrono::duration<double, std::milli> elapsed = std::chrono::high_resolution_clock::now() - start_time_stamp;
-	cout << "now: " << elapsed.count() << "ms" <<endl;
-	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result<< endl;
-	cout << "************************************************************************"<< endl;
-	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p2 << "	Speed: " << (uint)speed_code <<  endl;
-	cout << "************************************************************************"<< dec << endl;
-}
 
 int main()
 {
@@ -179,38 +138,9 @@ int main()
 		matWrite(image_addr, MI.store.image_BGR);
 		semV(image_sem);
 		
-	    string data;
-		int real_speed_enc_tmp;
-		if(ser.available())
-		{
-			data = ser.read(ser.available()); // 读取串口数据
-			cout << "data lenth: " << data.size() << endl;
-			for (auto i = data.size() - 1; i >= 0 ; i-- )
-			{
-				if((data[i] & 0xc0) == 0xc0)
-				{
-					if((data[i-1] & 0x40) == 0x40)
-					{
-						real_speed_enc_tmp = (data[i-1] & 0x1f) << 6;
-						real_speed_enc_tmp |= data[i] & 0x3f;
-						if((data[i-1] & 0x20) == 0x20)
-						{
-							real_speed_enc_tmp = -real_speed_enc_tmp;
-						}
-						if(!(abs(real_speed_enc_tmp) > 600 || abs(real_speed_enc_tmp - real_speed_enc) > 300))
-						{
-							real_speed_enc = real_speed_enc_tmp;
+		real_speed_enc = get_speed_enc();
 							cout << "true_speed_enc: " << real_speed_enc << endl;
-							break;
-						}			
-						else
-						{
-							i--;
-						}
-					}
-				}
-			}
-		}
+
 		//只有在straight状态下识别AI元素
 		if (MI.state_out == straight)
 		{

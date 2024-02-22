@@ -21,6 +21,7 @@ add_executable(main_node
 	src/process.cpp
 	src/pid.cpp
 	src/reader.cpp
+	src/comm.cpp
 )
 
 target_link_libraries(main_node
