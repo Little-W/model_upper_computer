@@ -133,6 +133,7 @@ int main()
 		// cout << "time:" << MI.store.save_num  << endl;
 
 		//更新处理后的图像和特征点查询结果
+
 		MI.update_image();
 		semP(image_sem);
 		matWrite(image_addr, MI.store.image_BGR);
@@ -141,6 +142,20 @@ int main()
 		real_speed_enc = get_speed_enc();
 							cout << "true_speed_enc: " << real_speed_enc << endl;
 
+		for(int i = -1200; i <= 1200; i+=10)
+		{
+			angle_result = i;
+			speed_result = 6;
+			encode_and_send();
+		}
+		for(int i = 1200; i >= -1200; i-=10)
+		{
+			angle_result = i;
+			speed_result = 2;
+			encode_and_send();
+		}
+		continue;
+		
 		//只有在straight状态下识别AI元素
 		if (MI.state_out == straight)
 		{
@@ -224,7 +239,7 @@ int main()
 				if(MI.right_end_point[1].y > MI.re.main.turn_thresh - MI.re.main.adv_coef * real_speed_enc){
 					MI.state_t_left = t_inside;
 					cout<<"turning left"<<endl;
-			}
+				}
 			break;
 			}
 		    case t_inside: {
@@ -689,18 +704,21 @@ int main()
 		else if(MI.state_out == turn_left){
 			if (MI.state_t_left == t_left_slow_down){
 				angle_result = AC.output(deviation);
-				speed_result = Re.main.turn_speed - Re.main.slow_down_kd * ((real_speed_enc)-Re.main.turn_speed*22)/22 ;	
+				speed_result = Re.main.turn_speed - Re.main.slow_down_kd * ((real_speed_enc)-Re.main.turn_speed*22)/22;
+				// speed_result = 0;
+				// if(speed_result < 0) speed_result = 0;
 				cout<<"calculate by t_left_slow_down"<<endl;			
 			}
 			else if (MI.state_t_left == t_inside){
 				angle_result = AC.output(deviation);
 				speed_result = Re.main.turn_speed;
-				
+				// speed_result = 0;
 				
 			}
 			else if(MI.state_t_left == t_left_out){
 				angle_result = AC.output(deviation);
 				speed_result = Re.main.turn_out_speed;
+				speed_result = 0;
 				cout<<"calculate by t_left_out"<<endl;
 			}
 

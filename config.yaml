@@ -21,9 +21,9 @@ main:
     garage_start: false
     #舵机动态kp kd，根据偏差deviation调整
     dy_kp_max: 10
-    dy_kp_threshold: 20 #62
-    dy_kp_coef: 0.5
-    dy_kp_exp: 2.7
+    dy_kp_threshold: 40 #62
+    dy_kp_coef: 0.3
+    dy_kp_exp: 3
     dy_kd_threshold: 55 #62
     dy_kd_coef: 0
     #根据偏差[min_v_diff,max_v_diff]动态调整当前速度[min_v,max_v]，幂函数形式
@@ -39,15 +39,15 @@ main:
     #-速度动态调整前瞻的阈值
     enc_forward_threshold: 150 #120
     #-动态调整中线位置
-    enc_forward_dist_coef: 14.12 #0.0015
+    enc_forward_dist_coef: 8 #0.0015
     enc_forward_dist_exp: 1.879 #1
-    max_enc_forward_dist: 75
+    max_enc_forward_dist: 90
     #-动态调整上半部分像素点数量
-    enc_up_scope_coef: 7.2 #0.0015
+    enc_up_scope_coef: 0 #0.0015
     enc_up_scope_exp: 1.884 #1
     max_enc_up_scope: 12
     #-动态调整上半部分权重
-    enc_forward_coef1_coef: 0.07
+    enc_forward_coef1_coef: 0
     enc_forward_coef1_exp: 1.5
     max_enc_forward_coef1: 1.2
 
@@ -59,23 +59,23 @@ main:
     right_ray: -1.2
     left_ray: 1.0
 
-    turn_kp: 13 #1.56 #6的入弯速度 1.58 #1.52 #2.2 #2.0
+    turn_kp: 12 #1.56 #6的入弯速度 1.58 #1.52 #2.2 #2.0
     turn_ki: 0.0
-    turn_kd: 50 #3.44 #6.79 #7392 #6的入弯速度6.16 # 6.08 5.3 #4.0
+    turn_kd: 20 #3.44 #6.79 #7392 #6的入弯速度6.16 # 6.08 5.3 #4.0
     turn_dv: 0
-    slow_down_kd: 0.1
+    slow_down_kd: 1.9
     adv_coef: 0.017
     turn_forward_dist: 48 #47
     straight_turn_thresh: 5
     
     kp: 5.8 #1.6
     ki: 0
-    kd: 42 #4.54
+    kd: 45 #4.54
     dv: 0
     max_ag: 1200 ## 250
     min_ag: -1200 ## 0
-    max_v: 12 #95
-    min_v: 2 #95
+    max_v: 10 #95
+    min_v: 7 #95
     max_v_diff: 35 #40
     min_v_diff: 4
     use_dv: false #false
@@ -85,13 +85,13 @@ main:
     #计算deviation时的重要参数：
     #-以IMGH-forward_dist作为分界线，上取up_scope个中心点，下取down_scope个中心点来衡量
     #--该值越大前瞻整体越远
-    forward_dist: 35 #45 
+    forward_dist: 40 #45 
     #--前瞻上下部分取点个数
-    up_scope: 6 #4
-    down_scope: 12 #4
+    up_scope: 4 #4
+    down_scope: 4 #4
     #--前瞻上下部分中心点对deviation的影响系数
-    forward_coef1: 0.5
-    forward_coef2: 0.6
+    forward_coef1: 0.6
+    forward_coef2: 0.4
 
     turn_forward_coef1: 0.8
     turn_forward_coef2: 0.6

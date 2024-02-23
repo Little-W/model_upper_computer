@@ -79,7 +79,7 @@ common_state:
 			if(new_forward_dist > re.main.max_enc_forward_dist)
 			{
 				new_forward_dist = re.main.max_enc_forward_dist;
-		}
+			}
 		}
 		else
 		{

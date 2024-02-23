@@ -46,10 +46,10 @@ data_t PartPdCtrl::output(data_t error) {
 		}	
 		else
 		{
-		if(cur_kp > Re.main.dy_kp_max)
-		{
-			cur_kp = Re.main.dy_kp_max;
-		}
+			if(cur_kp > Re.main.dy_kp_max)
+			{
+				cur_kp = Re.main.dy_kp_max;
+			}
 		}
 
 		// out += (1 + count * 0.05) * kp * error;//偏差过大增大kp

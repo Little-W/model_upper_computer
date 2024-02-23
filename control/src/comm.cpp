@@ -4,16 +4,37 @@
 #include <string>
 #include <vector>
 
-
 using namespace std;
+
+uint8_t crc8(uint8_t *data, size_t length) 
+{
+    uint8_t crc = INITIAL_REMAINDER;
+    for (size_t byte = 0; byte < length; ++byte) {
+        crc ^= data[byte]; // XOR byte into least sig. byte of crc
+
+        for (uint8_t bit = 8; bit > 0; --bit) { // Loop over each bit
+            if (crc & 0x80) { // If the uppermost bit is 1...
+                crc = (crc << 1) ^ POLYNOMIAL; // Shift left and XOR with the polynomial
+            } else {
+                crc <<= 1; // Just shift left
+            }
+        }
+    }
+
+    // Note: XOR with 0x00 can be omitted as it does not change the result
+    return crc; // Final remainder is the CRC result
+}
 
 void encode_and_send(void)
 {
 	vector<unsigned char> result;
 	unsigned char speed_result_tmp;
 	uint angle_result_tmp = 0;
+    unsigned char speed_crc = 0, angel_crc = 0, angel_crc_p2 = 0;
+    unsigned char crc_data[2];
 	//使用18th的[0,250]调出来的pid，拓展到+-1250
 	speed_result_tmp = speed_result < 0 ? -speed_result : speed_result;
+    if(speed_result_tmp > 22)   speed_result_tmp = 22;
 	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
 
 	if(angle_result_tmp > 1200) angle_result_tmp = 1200;
@@ -25,22 +46,58 @@ void encode_and_send(void)
 	servo_code_p1 |= 0x80;
 	servo_code_p2 = angle_result_tmp & 0x3f;
 	servo_code_p2 |= 0xc0;
-
-	result.push_back(0x55); //传输开始标志
-	result.push_back(0x55); //传输开始标志
-	for(int i = 0; i < 10; i++)
+    
+    crc_data[0] = speed_code;
+    speed_crc = crc8(crc_data,1);
+    crc_data[0] = servo_code_p1;
+    crc_data[1] = servo_code_p2;
+    angel_crc = crc8(crc_data,2);
+    // angel_crc_p2 = crc8(&servo_code_p2,1);
+	result.push_back(0x55); //舵机传输开始标志
+	result.push_back(0x55); //舵机传输开始标志
+	for(int i = 0; i < 5; i++)
 	{
-		result.push_back(speed_code);
 		result.push_back(servo_code_p1);
 		result.push_back(servo_code_p2);
+        result.push_back(0x6f); ///angle crc传输标志
+        result.push_back(angel_crc);
+        result.push_back(0x6f); ///angle crc传输标志
+        result.push_back(angel_crc);
 		result.push_back(0x5b); //传输分割标志
 		result.push_back(0x5b); //传输分割标志
 	}
-	result.push_back(speed_code);
-	result.push_back(servo_code_p1);
-	result.push_back(servo_code_p2);
-	result.push_back(0x6a);	//传输结束标志
-	result.push_back(0x6a);	//传输结束标志
+    result.push_back(servo_code_p1);
+    result.push_back(servo_code_p2);
+    result.push_back(0x6f); ///angle crc传输标志
+    result.push_back(angel_crc);
+    result.push_back(0x6f); ///angle crc传输标志
+    result.push_back(angel_crc);
+    result.push_back(0x5c); //舵机传输结束标志
+    // result.push_back(0x5c); //舵机传输结束标志
+    
+	// result.push_back(0x6b); //速度传输开始标志
+	result.push_back(0x6b); //速度传输开始标志
+	for(int i = 0; i < 5; i++)
+	{
+        result.push_back(speed_code);
+        result.push_back(0x6c); //speed crc传输标志
+        result.push_back(speed_crc);
+        result.push_back(0x6c);
+        result.push_back(speed_crc);
+        result.push_back(0x6c);
+        result.push_back(speed_crc);
+		result.push_back(0x5b); //传输分割标志
+		result.push_back(0x5b); //传输分割标志
+    }
+    result.push_back(speed_code);
+    result.push_back(0x6c); //speed crc传输标志
+    result.push_back(speed_crc);
+    result.push_back(0x6c);
+    result.push_back(speed_crc);
+    result.push_back(0x6c);
+    result.push_back(speed_crc);
+	result.push_back(0x6a);	//速度传输结束标志
+	result.push_back(0x6a);	//速度传输结束标志
 
 	ser.write(result);
 	std::chrono::duration<double, std::milli> elapsed = std::chrono::high_resolution_clock::now() - start_time_stamp;
@@ -48,6 +105,7 @@ void encode_and_send(void)
 	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result<< endl;
 	cout << "************************************************************************"<< endl;
 	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p2 << "	Speed: " << (uint)speed_code <<  endl;
+    cout << "HEX:   Angle CRC: "  << hex << (uint)angel_crc  << "	Speed CRC: " << (uint)speed_crc <<  endl;
 	cout << "************************************************************************"<< dec << endl;
 }
 

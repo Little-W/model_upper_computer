@@ -5,6 +5,11 @@
 #include <chrono>
 #include <ctime>
 
+
+// CRC-8 polynomial: x^8 + x^2 + x^1 + 1 (0x07)
+#define POLYNOMIAL 0x07
+#define INITIAL_REMAINDER 0x00
+
 extern serial::Serial ser;
 extern float speed_result;
 extern float angle_result;
