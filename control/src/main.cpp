@@ -224,7 +224,7 @@ int main()
 				if(MI.right_end_point[1].y > MI.re.main.turn_thresh - MI.re.main.adv_coef * real_speed_enc){
 					MI.state_t_left = t_inside;
 					cout<<"turning left"<<endl;
-			}
+				}
 			break;
 			}
 		    case t_inside: {
