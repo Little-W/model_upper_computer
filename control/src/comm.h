@@ -9,6 +9,10 @@
 // CRC-8 polynomial: x^8 + x^2 + x^1 + 1 (0x07)
 #define POLYNOMIAL 0x07
 #define INITIAL_REMAINDER 0x00
+#define TRANS_COUNT 5
+#define SPEED_TRANS_BEGIN 0xb6
+#define ANGLE_TRANS_BEGIN 0xd9
+#define TRANS_SPLIT 0xcc
 
 extern serial::Serial ser;
 extern float speed_result;
