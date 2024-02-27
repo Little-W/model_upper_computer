@@ -689,7 +689,31 @@ int main()
 		else if(MI.state_out == turn_left){
 			if (MI.state_t_left == t_left_slow_down){
 				angle_result = AC.output(deviation);
-				speed_result = Re.main.turn_speed - Re.main.slow_down_kd * ((real_speed_enc)-Re.main.turn_speed*22)/22 ;	
+				// TODO 修改为关于error的非线性 24/02/25
+				
+				// 通信中编码的速度缩放系数
+				float encode_speed_coef = 22;
+				// 初始化边界值和控制点
+				float p0_x = 0 ,p0_y = 0;
+				float p1_x = Re.main.turn_speed * encode_speed_coef ,p1_y = Re.main.turn_speed * encode_speed_coef;
+				float p0_ctrl_x = Re.main.turn_speed_delta_bezier_p0_ctrl_x ,p0_ctrl_y = Re.main.turn_speed_delta_bezier_p0_ctrl_y;
+				float p1_ctrl_x = Re.main.turn_speed_delta_bezier_p1_ctrl_x ,p1_ctrl_y = Re.main.turn_speed_delta_bezier_p1_ctrl_y;
+				
+				int speed_error = real_speed_enc - Re.main.turn_speed * encode_speed_coef;
+				// 设置最大偏差在曲线之内，保留speed_error符号用于计算最终结果
+				speed_error = abs(speed_error) > p1_x ? p1_x * speed_error / abs(speed_error) : speed_error;
+				float bezier_t = SC.bezier_get_t(abs(speed_error),0,1,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
+				
+				float bezier_out = (pow(1.0 - bezier_t, 3) * p0_y) + (3.0 * bezier_t * pow(1.0 - bezier_t, 2) * p0_ctrl_y) + (3.0 * pow(bezier_t, 2) * (1 - bezier_t) * p1_ctrl_y) + (pow(bezier_t, 3) * p1_y);
+				// 保留kd做范围调整
+				bezier_out = bezier_out / encode_speed_coef * Re.main.slow_down_kd; 
+
+				// 最终结果，out为正数，real_speed_enc距目标值较远时上位机给出比目标值更大的偏差，震荡接近目标turn_speed
+				// speed_result range 初始化为[0,2*turn_speed]，可调整slow_down_kd
+				speed_result = speed_error > 0 ? Re.main.turn_speed - bezier_out : Re.main.turn_speed + bezier_out;
+
+				// 旧的线性变化方案
+				// speed_result = Re.main.turn_speed - Re.main.slow_down_kd * ((real_speed_enc)-Re.main.turn_speed*22)/22 ;	
 				cout<<"calculate by t_left_slow_down"<<endl;			
 			}
 			else if (MI.state_t_left == t_inside){

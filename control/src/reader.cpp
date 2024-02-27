@@ -218,6 +218,10 @@ Reader::Reader(string path) {
     main.left_ray = n_main.get<float>("left_ray");
     main.right_ray = n_main.get<float>("right_ray");
 
+    main.turn_speed_delta_bezier_p0_ctrl_x = n_main.get<float>("turn_speed_delta_bezier_p0_ctrl_x;");
+    main.turn_speed_delta_bezier_p0_ctrl_y = n_main.get<float>("turn_speed_delta_bezier_p0_ctrl_y;");
+    main.turn_speed_delta_bezier_p1_ctrl_x = n_main.get<float>("turn_speed_delta_bezier_p1_ctrl_x;");
+    main.turn_speed_delta_bezier_p1_ctrl_y = n_main.get<float>("turn_speed_delta_bezier_p1_ctrl_y;");
     main.turn_kp = n_main.get<float>("turn_kp");
     main.turn_kd = n_main.get<float>("turn_kd");
     main.turn_ki = n_main.get<float>("turn_ki");

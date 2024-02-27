@@ -75,7 +75,7 @@ public:
 	 * @note 根据偏移量来决定速度，在范围内偏移量越大速度越小，并随偏移量增大减速幅度增加
 	*/
 	out_t output(data_t input);
-	float bezier_get_t(float t_head,float t_tail,float x);
+	float bezier_get_t(float x,float t_head,float t_tail,float p0_x,float p0_ctrl_x,float p1_ctrl_x,float p1_x);
 };
 
 #endif

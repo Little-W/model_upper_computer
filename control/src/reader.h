@@ -191,6 +191,10 @@ public:
         float left_ray;
         float right_ray;
 
+        float turn_speed_delta_bezier_p0_ctrl_x;
+        float turn_speed_delta_bezier_p0_ctrl_y;
+        float turn_speed_delta_bezier_p1_ctrl_x;
+        float turn_speed_delta_bezier_p1_ctrl_y;
         float turn_kp;
         float turn_ki;
         float turn_kd;
