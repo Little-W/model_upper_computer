@@ -175,6 +175,11 @@ public:
         pii v_left_circle;
         float left_ray;
         float right_ray;
+        float speed_delta_bezier_p0_ctrl_x;
+        float speed_delta_bezier_p0_ctrl_y;
+        float speed_delta_bezier_p1_ctrl_x;
+        float speed_delta_bezier_p1_ctrl_y;
+        float slow_down_kd;
     }main;
     struct {
         float kp;

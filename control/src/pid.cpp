@@ -20,7 +20,7 @@ data_t PartPdCtrl::output(data_t error) {
 	if (abs(error) > Re.main.dy_kd_threshold) {
 		this->count++;
 		// out += (1 + count * 0.05) * kp * error;//偏差过大增大kp
-		now_out_diff += (1 + count * Re.main.dy_kd_coef) * kd * (error - last_error);//偏差过大增大kp
+		now_out_diff += (1 + count * Re.main.dy_kd_coef) * kd * (error - last_error);//偏差过大增大kd
 	}
 	else {
 		this->count = 0;
@@ -91,13 +91,13 @@ SpeedControl::SpeedControl(data_t start_error_, data_t end_error_, data_t max_, 
 	this->p1_ctrl_y = Re.main.dy_speed_bezier_p1_ctrl_y;
 }
 //二分查找解出三阶贝塞尔曲线当前x对应的参数t
-float SpeedControl::bezier_get_t(float x, float t_head, float t_tail) {
+float SpeedControl::bezier_get_t(float x, float t_head, float t_tail,float p0_x,float p0_ctrl_x,float p1_ctrl_x,float p1_x) {
 	float t = (t_head + t_tail) / 2.0;
 	float t2x = (pow(1.0 - t, 3) * p0_x) + (3.0 * t * pow(1.0 - t, 2) * p0_ctrl_x) + (3.0 * pow(t, 2) * (1 - t) * p1_ctrl_x) + (pow(t, 3) * p1_x);
 	//可接受误差范围内返回结果
 	if (abs(t2x - x) < 0.001) return t;
-	if (t2x < x) return bezier_get_t(x,t, t_tail);
-	return bezier_get_t(x,t_head, t);
+	if (t2x < x) return bezier_get_t(x,t, t_tail,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
+	return bezier_get_t(x,t_head, t,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
 }
 float limit2range(float target,float head,float tail){
 	target = max(head,target);
@@ -134,7 +134,7 @@ out_t SpeedControl::output(data_t input) {
 		//限制p1_ctrl_y不超过p0_ctrl_y
 		p1_ctrl_y = min(p0_ctrl_y,p1_ctrl_y);
 
-		float t = bezier_get_t(input,0,1);
+		float t = bezier_get_t(input,0,1,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
 		out = (pow(1.0 - t, 3) * p0_y) + (3.0 * t * pow(1.0 - t, 2) * p0_ctrl_y) + (3.0 * pow(t, 2) * (1 - t) * p1_ctrl_y) + (pow(t, 3) * p1_y);
 	}
 	return out_t(out);

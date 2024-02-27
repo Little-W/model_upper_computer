@@ -182,8 +182,13 @@ Reader::Reader(string path) {
     main.dy_speed_bezier_p0_ctrl_x = n_main.get<float>("dy_speed_bezier_p0_ctrl_x");
     main.dy_speed_bezier_p0_ctrl_y = n_main.get<float>("dy_speed_bezier_p0_ctrl_y");
     main.dy_speed_bezier_p1_ctrl_x = n_main.get<float>("dy_speed_bezier_p1_ctrl_x");
-    main.dy_speed_bezier_p1_ctrl_y = n_main.get<float>("dy_speed_bezier_p1_ctrl_y")    ;
+    main.dy_speed_bezier_p1_ctrl_y = n_main.get<float>("dy_speed_bezier_p1_ctrl_y");
     
+    main.speed_delta_bezier_p0_ctrl_x = n_main.get<float>("speed_delta_bezier_p0_ctrl_x");
+    main.speed_delta_bezier_p0_ctrl_y = n_main.get<float>("speed_delta_bezier_p0_ctrl_y");
+    main.speed_delta_bezier_p1_ctrl_x = n_main.get<float>("speed_delta_bezier_p1_ctrl_x");
+    main.speed_delta_bezier_p1_ctrl_y = n_main.get<float>("speed_delta_bezier_p1_ctrl_y");
+    main.slow_down_kd = n_main.get<float>("slow_down_kd");
     main.kp = n_main.get<float>("kp");
     main.kd = n_main.get<float>("kd");
     main.ki = n_main.get<float>("ki");

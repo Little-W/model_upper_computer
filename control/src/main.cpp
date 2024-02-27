@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -650,6 +650,29 @@ int main()
 				angle_result = angle_result_tmp;
 			}
 			speed_result = SC.output(deviation);
+		}
+
+		//通过增量提升刹车性能
+		if(real_speed_enc > speed_result * ENC_SPEED_SCALE){
+			// 初始化边界值和控制点
+			float p0_x = 0 ,p0_y = 0;
+			float p1_x = Re.main.max_v * ENC_SPEED_SCALE ,p1_y = 1;
+			float p0_ctrl_x = Re.main.speed_delta_bezier_p0_ctrl_x ,p0_ctrl_y = Re.main.speed_delta_bezier_p0_ctrl_y;
+			float p1_ctrl_x = Re.main.speed_delta_bezier_p1_ctrl_x ,p1_ctrl_y = Re.main.speed_delta_bezier_p1_ctrl_y;
+
+			float bezier_x = abs(real_speed_enc) > p1_x ? p1_x : abs(real_speed_enc);
+			float bezier_t = SC.bezier_get_t(bezier_x,0,1,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
+
+			float bezier_out = (pow(1.0 - bezier_t, 3) * p0_y) + (3.0 * bezier_t * pow(1.0 - bezier_t, 2) * p0_ctrl_y) + (3.0 * pow(bezier_t, 2) * (1 - bezier_t) * p1_ctrl_y) + (pow(bezier_t, 3) * p1_y);
+
+			float speed_bias = bezier_out * Re.main.slow_down_kd * ((real_speed_enc)-speed_result * ENC_SPEED_SCALE) / ENC_SPEED_SCALE;
+
+			if(speed_bias < 0)
+			{
+				speed_bias = 0;
+			}
+							
+			speed_result = speed_result - speed_bias;
 		}
 
 		if (!Re.set.motor_use)speed_result = 0;
