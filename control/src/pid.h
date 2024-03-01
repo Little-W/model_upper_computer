@@ -5,7 +5,6 @@
 //#include <bits/stdint-uintn.h>
 #include <cmath>
 #include <iostream>
-#include"process.h"
 
 // 使用 float 作为输入、误差类型
 typedef float data_t;
@@ -13,7 +12,7 @@ typedef float data_t;
 typedef float out_t;
 extern float cur_kp;
 extern float deviation;
-extern MainImage MI;
+
 class PartPdCtrl {
 private:
 	float kp;//读取

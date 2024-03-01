@@ -41,34 +41,7 @@ float MainImage::MidlineDeviation(int enc_speed)
 		deviation += re.main.forward_coef2 * (center - float(sum) / re.farm.down_scope);
 		cout << "deviation: " << deviation << endl;
 	}
-	else if (state_out == turn_left)
-	{
-		if (state_t_left == t_inside)
-		{
-			MainImage::deviation_thresh = IMGH - re.main.turn_forward_dist;
-
-			sum = 0;
-
-			for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - re.main.up_scope; i--) {
-				sum += center_point[i];
-			}
-
-			deviation = re.main.turn_forward_coef1 * (center - float(sum) / re.main.up_scope);
-			sum = 0;
-			for (i = MainImage::deviation_thresh + re.main.down_scope; i > MainImage::deviation_thresh; i--) {
-				sum += center_point[i];
-			}
-			deviation += re.main.turn_forward_coef2 * (center - float(sum) / re.main.down_scope);
-			cout << "turn left deviation: " << deviation << endl;
-		}
-		else
-		{
-			goto common_state;
-		}
-	}
-	else 
-	{
-common_state:
+	else {
 		//速度大于阈值时对前瞻进行动态调整:forward_dist up_scope forward_coef1
 		double speed_error;
 		double new_forward_dist;
@@ -79,7 +52,7 @@ common_state:
 			if(new_forward_dist > re.main.max_enc_forward_dist)
 			{
 				new_forward_dist = re.main.max_enc_forward_dist;
-			}
+		}
 		}
 		else
 		{
@@ -220,8 +193,6 @@ MainImage::MainImage() : re("./config.yaml")
 	state_out = garage_out;
 	state_r_circle = right_circle_in_find;
 	state_l_circle = left_circle_in_find;
-	state_t_right = t_right_slow_down;
-	state_t_left = t_left_slow_down;
 	state_repair = repair_in_find;
 	state_farm = farm_in_find;
 	state_hump = hump_in_find;
@@ -306,14 +277,8 @@ void MainImage::state_judge()
 		ai_pig = false;
 		if (state_hump != hump_out)state_out = hump_find;
 	}
-	cout<<"end point size:" << right_end_point.size() << endl;
-	cout<<"end point size:" << left_end_point.size() << endl;
-	cout<<"end point diff:" << 	abs(right_end_point[1].x - left_end_point[1].x) << endl;
-	cout<<"point height: "<<left_end_point[1].y <<endl;
-
 	if (state_out == straight)
 	{
-		
 		if (re.set.zebra_detect) {
 			find_far_zebra();
 			find_near_zebra();
@@ -321,7 +286,7 @@ void MainImage::state_judge()
 		if (zebra_far_find) {
 			state_out = garage_find;
 		}
-		if (r_circle_use && right_end_point.size() >= 6 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)
+		else if (r_circle_use && right_end_point.size() >= 6 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)
 		{
 			bool f = true;
 			int i;
@@ -348,19 +313,6 @@ void MainImage::state_judge()
 				state_out = left_circle;
 			}
 		}
-
-		
-		else if(right_end_point.size() == 2 && left_end_point.size() == 2 && abs(right_end_point[1].x - left_end_point[1].x) < re.main.advanced_turn_thresh && (right_end_point[1].y > re.main.straight_turn_thresh)){
-           
-
-			state_out = turn_left;
-			cout<<"turning left"<<endl;
-
-			// else if(right_end_point[1].y < IMGH/2 - re.main.turn_thresh){
-			// 	state_out = turn_right;
-			// }
-			
-		}
 	}
 	else if (state_out == garage_find) {
 		find_far_zebra();
@@ -384,33 +336,6 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 		ki = re.main.ki;
 		dv = re.main.dv;
 		return;
-	}
-	case turn_left: {
-		switch (state_t_left) {
-		case t_left_slow_down: {
-			kp = re.main.kp;
-			kd = re.main.kd;
-			ki = re.main.ki;
-			dv = re.main.dv;
-			return;
-		}
-		case t_inside: {
-			kp = re.main.turn_kp;
-			kd = re.main.turn_kd;
-			ki = re.main.turn_ki;
-			dv = re.main.turn_dv;
-			return;
-		}
-		case t_left_out: {
-			kp = re.main.kp;
-			kd = re.main.kd;
-			ki = re.main.ki;
-			dv = re.main.dv;
-			return;
-		}
-		}
-		return;
-
 	}
 	case right_circle: {
 		kp = re.r_circle.kp;
@@ -1259,6 +1184,7 @@ void MainImage::end_filter(int side) {
 /**
  * @brief 保存图像
 */
+
 void MainImage::show(float dev, float angle_result, float speed, int current_speed, bool c, bool l, bool r, bool l_e, bool r_e, bool l_c, bool r_c, bool c_c)
 {
     Mat channels[3];
@@ -1268,7 +1194,6 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     store.image_mat.copyTo(channels[2]);
 
     // 在图像上添加边缘、端点和圆锥标记
-
     merge(channels, 3, store.image_show);
 
     // 在图像上添加边缘、端点和圆锥标记
@@ -1309,12 +1234,6 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     // textOrg.y += textSize.height + 10;
     putText(store.image_show, "kp: " + to_string(cur_kp), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
     textOrg.y += textSize.height + 10;
-    putText(store.image_show, "sl st: " + string(((state_t_left == t_left_slow_down) ? "left slow_down" : "not left_slow_down")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    textOrg.y += textSize.height + 10;
-    putText(store.image_show, "in l st: " + string(((state_t_left == t_inside) ? "t inside" : "not t inside")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    textOrg.y += textSize.height + 10;
-    // putText(store.image_show, "R_E: " + string(((state_t_left == t_left_out) ? "t_left_out" : "not t_left_out")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    // textOrg.y += textSize.height + 10;
     putText(store.image_show, "Angle: " + to_string(angle_result), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
     textOrg.y += textSize.height + 10;
     putText(store.image_show, "speed: " + to_string(speed), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
@@ -1325,10 +1244,7 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 
     putText(store.image_show, "deviation: " + to_string(deviation), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
 	textOrg.y += textSize.height + 10;
-
-    // putText(store.image_show, "right p h: " + to_string(right_end_point[1].y), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-	// textOrg.y += textSize.height + 10;
-
+	
     putText(store.image_show, "end point size: " + to_string(right_end_point.size()), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
 
     resize(store.image_show, store.image_show, cv::Size(IMGW * 2, IMGH * 2));

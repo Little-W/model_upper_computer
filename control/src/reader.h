@@ -24,14 +24,6 @@
 #define hump_find 6
 #define barn_find 7
 #define farm_find 8
-#define turn_left 9
-#define turn_right 10
-#define t_right_slow_down 47
-#define t_left_slow_down 48
-#define t_inside 51
-#define t_left_out 49
-#define t_right_out 50
-
 #define repair_in_find 11
 #define repair_out_out 12
 #define farm_in_find 14
@@ -141,11 +133,6 @@ public:
         bool garage_start;
         int enc_forward_threshold;
         float enc_forward_dist_coef;
-        int turn_thresh;
-        int advanced_turn_thresh;
-        int turn_speed;
-        int turn_out_speed;
-        int acce_thresh;
         float enc_forward_dist_exp;
         int max_enc_forward_dist;
         float enc_up_scope_coef;
@@ -184,22 +171,10 @@ public:
         int down_scope;
         float forward_coef1;
         float forward_coef2;
-        float turn_forward_coef1;
-        float turn_forward_coef2;
         pii v_right_circle;
         pii v_left_circle;
         float left_ray;
         float right_ray;
-
-        float turn_kp;
-        float turn_ki;
-        float turn_kd;
-        int turn_dv;
-
-        int adv_coef;
-        int turn_forward_dist;
-        float slow_down_kd;
-        int straight_turn_thresh;
     }main;
     struct {
         float kp;
