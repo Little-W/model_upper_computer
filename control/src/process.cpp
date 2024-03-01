@@ -1220,32 +1220,55 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     double fontScale = 0.25;
     int thickness = 1;
     int baseline = 0;
+	int interval = 5;//行间距
     Size textSize = getTextSize("Text", fontFace, fontScale, thickness, &baseline);
     baseline += thickness;
 
     // 文本位置的起始点
-    Point textOrg(10, textSize.height + 5);
+    Point textOrg(2, textSize.height + 5);
+	// 主文本颜色
+	cv::Scalar mainColor = Scalar(60,20,220,0.75);
     // 绘制每个变量
-    putText(store.image_show, "state: " + string(((state_out == straight) ? "straight" : "turn_left")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    textOrg.y += textSize.height + 10; // 调整下一行文本的y坐标
-    // putText(store.image_show, "C: " + string(((state_out == right_circle) ? "right_circle" : "not right_circle")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    // textOrg.y += textSize.height + 10;
-    // putText(store.image_show, "l st: " + string(((state_out == turn_left) ? "turn_left" : "not turn left")), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    // textOrg.y += textSize.height + 10;
-    putText(store.image_show, "kp: " + to_string(cur_kp), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    textOrg.y += textSize.height + 10;
-    putText(store.image_show, "Angle: " + to_string(angle_result), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    textOrg.y += textSize.height + 10;
-    putText(store.image_show, "speed: " + to_string(speed), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-    textOrg.y += textSize.height + 10;
 
-    putText(store.image_show, "current_speed: " + to_string(current_speed), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-	textOrg.y += textSize.height + 10;
+    putText(store.image_show, "state: " + 
+		string(((state_out == straight) ? "straight" :
+				(state_out == right_circle_in_find) ? "right_circle_in_find" :
+				(state_out == right_circle_in_strai) ? "right_circle_in_strai" :
+				(state_out == right_circle_in_circle) ? "right_circle_in_circle" :
+				(state_out == right_circle_inside_before) ? "right_circle_inside_before" :
+				(state_out == right_circle_inside) ? "right_circle_inside" :
+				(state_out == right_circle_out) ? "right_circle_out" :
+				(state_out == right_circle_out_find) ? "right_circle_out_find" :
+				(state_out == right_circle_out_strai) ? "right_circle_out_strai" :
+				(state_out == right_circle_out_out) ? "right_circle_out_out" :
+				(state_out == left_circle_in_find) ? "left_circle_in_find" :
+				(state_out == left_circle_in_strai) ? "left_circle_in_strai" :
+				(state_out == left_circle_in_circle) ? "left_circle_in_circle" :
+				(state_out == left_circle_inside_before) ? "left_circle_inside_before" :
+				(state_out == left_circle_inside) ? "left_circle_inside" :
+				(state_out == left_circle_out) ? "left_circle_out" :
+				(state_out == left_circle_out_find) ? "left_circle_out_find" :
+				(state_out == left_circle_out_strai) ? "left_circle_out_strai" :
+	 			"other")),
+				textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	textOrg.y += textSize.height + interval;
 
-    putText(store.image_show, "deviation: " + to_string(deviation), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
-	textOrg.y += textSize.height + 10;
-	
-    putText(store.image_show, "end point size: " + to_string(right_end_point.size()), textOrg, fontFace, fontScale, Scalar(0, 255, 255), thickness, 8);
+    putText(store.image_show, "kp: " + to_string(cur_kp), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+    textOrg.y += textSize.height + interval;
+
+    putText(store.image_show, "Angle: " + to_string(angle_result), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+    textOrg.y += textSize.height + interval;
+
+    putText(store.image_show, "speed: " + to_string(speed), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+    textOrg.y += textSize.height + interval;
+
+    putText(store.image_show, "current_speed: " + to_string(current_speed), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	textOrg.y += textSize.height + interval;
+
+    putText(store.image_show, "deviation: " + to_string(deviation), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	textOrg.y += textSize.height + interval;
+
+    putText(store.image_show, "end point size: " + to_string(right_end_point.size()), textOrg, fontFace, fontScale, mainColor, thickness, 8);
 
     resize(store.image_show, store.image_show, cv::Size(IMGW * 2, IMGH * 2));
     if (re.set.color)store.wri << store.image_BGR;
