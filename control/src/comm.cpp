@@ -58,12 +58,17 @@ uint8_t crc8(uint8_t* data, size_t length) {
     }
     return crc;
 }
-
+/**
+ * @brief 编码器
+ * @note  将上位机数据参考编码方案编码并发送给下位机 
+ * @note  下位机速度控制范围:  +- 31
+ * @note  舵机控制范围:       +- 1200
+*/
 void encode_and_send(void)
 {
 	vector<unsigned char> speed_data;
     vector<unsigned char> angle_data;
-	unsigned char speed_result_tmp;
+	uint speed_result_tmp;
 	uint angle_result_tmp = 0;
     unsigned char speed_crc = 0, angle_crc = 0, angle_crc_p2 = 0;
     unsigned char crc_data[2];
@@ -71,20 +76,23 @@ void encode_and_send(void)
     std::chrono::time_point<std::chrono::high_resolution_clock> uart_trans_begin_ts = std::chrono::high_resolution_clock::now();
 
 	//使用18th的[0,250]调出来的pid，拓展到+-1250
-	speed_result_tmp = speed_result < 0 ? -speed_result : speed_result;
-    if(speed_result_tmp > 22)   speed_result_tmp = 22;
+	speed_result_tmp = ENC_SPEED_SCALE * (speed_result < 0 ? -speed_result : speed_result);
+    if(speed_result_tmp > MAX_SPEED_VAL)   speed_result_tmp = MAX_SPEED_VAL;
 	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
 
-	if(angle_result_tmp > 1200) angle_result_tmp = 1200;
-	unsigned char speed_code,servo_code_p1,servo_code_p2;
-	speed_code = speed_result_tmp & 0x1f;
-	if(speed_result < 0) speed_code |= 0x20;
+	if(angle_result_tmp > MAX_ANGLE_VAL) angle_result_tmp = MAX_ANGLE_VAL;
+	unsigned char speed_code_p1,speed_code_p2,servo_code_p1,servo_code_p2;
+    speed_code_p1 = (speed_result_tmp >> 6) & 0x1f;
+	if(speed_result < 0) speed_code_p1 |= 0x20;
+	speed_code_p2 = speed_result_tmp & 0x3f;
+
 	servo_code_p1 = (angle_result_tmp >> 6) & 0x1f;
 	if(angle_result < 0) servo_code_p1 |= 0x20;
 	servo_code_p2 = angle_result_tmp & 0x3f;
     
-    crc_data[0] = speed_code;
-    speed_crc = crc8(crc_data,1);
+    crc_data[0] = speed_code_p1;
+    crc_data[1] = speed_code_p2;
+    speed_crc = crc8(crc_data,2);
     crc_data[0] = servo_code_p1;
     crc_data[1] = servo_code_p2;
     angle_crc = crc8(crc_data,2);
@@ -98,18 +106,14 @@ void encode_and_send(void)
         angle_data.push_back(angle_crc);
         angle_data.push_back(angle_crc);
 	}
-    angle_data.push_back(servo_code_p1);
-    angle_data.push_back(servo_code_p2);
-    angle_data.push_back(angle_crc);
-    angle_data.push_back(angle_crc);
-    angle_data.push_back(angle_crc);
     ser.write(angle_data);
 
 	
 	for(int i = 0; i <= TRANS_COUNT; i++)
 	{
         speed_data.push_back(SPEED_TRANS_BEGIN); //速度传输开始标志
-        speed_data.push_back(speed_code);
+        speed_data.push_back(speed_code_p1);
+        speed_data.push_back(speed_code_p2);
         speed_data.push_back(speed_crc);
         speed_data.push_back(speed_crc);
         speed_data.push_back(speed_crc);
@@ -120,9 +124,9 @@ void encode_and_send(void)
     std::chrono::duration<double, std::milli> duration = std::chrono::high_resolution_clock::now() - uart_trans_begin_ts;
     cout << "UART time consumed: " << duration.count() << "ms" <<endl;
 	cout << "now: " << elapsed.count() << "ms" <<endl;
-	cout << "Angle: " << dec << angle_result  << "	Speed: " << (int)speed_result<< endl;
+	cout << "Angle: " << dec << angle_result  << "	Speed: " << speed_result<< endl;
 	cout << "************************************************************************"<< endl;
-	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p2 << "	Speed: " << (uint)speed_code <<  endl;
+	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p2 << "	Speed: " << (uint)speed_code_p1 << (uint)speed_code_p2 <<  endl;
     cout << "HEX:   Angle CRC: "  << hex << (uint)angle_crc  << "	Speed CRC: " << (uint)speed_crc <<  endl;
 	cout << "************************************************************************"<< dec << endl;
 }
