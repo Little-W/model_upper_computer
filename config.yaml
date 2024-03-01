@@ -19,85 +19,177 @@ set:
 #    
 main:
     garage_start: false
-    #舵机动态kp kd，根据偏差deviation调整
-    dy_kp_max: 10
-    dy_kp_threshold: 20 #62
-    dy_kp_coef: 0.5
-    dy_kp_exp: 2.7
-    dy_kd_threshold: 55 #62
-    dy_kd_coef: 0
     #根据偏差[min_v_diff,max_v_diff]动态调整当前速度[min_v,max_v]，幂函数形式
     dy_speed_coef: 0
     dy_speed_exp: 0
     #根据偏差[min_v_diff,max_v_diff]动态调整当前速度[min_v,max_v]，Bezier曲线形式,p0在左上角，p1在右下角
-    dy_speed_bezier_p0_ctrl_x: 12 # 25 #30.0 # [p0_x=start_error,p1_ctrl_x]
-    dy_speed_bezier_p0_ctrl_y: 28 # 12 #12.0 # [p1_ctrl_y,p0_y=max_v] 
-    dy_speed_bezier_p1_ctrl_x: 4 # 40 #40.0 # [p0_ctrl_x,p1_x=end_error]
-    dy_speed_bezier_p1_ctrl_y: 40 # 12 #7.0 # [p1_y=min_v,p0_ctrl_y]
+    dy_speed_bezier_p0_ctrl_x: 44 # 25 #30.0 # [p0_x=start_error,p1_ctrl_x]
+    dy_speed_bezier_p0_ctrl_y: 13 # 12 #12.0 # [p1_ctrl_y,p0_y=max_v] 
+    dy_speed_bezier_p1_ctrl_x: 32 # 40 #40.0 # [p0_ctrl_x,p1_x=end_error]
+    dy_speed_bezier_p1_ctrl_y: 5 # 12 #7.0 # [p1_y=min_v,p0_ctrl_y]
     
-    speed_delta_bezier_p0_ctrl_x: 64
-    speed_delta_bezier_p0_ctrl_y: 0.37
-    speed_delta_bezier_p1_ctrl_x: 124
-    speed_delta_bezier_p1_ctrl_y: 0.152
-    #根据速度动态调整前瞻的参数，幂函数形式
-    #-速度动态调整前瞻的阈值
-    enc_forward_threshold: 150 #120
-    #-动态调整中线位置
-    enc_forward_dist_coef: 14.12 #0.0015
-    enc_forward_dist_exp: 1.879 #1
-    max_enc_forward_dist: 75
-    #-动态调整上半部分像素点数量
-    enc_up_scope_coef: 7.2 #0.0015
-    enc_up_scope_exp: 1.884 #1
-    max_enc_up_scope: 12
-    #-动态调整上半部分权重
-    enc_forward_coef1_coef: 0.07
-    enc_forward_coef1_exp: 1.5
-    max_enc_forward_coef1: 1.2
+    speed_delta_bezier_p0_ctrl_x: 36
+    speed_delta_bezier_p0_ctrl_y: 0.64
+    speed_delta_bezier_p1_ctrl_x: 35
+    speed_delta_bezier_p1_ctrl_y: 1.42
 
     right_ray: -1.2
     left_ray: 1.0
-    kp: 5.8 #1.6
+
+    kp: 9 #1.6
     ki: 0
-    kd: 42 #4.54
+    kd: 35 #4.54
     dv: 0
-    max_ag: 1200 ## 250
-    min_ag: -1200 ## 0
-    max_v: 12 #95
-    min_v: 2 #95
+    slow_down_kd: 1.6
+    max_ag: 1133 ## 250
+    min_ag: -1133 ## 0
+    max_v: 14 #95
+    min_v: 6 #95
     max_v_diff: 35 #40
     min_v_diff: 4
     use_dv: false #false
     second_lap: false
-    center_coef: 0.2
+    center_coef: 0
 
+    #舵机动态kp kd，根据偏差deviation调整
+    dy_kp_max: 15
+    dy_kp_threshold: 25 #62
+    dy_kp_coef: 0.6
+    dy_kp_exp: 3
+    dy_kd_threshold: 55 #62
+    dy_kd_coef: 0
+    
     #计算deviation时的重要参数：
     #-以IMGH-forward_dist作为分界线，上取up_scope个中心点，下取down_scope个中心点来衡量
     #--该值越大前瞻整体越远
-    forward_dist: 35 #45 
+    forward_dist: 45 #45 
     #--前瞻上下部分取点个数
-    up_scope: 6 #4
-    down_scope: 12 #4
+    up_scope: 4 #4
+    down_scope: 4 #4
     #--前瞻上下部分中心点对deviation的影响系数
-    forward_coef1: 0.5
-    forward_coef2: 0.6
+    forward_coef1: 0.6
+    forward_coef2: 0.4
+
+    ## 角度控制的前瞻位置
+    #根据速度动态调整前瞻的参数，幂函数形式
+    #-速度动态调整前瞻的阈值
+    angle_enc_forward_threshold: 80 #120
+    #-动态调整中线位置
+    angle_enc_forward_dist_coef: 7 #0.0015
+    angle_enc_forward_dist_exp: 1.87 #1
+    angle_max_enc_forward_dist: 100
+    #-动态调整上半部分像素点数量
+    angle_enc_up_scope_coef: 0 #0.0015
+    angle_enc_up_scope_exp: 1.884 #1
+    angle_max_enc_up_scope: 12
+    #-动态调整上半部分权重
+    angle_enc_forward_coef1_coef: 0
+    angle_enc_forward_coef1_exp: 1.5
+    angle_max_enc_forward_coef1: 1.2
+
+    ## 速度控制的前瞻位置
+    #根据速度动态调整前瞻的参数，幂函数形式
+    #-速度动态调整前瞻的阈值
+    speed_enc_forward_threshold: 80 #120
+    #-动态调整中线位置
+    speed_enc_forward_dist_coef: 6 #0.0015
+    speed_enc_forward_dist_exp: 2 #1
+    speed_max_enc_forward_dist: 100
+    speed_forward_dist: 60
+    #-动态调整上半部分像素点数量
+    speed_enc_up_scope_coef: 0 #0.0015
+    speed_enc_up_scope_exp: 1.884 #1
+    speed_max_enc_up_scope: 12
+    #-动态调整上半部分权重
+    speed_enc_forward_coef1_coef: 0
+    speed_enc_forward_coef1_exp: 1.5
+    speed_max_enc_forward_coef1: 1.2
 
     # 恒定速度与打角
     v_right_circle: [60,90] #[60,70]
     v_left_circle: [175,90] #[175,70]
 
 right_circle:
-    kp: 10 #1.6
+    kp: 15 #8 #1.6
     ki: 0
-    kd: 38 #4.54
+    kd: 0 #20 #4.54
     dv: 0
-    speed: 4
+    speed: 6.2
+    circle_slow_down_kd: 25
     circle_dist: 40
     use: false 
     big_circle: false 
     count_start: 2
     in_find:
-        kp: 9 #1.6
+        kp: 25 #1.6
+        ki: 0
+        kd: 0 #4.54
+        dv: 0
+        ray_ag: 2
+    in_strai:
+        kp: 15 #1.6
+        ki: 0
+        kd: 0 #4.54
+        dv: 0
+        ray_ag1: -0.94
+        ray_ag2: -2.55 #-2.55
+    in_circle:
+        kp: 13 #1.6
+        ki: 0
+        kd: 0 #4.54
+        dv: 0
+        ray_ag1: 0.64 #0.84
+        ray_ag2: -0.94
+        ray_ag3: -2.45
+        ray_ag4: -2.45
+        ray_ag5: 0.44 #0.84
+    inside_before:
+        kp: 10
+        ki: 0
+        kd: 0 # 5.10
+        dv: 0
+        p: ['0','IMGH-5']
+    inside:
+        kp: 15 #1.6
+        ki: 0
+        kd: 0 #4.54
+        dv: 0 #2
+    out_find:
+        kp: 15 #1.6
+        ki: 0
+        kd: 0 #4.54
+        dv: 0 #2
+        p:  ['2.7*IMGW/3','IMGH/3'] #['2*IMGW/3','IMGH/2'] #['2*IMGW/3','IMGH/2-5']
+    out_strai: 
+        find_pos: 12
+        kp: 15 #1.6
+        ki: 0
+        kd: 0 #4.54
+        dv: 0
+    out:
+        kp: 15 #1.6
+        ki: 0
+        kd: 0 #4.54
+        ray_ag: 1.9
+    out_out: 
+        kp: 15 #1.6
+        ki: 0
+        kd: 0 #4.54
+        dv: 0
+#
+left_circle:
+    kp: 12 #8 #1.6
+    ki: 0
+    kd: 0 #20 #4.54
+    dv: 0
+    speed: 4.8
+    circle_slow_down_kd: 25
+    circle_dist: 50
+    use: false 
+    big_circle: false 
+    count_start: 2
+    in_find:
+        kp: 10 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0
@@ -110,7 +202,7 @@ right_circle:
         ray_ag1: -0.94
         ray_ag2: -2.55 #-2.55
     in_circle:
-        kp: 11 #1.6
+        kp: 13 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0
@@ -120,105 +212,37 @@ right_circle:
         ray_ag4: -2.45
         ray_ag5: 0.44 #0.84
     inside_before:
-        kp: 11
+        kp: 10
         ki: 0
         kd: 0 # 5.10
         dv: 0
         p: ['0','IMGH-5']
     inside:
-        kp: 11 #1.6
+        kp: 15 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0 #2
     out_find:
-        kp: 7.8 #1.6
+        kp: 15 #1.6
         ki: 0
-        kd: 30 #4.54
+        kd: 0 #4.54
         dv: 0 #2
         p:  ['2.7*IMGW/3','IMGH/3'] #['2*IMGW/3','IMGH/2'] #['2*IMGW/3','IMGH/2-5']
     out_strai: 
         find_pos: 12
-        kp: 11 #1.6
+        kp: 15 #1.6
         ki: 0
-        kd: 30 #4.54
+        kd: 0 #4.54
         dv: 0
     out:
-        kp: 12 #1.6
+        kp: 15 #1.6
         ki: 0
         kd: 0 #4.54
         ray_ag: 1.9
     out_out: 
-        kp: 11 #1.6
+        kp: 15 #1.6
         ki: 0
         kd: 0 #4.54
-        dv: 0
-#
-left_circle:
-    kp: 1.5
-    ki: 0
-    kd: 4
-    dv: 0
-    speed: 4
-    circle_dist: 30
-    use: false ######
-    big_circle: false
-    count_start: 2
-    in_find:
-        kp: 1.5
-        ki: 0
-        kd: 4
-        dv: 0 #10
-        ray_ag: 1
-    in_strai:
-        kp: 1.5
-        ki: 0
-        kd: 4
-        dv: 0
-        ray_ag1: -2.1
-        ray_ag2: -0.55
-    in_circle:
-        kp: 4
-        ki: 0
-        kd: 12
-        dv: 0
-        ray_ag1: 2.5
-        ray_ag2: -2.2
-        ray_ag3: -0.6
-        ray_ag4: -0.6
-        ray_ag5: 2.7
-    inside_before:
-        kp: 2.19
-        ki: 0
-        kd: 5.10
-        dv: 0
-        p: ['IMGW-1','IMGH-5']
-    inside:
-        kp: 1.5
-        ki: 0
-        kd: 4
-        dv: 0 #2
-    out_find:
-        kp: 1.5
-        ki: 0
-        kd: 4
-        dv: 0 #2
-        p: ['IMGW/3','IMGH/2']
-    out_strai: 
-        find_pos: 12
-        kp: 1.5
-        ki: 0
-        kd: 4
-        dv: 0
-    out: 
-        kp: 1.5
-        ki: 0
-        kd: 4
-        dv: 0 #10
-        ray_ag: 1.24
-    out_out: 
-        kp: 1.5
-        ki: 0
-        kd: 4
         dv: 0
 #
 repair:
