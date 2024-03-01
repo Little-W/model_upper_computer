@@ -195,10 +195,10 @@ Reader::Reader(string path) {
     main.dv = n_main.get<int>("dv");
     main.max_ag = n_main.get<int>("max_ag");
     main.min_ag = n_main.get<int>("min_ag");
-    main.max_v = n_main.get<int>("max_v");
-    main.min_v = n_main.get<int>("min_v");
-    main.max_v_diff = n_main.get<int>("max_v_diff");
-    main.min_v_diff = n_main.get<int>("min_v_diff");
+    main.max_v = n_main.get<float>("max_v");
+    main.min_v = n_main.get<float>("min_v");
+    main.max_v_diff = n_main.get<float>("max_v_diff");
+    main.min_v_diff = n_main.get<float>("min_v_diff");
     main.use_dv = n_main.get<bool>("use_dv");
     main.garage_start = n_main.get<bool>("garage_start");
     main.second_lap = n_main.get<bool>("second_lap");
@@ -231,7 +231,7 @@ Reader::Reader(string path) {
     r_circle.kp = n_right_circle.get<float>("kp");
     r_circle.kd = n_right_circle.get<float>("kd");
     r_circle.dv = n_right_circle.get<int>("dv");
-    r_circle.speed = n_right_circle.get<int>("speed");
+    r_circle.speed = n_right_circle.get<float>("speed"); 
     r_circle.circle_dist = n_right_circle.get<int>("circle_dist");
     r_circle.use = n_right_circle.get<bool>("use");
     r_circle.big_circle = n_right_circle.get<bool>("big_circle");
@@ -252,7 +252,7 @@ Reader::Reader(string path) {
     l_circle.kp = n_left_circle.get<float>("kp");
     l_circle.kd = n_left_circle.get<float>("kd");
     l_circle.dv = n_left_circle.get<int>("dv");
-    l_circle.speed = n_left_circle.get<int>("speed");
+    l_circle.speed = n_left_circle.get<float>("speed");
     l_circle.circle_dist = n_left_circle.get<int>("circle_dist");
     l_circle.use = n_left_circle.get<bool>("use");
     l_circle.big_circle = n_left_circle.get<bool>("big_circle");
@@ -273,13 +273,13 @@ Reader::Reader(string path) {
     repair.kp = n_repair.get<float>("kp");
     repair.kd = n_repair.get<float>("kd");
     repair.dv = n_repair.get<float>("dv");
-    repair.speed = n_repair.get<int>("speed");
+    repair.speed = n_repair.get<float>("speed");
     //farm
     farm.kp=n_farm.get<float>("kp");
     farm.kd=n_farm.get<float>("kd");
     farm.dv=n_farm.get<int>("dv");
-    farm.speed=n_farm.get<int>("speed");
-    farm.speed_out=n_farm.get<int>("speed_out");
+    farm.speed=n_farm.get<float>("speed");
+    farm.speed_out=n_farm.get<float>("speed_out");
     farm.dist=n_farm.get<int>("dist");
     farm.up_scope=n_farm.get<int>("up_scope");
     farm.down_scope=n_farm.get<int>("down_scope");
@@ -291,7 +291,7 @@ Reader::Reader(string path) {
     hump.kp=n_hump.get<float>("kp");
     hump.kd=n_hump.get<float>("kd");
     hump.dv=n_hump.get<int>("dv");
-    hump.speed=n_hump.get<int>("speed");
+    hump.speed=n_hump.get<float>("speed");
     hump.mend_up_line=n_hump.get<int>("mend_up_line");
     hump.on_line=n_hump.get<int>("on_line");
     //start
@@ -320,7 +320,7 @@ Reader::Reader(string path) {
     hill.kp = n_hill.get<float>("kp");
     hill.kd = n_hill.get<float>("kd");
     hill.dv = n_hill.get<int>("dv");
-    hill.speed = n_hill.get<int>("speed");
+    hill.speed = n_hill.get<float>("speed");
     hill.mid_bot_y = n_hill.get<int>("mid_bot_y");
     hill.mid_top_y = n_hill.get<int>("mid_top_y");
     hill.frame = n_hill.get<int>("frame");

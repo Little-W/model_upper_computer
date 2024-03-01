@@ -172,10 +172,10 @@ public:
         int dv;
         int max_ag;
         int min_ag;
-        int max_v;
-        int min_v;
-        int max_v_diff;
-        int min_v_diff;
+        float max_v;
+        float min_v;
+        float max_v_diff;
+        float min_v_diff;
         bool use_dv;
         bool second_lap;
         float center_coef;
@@ -206,7 +206,7 @@ public:
         float ki;
         float kd;
         int dv;
-        int speed;
+        float speed;
         int circle_dist;
         bool use;
         bool big_circle;
@@ -229,15 +229,15 @@ public:
         float ki;
         float kd;
         int dv;
-        int speed;
+        float speed;
     }repair;
     struct {
         float kp;
         float kd;
         float ki;
         int dv;
-        int speed;
-        int speed_out;
+        float speed;
+        float speed_out;
         int dist;
         int up_scope;
         int down_scope;
@@ -251,7 +251,7 @@ public:
         float kd;
         float ki;
         int dv;
-        int speed;
+        float speed;
         int mend_up_line;
         int on_line;
     }hump;
@@ -273,6 +273,7 @@ public:
         pii v_right_garage;  
     }end;
     struct {
+        float speed;
         float kp;
         float kd;
         float ki;
@@ -287,7 +288,7 @@ public:
         float kd;
         float ki;
         int dv;
-        int speed;
+        float speed;
         int mid_bot_y;
         int mid_top_y;
         int frame;
