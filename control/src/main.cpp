@@ -35,6 +35,7 @@ int circle_count = 0;//环岛中计数
 int zebra_count = 0;
 
 int real_speed_enc = 0;//下位机传输的真实速度
+int smoothed_real_speed_enc = 0;
 
 //通信端口
 serial::Serial ser;
@@ -132,8 +133,15 @@ int main()
 		semV(image_sem);
 		
 		real_speed_enc = get_speed_enc();
-							cout << "true_speed_enc: " << real_speed_enc << endl;
-
+		cout << "true_speed_enc: " << real_speed_enc << endl;
+		if(smoothed_real_speed_enc != 0)
+		{
+			smoothed_real_speed_enc = 0.1 * real_speed_enc + 0.9 * smoothed_real_speed_enc;
+		}
+		else
+		{
+			smoothed_real_speed_enc = real_speed_enc;
+		}
 		//只有在straight状态下识别AI元素
 		if (MI.state_out == straight)
 		{
@@ -553,7 +561,7 @@ int main()
 			MI.find_center();
 		}
 		//运动控制
-		deviation = MI.MidlineDeviation(real_speed_enc);
+		deviation = MI.MidlineDeviation(smoothed_real_speed_enc);
 
 		if (MI.state_out == right_circle)
 		{
