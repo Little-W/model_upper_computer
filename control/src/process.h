@@ -103,7 +103,7 @@ public:
 	void init(bool complete);//初始化
 	void update_image();//帧处理
 	void state_judge();	//状态判断
-	void update_control(float& kp, float& kd, float& ki, int& dv);
+	void update_control(float& kp, float& kd, float& ki, int& dv,float& slow_down_kd);
 
 	void find_edge_point();    //搜索边界点
 	void find_end_point(); //搜索断点

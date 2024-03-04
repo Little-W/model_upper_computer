@@ -29,6 +29,7 @@ std::chrono::time_point<std::chrono::high_resolution_clock> start_time_stamp;
 bool disable_motor = false;
 bool direct_motor_power_ctrl = false;
 float kp, kd, ki;
+float slow_down_kd;
 int dv;
 float angle_deviation = 0;
 float speed_deviation = 0;
@@ -197,7 +198,7 @@ int main()
 		cur_slope = MI.get_slope_near();
 		//更新当前状态
 		MI.state_judge();
-		MI.update_control(kp, kd, ki, dv);
+		MI.update_control(kp, kd, ki, dv,slow_down_kd);
 
 		AC.reset(kp, kd, ki);
 

@@ -439,7 +439,7 @@ void MainImage::state_judge()
 	}
 }
 
-void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
+void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& slow_down_kd)
 {
 	switch (state_out) {
 	case garage_out: {
@@ -447,6 +447,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 		kd = re.start.kd;
 		ki = re.start.ki;
 		dv = re.start.dv;
+		slow_down_kd = re.main.slow_down_kd;
 		return;
 	}
 	case straight: {
@@ -454,20 +455,44 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 		kd = re.main.kd;
 		ki = re.main.ki;
 		dv = re.main.dv;
+		slow_down_kd = re.main.slow_down_kd;
+		return;
+	}
+	case turn_state: {
+		switch (state_turn_state) {
+		case turn_slow_down: {
+			kp = re.main.kp;
+			kd = re.main.kd;
+			ki = re.main.ki;
+			dv = re.main.dv;
+			slow_down_kd = re.turn.slow_down_kd;
+			return;
+		}
+		case turn_inside: {
+			kp = re.main.kp;
+			kd = re.main.kd;
+			ki = re.main.ki;
+			slow_down_kd = re.turn.slow_down_kd;
+			return;
+		}
+		case turn_out: {
+			kp = re.main.kp;
+			kd = re.main.kd;
+			ki = re.main.ki;
+			slow_down_kd = re.turn.slow_down_kd;
+			return;
+		}
+		}
 		return;
 	}
 	case right_circle: {
-		kp = re.r_circle.kp;
-		kd = re.r_circle.kd;
-		ki = re.r_circle.ki;
-		dv = re.r_circle.dv;
+		slow_down_kd = re.r_circle.circle_slow_down_kd;
+		circle_pid_update(state_r_circle,kp,kd,ki);
 		return;
 	}
 	case left_circle: {
-		kp = re.l_circle.kp;
-		kd = re.l_circle.kd;
-		ki = re.l_circle.ki;
-		dv = re.l_circle.dv;
+		slow_down_kd = re.l_circle.circle_slow_down_kd;
+		circle_pid_update(state_l_circle,kp,kd,ki);
 		return;
 	}
 	case repair_find: {
@@ -475,6 +500,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 		kd = re.repair.kd;
 		ki = re.repair.ki;
 		dv = re.repair.dv;
+		slow_down_kd = re.main.slow_down_kd;
 		return;
 	}
 	case farm_find: {
@@ -482,6 +508,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 		kd = re.farm.kd;
 		ki = re.farm.ki;
 		dv = re.farm.dv;
+		slow_down_kd = re.main.slow_down_kd;
 		return;
 	}
 	case hump_find: {
@@ -489,6 +516,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 		kd = re.hump.kd;
 		ki = re.hump.ki;
 		dv = re.hump.dv;
+		slow_down_kd = re.main.slow_down_kd;
 		return;
 	}
 	case garage_find: {
@@ -496,6 +524,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 		kd = re.zebra.kd;
 		ki = re.zebra.ki;
 		dv = re.zebra.dv;
+		slow_down_kd = re.main.slow_down_kd;
 		return;
 	}
 	case hill_find: {
@@ -503,6 +532,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv)
 		kd = re.hill.kd;
 		ki = re.hill.ki;
 		dv = re.hill.dv;
+		slow_down_kd = re.main.slow_down_kd;
 		return;
 	}
 	}
