@@ -92,14 +92,24 @@ int main()
 
 	#pragma region 串口
 	//尝试开启串口
-	try {
-		ser.setPort("/dev/ttyUSB0");
-		ser.setBaudrate(115200);
-		serial::Timeout out = serial::Timeout::simpleTimeout(1000);
-		ser.setTimeout(out);
-		ser.open();
+	bool ser_ok = false;
+	int ser_index = 0;
+	while(!(ser_ok || ser_index > 10))
+	{
+		try {
+			ser.setPort("/dev/ttyUSB" + to_string(ser_index));
+			ser.setBaudrate(115200);
+			serial::Timeout out = serial::Timeout::simpleTimeout(1000);
+			ser.setTimeout(out);
+			ser.open();
+			ser_ok = true;
+		}
+		catch (serial::IOException& e) {
+			ser_index ++;
+		}
 	}
-	catch (serial::IOException& e) {
+	if(!ser_ok)
+	{
 		cerr << "Unable to open port!" << endl;
 		return -1;
 	}

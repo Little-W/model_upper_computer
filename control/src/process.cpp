@@ -10,6 +10,7 @@ bool r_circle_use = true;
 bool l_circle_use = true;
 bool l_circle_big_circle = true;
 bool r_circle_big_circle = true;
+bool video_ok = false;
 
 Mat get_frame(VideoCapture cap) {
 	Mat frame;
@@ -107,9 +108,20 @@ ImageStorage::ImageStorage()
 #if USE_VIDEO == 1
 	cap.open("./sample.avi");//这个路径就是当前路径的意思
 #else
-	cap.open("/dev/video0", cv::CAP_V4L2);
+	int video_index = 0;
+	while(!(video_ok || video_index > 10))
+	{
+		cap.open("/dev/video" + to_string(video_index), cv::CAP_V4L2);
+		if (!cap.isOpened()) {
+			video_index ++;
+		}
+		else
+		{
+			video_ok = true;
+		}
+	}
 #endif
-	if (!cap.isOpened()) {
+	if (!video_ok) {
 		std::cout << "An error occured!!!" << std::endl;
 	}
 	cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));  //'M', 'J', 'P', 'G'
