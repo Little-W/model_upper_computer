@@ -84,7 +84,7 @@ public:
 	uchar state_in_garage;
 	uchar state_last;
 	uchar state_hill;
-
+	uchar state_turn_state;
 	Reader re;
 	ImageStorage store;
 

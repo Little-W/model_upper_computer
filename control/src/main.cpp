@@ -175,7 +175,7 @@ int main()
 		MI.last_enc_speed = MI.enc_speed;
 		MI.enc_speed = smoothed_real_speed_enc;
 		//只有在straight状态下识别AI元素
-		if (MI.state_out == straight)
+		if (MI.state_out == straight || MI.state_out == turn_state)
 		{
 			semP(result_sem);
 			//开启AI识别
@@ -212,6 +212,7 @@ int main()
 		switch (MI.state_out)
 		{
 		case straight:
+		case turn_state:
 		{
 			MI.mend_trunk();
 			break;
@@ -688,6 +689,28 @@ int main()
 				speed_result = Re.end.v_right_garage.second;
 			}
 		}
+		else if(MI.state_out == turn_state)
+		{
+			angle_result = AC.output(Re.turn.angle_ctrl_deviation_coef * angle_deviation +
+								     Re.turn.angle_ctrl_slope_coef * cur_slope);
+			if(MI.state_out == turn_slow_down)
+			{
+				// disable_motor = false;
+				if(speed_result > Re.turn.speed_in || speed_result == 0)
+					speed_result = Re.turn.speed_in;
+				cout <<"speed in" << Re.turn.speed_in << endl;
+			}
+			else if(MI.state_out == turn_inside)
+			{
+				speed_result = SC_turn.output(Re.turn.speed_ctrl_deviation_coef * speed_deviation + 
+									 	 Re.turn.speed_ctrl_slope_coef * cur_slope);
+			}
+			else 
+			{
+				speed_result = SC.output(Re.main.deviation_coef * speed_deviation + 
+									 Re.main.slope_coef * cur_slope);
+			}
+		}
 		else {
 			float angle_result_tmp = 0;
 			angle_result_tmp = AC.output(angle_deviation);
@@ -737,6 +760,7 @@ int main()
 		switch (MI.state_out)
 		{
 			case straight: cout << "straight" << endl; break;
+			case turn_state: cout << "turn_state" << endl; break;
 			case garage_out: cout << "garage_out" << endl; break;
 			case hill_find: cout << "hill_find" << endl; break;
 			case right_circle:

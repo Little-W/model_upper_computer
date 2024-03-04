@@ -146,6 +146,7 @@ Reader::Reader(string path) {
     n_end=root["end"];
     n_zebra=root["zebra"];
     n_hill=root["hill"];
+    n_turn=root["turn"];
     //set
     set.video_save=n_set.get<bool>("video_save");
     set.color=n_set.get<bool>("color");
@@ -425,6 +426,36 @@ Reader::Reader(string path) {
     hill.mid_bot_y = n_hill.get<int>("mid_bot_y");
     hill.mid_top_y = n_hill.get<int>("mid_top_y");
     hill.frame = n_hill.get<int>("frame");
+
+    //turn
+    turn.turn_curvature_thresh = n_turn.get<float>("turn_curvature_thresh");
+    turn.turn_deviation_thresh = n_turn.get<float>("turn_deviation_thresh");
+    turn.turn_slope_thresh = n_turn.get<float>("turn_slope_thresh");
+    turn.turn_out_slope_thresh = n_turn.get<float>("turn_out_slope_thresh");
+    turn.speed_ceiling = n_turn.get<float>("speed_ceiling");
+    turn.speed_ground = n_turn.get<float>("speed_ground");
+    turn.speed_in = n_turn.get<float>("speed_in");
+    turn.motor_power = n_turn.get<float>("motor_power");
+    turn.speed_ctrl_deviation_coef = n_turn.get<float>("speed_ctrl_deviation_coef");
+    turn.speed_ctrl_slope_coef = n_turn.get<float>("speed_ctrl_slope_coef");
+    turn.angle_ctrl_deviation_coef = n_turn.get<float>("angle_ctrl_deviation_coef");
+    turn.angle_ctrl_slope_coef = n_turn.get<float>("angle_ctrl_slope_coef");
+    turn.sc_kp = n_turn.get<float>("sc_kp");
+    turn.sc_ki = n_turn.get<float>("sc_ki");    
+    turn.sc_kd = n_turn.get<float>("sc_kd");    
+    turn.dy_speed_bezier_p0_ctrl_x = n_turn.get<float>("dy_speed_bezier_p0_ctrl_x");    
+    turn.dy_speed_bezier_p0_ctrl_y = n_turn.get<float>("dy_speed_bezier_p0_ctrl_y");
+    turn.dy_speed_bezier_p1_ctrl_x = n_turn.get<float>("dy_speed_bezier_p1_ctrl_x");    
+    turn.dy_speed_bezier_p1_ctrl_y = n_turn.get<float>("dy_speed_bezier_p1_ctrl_y");
+
+    turn.slow_down_kd = n_turn.get<float>("slow_down_kd"); 
+    turn.max_v_diff = n_turn.get<float>("max_v_diff");
+    turn.min_v_diff = n_turn.get<float>("min_v_diff");
+
+    turn.speed_delta_bezier_p0_ctrl_x = n_turn.get<float>("speed_delta_bezier_p0_ctrl_x");
+    turn.speed_delta_bezier_p0_ctrl_y = n_turn.get<float>("speed_delta_bezier_p0_ctrl_y");
+    turn.speed_delta_bezier_p1_ctrl_x = n_turn.get<float>("speed_delta_bezier_p1_ctrl_x");
+    turn.speed_delta_bezier_p1_ctrl_y = n_turn.get<float>("speed_delta_bezier_p1_ctrl_y");
 }
 
 struct Reader::pidv Reader::get_pidv(int state_out, int state_in) {

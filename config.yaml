@@ -115,6 +115,34 @@ main:
     v_right_circle: [60,90] #[60,70]
     v_left_circle: [175,90] #[175,70]
 
+turn:
+    turn_deviation_thresh: 30
+    turn_curvature_thresh: 0.15
+    turn_slope_thresh: 0.7
+    turn_out_slope_thresh : 0.55
+    speed_ground: 8
+    speed_ceiling: 16
+    speed_in: 9
+    motor_power: 25
+    speed_ctrl_slope_coef: 15
+    speed_ctrl_deviation_coef: 0.9
+    angle_ctrl_slope_coef: 1
+    angle_ctrl_deviation_coef: 1
+    sc_kp: 0.9
+    sc_ki: 0
+    sc_kd: 5
+    dy_speed_bezier_p0_ctrl_x: 24.3
+    dy_speed_bezier_p0_ctrl_y: 9.9
+    dy_speed_bezier_p1_ctrl_x: 44
+    dy_speed_bezier_p1_ctrl_y: 10.9
+    max_v_diff: 70 #40
+    min_v_diff: 5
+    slow_down_kd: 0.4
+    speed_delta_bezier_p0_ctrl_x: 201.5
+    speed_delta_bezier_p0_ctrl_y: 24.4
+    speed_delta_bezier_p1_ctrl_x: 165
+    speed_delta_bezier_p1_ctrl_y: 102.4
+    
 right_circle:
     kp: 25 #8 #1.6
     ki: 0

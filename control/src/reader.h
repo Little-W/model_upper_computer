@@ -24,6 +24,8 @@
 #define hump_find 6
 #define barn_find 7
 #define farm_find 8
+#define turn_state 9
+
 #define repair_in_find 11
 #define repair_out_out 12
 #define farm_in_find 14
@@ -64,6 +66,10 @@
 #define garage_inside 44
 #define garage_in_before 45
 
+#define turn_slow_down 47
+#define turn_inside 48
+#define turn_out 49
+
 typedef std::pair<int, int> pii;
 
 float expr2f(const std::string& expr);//字符串转浮点
@@ -103,6 +109,7 @@ private:
     BaseReader n_end;
     BaseReader n_zebra;
     BaseReader n_hill;
+    BaseReader n_turn;
 public:
     struct pidv
     {
@@ -339,6 +346,35 @@ public:
         int mid_top_y;
         int frame;
     }hill;
+    struct{
+        float turn_curvature_thresh;
+        float turn_deviation_thresh;
+        float turn_slope_thresh;
+        float turn_out_slope_thresh;
+        float speed_ceiling;
+        float speed_ground;
+        float speed_in;
+        int motor_power;
+        float speed_ctrl_slope_coef;
+        float speed_ctrl_deviation_coef;
+        float angle_ctrl_slope_coef;
+        float angle_ctrl_deviation_coef;
+        float sc_kp;
+        float sc_ki;
+        float sc_kd;
+        float dy_speed_bezier_p0_ctrl_x;
+        float dy_speed_bezier_p0_ctrl_y;
+        float dy_speed_bezier_p1_ctrl_x;
+        float dy_speed_bezier_p1_ctrl_y;        
+        float slow_down_kd;
+        float max_v_diff;
+        float min_v_diff;
+        float speed_delta_bezier_p0_ctrl_x;
+        float speed_delta_bezier_p0_ctrl_y;
+        float speed_delta_bezier_p1_ctrl_x;
+        float speed_delta_bezier_p1_ctrl_y;
+    }turn;
+    
 };
 
 #endif

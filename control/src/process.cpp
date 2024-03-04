@@ -312,6 +312,7 @@ MainImage::MainImage() : re("./config.yaml")
 	state_out = garage_out;
 	state_r_circle = right_circle_in_find;
 	state_l_circle = left_circle_in_find;
+	state_turn_state = turn_slow_down;
 	state_repair = repair_in_find;
 	state_farm = farm_in_find;
 	state_hump = hump_in_find;
@@ -396,6 +397,17 @@ void MainImage::state_judge()
 		ai_pig = false;
 		if (state_hump != hump_out)state_out = hump_find;
 	}
+	else if (ai_bomb) {
+		ai_bomb = false;
+	}
+	else if (ai_right_garage){
+		ai_right_garage = false;
+		if (state_right_garage != right_garage_out)state_out = right_garage_find;
+	}
+	else if (ai_left_garage){
+		ai_left_garage = false;
+		if (state_left_garage != left_garage_out)state_out = left_garage_find;
+	}
 	if (state_out == straight)
 	{
 		if (re.set.zebra_detect) {
@@ -431,6 +443,61 @@ void MainImage::state_judge()
 			if (f) {
 				state_out = left_circle;
 			}
+		}
+		else if(smoothed_curvature_near > re.turn.turn_curvature_thresh || 
+				abs(slope) >= re.turn.turn_slope_thresh || 
+				abs(angle_deviation) > re.turn.turn_deviation_thresh)
+		{
+			state_out = turn_state;
+			state_turn_state = turn_inside;
+		}
+		else if(smoothed_curvature_far > re.turn.turn_curvature_thresh)
+		{
+			state_out = turn_state;
+			state_turn_state = turn_slow_down;
+		}
+	}
+	else if(state_out == turn_state)
+	{
+		if(smoothed_curvature_near < re.turn.turn_curvature_thresh && 
+				smoothed_curvature_far < re.turn.turn_curvature_thresh && 
+				abs(slope) < re.turn.turn_out_slope_thresh)
+		{
+			state_out = straight;
+		}
+		else if (r_circle_use && right_end_point.size() >= 5 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)
+		{
+			bool f = true;
+			int i;
+			for (i = right_end_point[1].y - 10; i > right_end_point[4].y - 1; i--) {
+				if (!(exist_left_edge_point[i] && abs(left_edge_point[i] - left_edge_point[i + 1]) < 3)) {
+					f = false;
+					break;
+				}
+			}
+			if (f) {
+				state_out = right_circle;
+			}
+		}
+		else if (l_circle_use && left_end_point.size() >= 5 && left_branch_num >= 2 && abs(left_end_point[1].y - left_end_point[4].y) > 35) {
+			bool f = true;
+			int i;
+			for (i = left_end_point[1].y - 10; i > left_end_point[4].y - 1; i--) {
+				if (!(exist_right_edge_point[i] && abs(right_edge_point[i] - right_edge_point[i + 1]) < 3)) {
+					f = false;
+					break;
+				}
+			}
+			if (f) {
+				state_out = left_circle;
+			}
+		}
+		else if(smoothed_curvature_near > re.turn.turn_curvature_thresh || 
+		    	abs(slope) >= re.turn.turn_slope_thresh || 
+				abs(angle_deviation) > re.turn.turn_deviation_thresh)
+		{
+			state_out = turn_state;
+			state_turn_state = turn_inside;
 		}
 	}
 	else if (state_out == garage_find) {
