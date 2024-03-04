@@ -1,0 +1,6 @@
+bomb
+bridge
+evil
+patient
+thief
+tumble

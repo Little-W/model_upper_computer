@@ -1,0 +1,302 @@
+{
+  "nodes": [
+    {
+      "op": "null", 
+      "name": "image", 
+      "inputs": []
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_fused__copy", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_fused__copy", 
+        "hash": "7aaf13367fd47feb"
+      }, 
+      "inputs": [
+        [
+          0, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_nna_main_0", 
+      "attrs": {
+        "num_outputs": "4", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_nna_main_0"
+      }, 
+      "inputs": [
+        [
+          1, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_fused__copy_1", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_fused__copy_1", 
+        "hash": "a97b0a767e032857"
+      }, 
+      "inputs": [
+        [
+          2, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_fused__copy_2", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_fused__copy_2", 
+        "hash": "5cd7e85831f2f57c"
+      }, 
+      "inputs": [
+        [
+          2, 
+          1, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_fused__copy_3", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_fused__copy_3", 
+        "hash": "7b6758ffa0b7bd2d"
+      }, 
+      "inputs": [
+        [
+          2, 
+          2, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_fused__copy_4", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_fused__copy_4", 
+        "hash": "7a036fecb27bea98"
+      }, 
+      "inputs": [
+        [
+          2, 
+          3, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_fused_concatenate_1", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "2", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_fused_concatenate_1", 
+        "hash": "598f6c676beda6bd"
+      }, 
+      "inputs": [
+        [
+          5, 
+          0, 
+          0
+        ], 
+        [
+          6, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_fused__copy_5", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_fused__copy_5", 
+        "hash": "1f943d09db119397"
+      }, 
+      "inputs": [
+        [
+          7, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_nna_main_212", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_nna_main_212"
+      }, 
+      "inputs": [
+        [
+          8, 
+          0, 
+          0
+        ]
+      ]
+    }, 
+    {
+      "op": "tvm_op", 
+      "name": "tvmgen_default_fused__copy_6", 
+      "attrs": {
+        "num_outputs": "1", 
+        "num_inputs": "1", 
+        "flatten_data": "0", 
+        "func_name": "tvmgen_default_fused__copy_6", 
+        "hash": "4ebb05bccac97243"
+      }, 
+      "inputs": [
+        [
+          9, 
+          0, 
+          0
+        ]
+      ]
+    }
+  ], 
+  "arg_nodes": [0], 
+  "heads": [
+    [
+      3, 
+      0, 
+      0
+    ], 
+    [
+      4, 
+      0, 
+      0
+    ], 
+    [
+      10, 
+      0, 
+      0
+    ]
+  ], 
+  "attrs": {
+    "dltype": [
+      "list_str", 
+      [
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32", 
+        "float32"
+      ]
+    ], 
+    "device_index": [
+      "list_int", 
+      [
+        1, 
+        17, 
+        17, 
+        17, 
+        17, 
+        17, 
+        1, 
+        1, 
+        1, 
+        1, 
+        1, 
+        17, 
+        17, 
+        1
+      ]
+    ], 
+    "storage_id": [
+      "list_int", 
+      [
+        0, 
+        1, 
+        2, 
+        3, 
+        4, 
+        5, 
+        6, 
+        7, 
+        8, 
+        9, 
+        10, 
+        5, 
+        4, 
+        8
+      ]
+    ], 
+    "shape": [
+      "list_shape", 
+      [
+        [1, 3, 224, 224], 
+        [1, 3, 224, 224], 
+        [1, 33, 7, 7], 
+        [1, 33, 14, 14], 
+        [1, 128, 28, 28], 
+        [1, 256, 28, 28], 
+        [1, 33, 7, 7], 
+        [1, 33, 14, 14], 
+        [1, 128, 28, 28], 
+        [1, 256, 28, 28], 
+        [1, 384, 28, 28], 
+        [1, 384, 28, 28], 
+        [1, 33, 28, 28], 
+        [1, 33, 28, 28]
+      ]
+    ]
+  }, 
+  "node_row_ptr": [
+    0, 
+    1, 
+    2, 
+    6, 
+    7, 
+    8, 
+    9, 
+    10, 
+    11, 
+    12, 
+    13, 
+    14
+  ]
+}

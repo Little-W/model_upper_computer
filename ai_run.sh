@@ -1,3 +1,6 @@
 #!/usr/bin/env sh
 
-nice -n -18 ./ai/build/detection > ai.txt
+
+cd ./ai/build/
+nice -n -18 ./detection > ../../ai.txt
+# gdb --args ./new_ai/build/detection
