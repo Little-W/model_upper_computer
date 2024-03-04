@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -20,6 +20,8 @@ AngleControl AC(Re.main.kp, Re.main.kd, Re.main.ki, Re.main.max_ag, Re.main.min_
 SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v);
 
 std::chrono::time_point<std::chrono::high_resolution_clock> start_time_stamp;
+bool disable_motor = false;
+bool direct_motor_power_ctrl = false;
 float kp, kd, ki;
 int dv;
 float deviation = 0;

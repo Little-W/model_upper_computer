@@ -1,4 +1,5 @@
 #include "comm.h"
+#include "pid.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -72,19 +73,36 @@ void encode_and_send(void)
 	uint angle_result_tmp = 0;
     unsigned char speed_crc = 0, angle_crc = 0, angle_crc_p2 = 0;
     unsigned char crc_data[2];
+    unsigned char speed_code_p1,speed_code_p2,servo_code_p1,servo_code_p2;
 
     std::chrono::time_point<std::chrono::high_resolution_clock> uart_trans_begin_ts = std::chrono::high_resolution_clock::now();
 
 	//使用18th的[0,250]调出来的pid，拓展到+-1250
 	speed_result_tmp = ENC_SPEED_SCALE * (speed_result < 0 ? -speed_result : speed_result);
-    if(speed_result_tmp > MAX_SPEED_VAL)   speed_result_tmp = MAX_SPEED_VAL;
+    if(disable_motor)
+    {
+        speed_result_tmp = 777;
+        speed_code_p1 = (speed_result_tmp >> 6) & 0x1f;
+	    speed_code_p2 = speed_result_tmp & 0x3f;
+        // cout << "disable_motor" << endl;
+    }
+    else if(direct_motor_power_ctrl)
+    {
+        speed_result_tmp += 1000;
+        speed_code_p1 = (speed_result_tmp >> 6) & 0x1f;
+        if(speed_result < 0) speed_code_p1 |= 0x20;
+	    speed_code_p2 = speed_result_tmp & 0x3f;        
+    }
+    else
+    {
+        if(speed_result_tmp > MAX_SPEED_VAL)   speed_result_tmp = MAX_SPEED_VAL;
+        speed_code_p1 = (speed_result_tmp >> 6) & 0x1f;
+	    if(speed_result < 0) speed_code_p1 |= 0x20;
+	    speed_code_p2 = speed_result_tmp & 0x3f;
+    }
+    
 	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
-
 	if(angle_result_tmp > MAX_ANGLE_VAL) angle_result_tmp = MAX_ANGLE_VAL;
-	unsigned char speed_code_p1,speed_code_p2,servo_code_p1,servo_code_p2;
-    speed_code_p1 = (speed_result_tmp >> 6) & 0x1f;
-	if(speed_result < 0) speed_code_p1 |= 0x20;
-	speed_code_p2 = speed_result_tmp & 0x3f;
 
 	servo_code_p1 = (angle_result_tmp >> 6) & 0x1f;
 	if(angle_result < 0) servo_code_p1 |= 0x20;

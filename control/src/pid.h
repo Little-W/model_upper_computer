@@ -11,7 +11,8 @@ typedef float data_t;
 // 使用 float 作为输出类型
 typedef float out_t;
 extern float cur_kp;
-extern float deviation;
+extern bool disable_motor;
+extern bool direct_motor_power_ctrl;
 
 class PartPdCtrl {
 private:
