@@ -229,6 +229,9 @@ Reader::Reader(string path) {
     main.v_left_circle = n_main.get<pii>("v_left_circle");
     main.left_ray = n_main.get<float>("left_ray");
     main.right_ray = n_main.get<float>("right_ray");
+    main.deviation_coef = n_main.get<float>("deviation_coef");
+    main.slope_coef = n_main.get<float>("slope_coef");
+
 
     //right_circle
     r_circle.kp = n_right_circle.get<float>("kp");

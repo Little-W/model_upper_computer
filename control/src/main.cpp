@@ -703,7 +703,8 @@ int main()
 			{
 				angle_result = angle_result_tmp;
 			}
-			speed_result = SC.output(deviation);
+			speed_result = SC.output(Re.main.deviation_coef * speed_deviation + 
+									 Re.main.slope_coef * cur_slope);
 		}
 
 		//通过增量提升刹车性能

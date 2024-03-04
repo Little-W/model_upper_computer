@@ -197,6 +197,8 @@ public:
         int slope_forward_dist_near;
         int slope_forward_dist_far;
         int slope_direction_forward_dist;
+        float slope_coef;
+        float deviation_coef;
     }main;
     struct {
         float kp;
