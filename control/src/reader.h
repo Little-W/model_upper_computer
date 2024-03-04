@@ -131,16 +131,19 @@ public:
     }set;
     struct {
         bool garage_start;
-        int enc_forward_threshold;
-        float enc_forward_dist_coef;
-        float enc_forward_dist_exp;
-        int max_enc_forward_dist;
-        float enc_up_scope_coef;
-        float enc_up_scope_exp;
-        int max_enc_up_scope;
-        float enc_forward_coef1_coef;
-        float enc_forward_coef1_exp;
-        float max_enc_forward_coef1;
+        int angle_enc_forward_threshold;
+        float angle_enc_forward_dist_coef;
+        float angle_enc_forward_dist_exp;
+        int angle_max_enc_forward_dist;
+        float angle_dy_forward_dist_kp;
+        float angle_dy_forward_dist_kd;
+
+        int speed_enc_forward_threshold;
+        float speed_enc_forward_dist_coef;
+        float speed_enc_forward_dist_exp;
+        int speed_max_enc_forward_dist;
+        float speed_dy_forward_dist_kp;
+        float speed_dy_forward_dist_kd;
         float dy_kp_threshold;
         float dy_kp_coef;
         float dy_kp_exp;
@@ -173,6 +176,7 @@ public:
         bool second_lap;
         float center_coef;
         int forward_dist;
+        int speed_forward_dist;
         int up_scope;
         int down_scope;
         float forward_coef1;
@@ -194,6 +198,15 @@ public:
         int dv;
         float speed;
         int circle_dist;
+        int max_dy_forward_dist;
+        int min_dy_forward_dist;
+        float angle_forward_dist_kp;
+        float angle_forward_dist_kd;
+        float dy_forward_dist_coef_up;
+        float dy_forward_dist_exp_up;
+        float dy_forward_dist_coef_down;
+        float dy_forward_dist_exp_down;
+        float circle_slow_down_kd;
         bool use;
         bool big_circle;
         int count_start;

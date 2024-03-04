@@ -46,6 +46,8 @@ public:
 	int count_circle;					//圈数
 
 	int deviation_thresh;
+	int angle_new_forward_dist;
+	int speed_deviation_thresh;
 	float cur_kp_show;
 
 	bool zebra_far_find;
@@ -77,6 +79,10 @@ public:
 
 	Reader re;
 	ImageStorage store;
+
+	int enc_speed;
+	int last_enc_speed;
+	float angle_deviation;
 
 	MainImage();
 	void init(bool complete);//初始化
@@ -114,7 +120,11 @@ public:
 
 	void show(float dev, float angle_result, float speed, int current_speed, bool c = true, bool l = false, bool r = false, bool l_e = true, bool r_e = true, bool l_c = false, bool r_c = false, bool c_c = false);//总显示方案
 
-	float MidlineDeviation(int enc_speed);
+	float AngelDeviation(void);
+	float SpeedDeviation(void);
+	float dy_forward_dist_up(float kp, float kd, float coef, float exp, float bias, float speed_thresh, float max);
+	float dy_forward_dist_up_and_down(float kp, float kd, float coef_up, float coef_down, float exp_up, 
+									  float exp_down, float bias, float speed_thresh, float max, float min);
 };
 
 bool j_right_circle_in_circle(const MainImage& mi, uchar& state_in);

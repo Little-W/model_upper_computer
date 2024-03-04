@@ -161,16 +161,20 @@ Reader::Reader(string path) {
     set.ai_h=n_set.get<int>("ai_h");
     //main
     main.garage_start = n_main.get<bool>("garage_start");
-    main.enc_forward_threshold = n_main.get<int>("enc_forward_threshold");
-    main.enc_forward_dist_coef = n_main.get<float>("enc_forward_dist_coef");
-    main.enc_forward_dist_exp = n_main.get<float>("enc_forward_dist_exp");
-    main.max_enc_forward_dist = n_main.get<int>("max_enc_forward_dist");
-    main.enc_up_scope_coef = n_main.get<float>("enc_up_scope_coef");
-    main.enc_up_scope_exp = n_main.get<float>("enc_up_scope_exp");
-    main.max_enc_up_scope = n_main.get<int>("max_enc_up_scope");
-    main.enc_forward_coef1_coef = n_main.get<float>("enc_forward_coef1_coef");
-    main.enc_forward_coef1_exp = n_main.get<float>("enc_forward_coef1_exp");
-    main.max_enc_forward_coef1 = n_main.get<float>("max_enc_forward_coef1");
+    main.angle_enc_forward_threshold = n_main.get<int>("angle_enc_forward_threshold");
+    main.angle_enc_forward_dist_coef = n_main.get<float>("angle_enc_forward_dist_coef");
+    main.angle_enc_forward_dist_exp = n_main.get<float>("angle_enc_forward_dist_exp");
+    main.angle_max_enc_forward_dist = n_main.get<int>("angle_max_enc_forward_dist");
+    main.angle_dy_forward_dist_kp = n_main.get<float>("angle_dy_forward_dist_kp");
+    main.angle_dy_forward_dist_kd = n_main.get<float>("angle_dy_forward_dist_kd");
+
+    main.speed_enc_forward_threshold = n_main.get<int>("speed_enc_forward_threshold");
+    main.speed_enc_forward_dist_coef = n_main.get<float>("speed_enc_forward_dist_coef");
+    main.speed_enc_forward_dist_exp = n_main.get<float>("speed_enc_forward_dist_exp");
+    main.speed_max_enc_forward_dist = n_main.get<int>("speed_max_enc_forward_dist");
+    main.speed_dy_forward_dist_kp = n_main.get<float>("speed_dy_forward_dist_kp");
+    main.speed_dy_forward_dist_kd = n_main.get<float>("speed_dy_forward_dist_kd");
+
     main.dy_kp_threshold = n_main.get<float>("dy_kp_threshold");
     main.dy_kp_coef = n_main.get<float>("dy_kp_coef");
     main.dy_kp_exp = n_main.get<float>("dy_kp_exp");
@@ -211,6 +215,7 @@ Reader::Reader(string path) {
     main.second_lap = n_main.get<bool>("second_lap");
     main.center_coef = n_main.get<float>("center_coef");
     main.forward_dist = n_main.get<int>("forward_dist");
+    main.speed_forward_dist = n_main.get<int>("speed_forward_dist");
     main.up_scope = n_main.get<int>("up_scope");
     main.down_scope = n_main.get<int>("down_scope");
     main.forward_coef1 = n_main.get<float>("forward_coef1");
@@ -226,6 +231,15 @@ Reader::Reader(string path) {
     r_circle.dv = n_right_circle.get<int>("dv");
     r_circle.speed = n_right_circle.get<float>("speed"); 
     r_circle.circle_dist = n_right_circle.get<int>("circle_dist");
+    r_circle.max_dy_forward_dist = n_right_circle.get<int>("max_dy_forward_dist");
+    r_circle.min_dy_forward_dist = n_right_circle.get<int>("min_dy_forward_dist");
+    r_circle.angle_forward_dist_kp = n_right_circle.get<float>("angle_forward_dist_kp");  
+    r_circle.angle_forward_dist_kd = n_right_circle.get<float>("angle_forward_dist_kd");
+    r_circle.dy_forward_dist_coef_up = n_right_circle.get<float>("dy_forward_dist_coef_up");
+    r_circle.dy_forward_dist_exp_up = n_right_circle.get<float>("dy_forward_dist_exp_up");
+    r_circle.dy_forward_dist_coef_down = n_right_circle.get<float>("dy_forward_dist_coef_down");
+    r_circle.dy_forward_dist_exp_down = n_right_circle.get<float>("dy_forward_dist_exp_down");
+    r_circle.circle_slow_down_kd = n_right_circle.get<float>("circle_slow_down_kd");
     r_circle.use = n_right_circle.get<bool>("use");
     r_circle.big_circle = n_right_circle.get<bool>("big_circle");
     r_circle.count_start = n_right_circle.get<int>("count_start");
@@ -247,6 +261,15 @@ Reader::Reader(string path) {
     l_circle.dv = n_left_circle.get<int>("dv");
     l_circle.speed = n_left_circle.get<float>("speed");
     l_circle.circle_dist = n_left_circle.get<int>("circle_dist");
+    l_circle.max_dy_forward_dist = n_left_circle.get<int>("max_dy_forward_dist");
+    l_circle.min_dy_forward_dist = n_left_circle.get<int>("min_dy_forward_dist");
+    l_circle.angle_forward_dist_kp = n_left_circle.get<float>("angle_forward_dist_kp");  
+    l_circle.angle_forward_dist_kd = n_left_circle.get<float>("angle_forward_dist_kd");
+    l_circle.dy_forward_dist_coef_up = n_left_circle.get<float>("dy_forward_dist_coef_up");
+    l_circle.dy_forward_dist_exp_up = n_left_circle.get<float>("dy_forward_dist_exp_up");
+    l_circle.dy_forward_dist_coef_down = n_left_circle.get<float>("dy_forward_dist_coef_down");
+    l_circle.dy_forward_dist_exp_down = n_left_circle.get<float>("dy_forward_dist_exp_down");
+    l_circle.circle_slow_down_kd = n_left_circle.get<float>("circle_slow_down_kd");
     l_circle.use = n_left_circle.get<bool>("use");
     l_circle.big_circle = n_left_circle.get<bool>("big_circle");
     l_circle.count_start = n_left_circle.get<int>("count_start");

@@ -30,7 +30,8 @@ bool disable_motor = false;
 bool direct_motor_power_ctrl = false;
 float kp, kd, ki;
 int dv;
-float deviation = 0;
+float angle_deviation = 0;
+float speed_deviation = 0;
 float speed_result;
 float angle_result = 0;
 int circle_inside_count = 0;
@@ -160,6 +161,8 @@ int main()
 		{
 			smoothed_real_speed_enc = real_speed_enc;
 		}
+		MI.last_enc_speed = MI.enc_speed;
+		MI.enc_speed = smoothed_real_speed_enc;
 		//只有在straight状态下识别AI元素
 		if (MI.state_out == straight)
 		{
@@ -579,7 +582,8 @@ int main()
 			MI.find_center();
 		}
 		//运动控制
-		deviation = MI.MidlineDeviation(smoothed_real_speed_enc);
+		angle_deviation = MI.AngelDeviation();
+		speed_deviation = MI.SpeedDeviation();
 
 		if (MI.state_out == right_circle)
 		{
@@ -591,7 +595,7 @@ int main()
 			}
 			else
 			{
-				angle_result = AC.output(deviation);
+				angle_result = AC.output(angle_deviation);
 				speed_result = Re.r_circle.speed;
 			}
 		}
@@ -604,16 +608,16 @@ int main()
 			}
 			else
 			{
-				angle_result = AC.output(deviation);
+				angle_result = AC.output(angle_deviation);
 				speed_result = Re.l_circle.speed;
 			}
 		}
 		else if (MI.state_out == repair_find) {
-			angle_result = AC.output(deviation);
+			angle_result = AC.output(angle_deviation);
 			speed_result = Re.repair.speed;
 		}
 		else if (MI.state_out == farm_find) {
-			angle_result = AC.output(deviation);
+			angle_result = AC.output(angle_deviation);
 			speed_result = Re.farm.speed;
 			if (MI.state_farm == farm_out_find)
 			{
@@ -621,11 +625,11 @@ int main()
 			}
 		}
 		else if (MI.state_out == hump_find) {
-			angle_result = AC.output(deviation);
+			angle_result = AC.output(angle_deviation);
 			speed_result = Re.hump.speed;
 		}
 		else if (MI.state_out == hill_find) {
-			angle_result = AC.output(deviation);
+			angle_result = AC.output(angle_deviation);
 			speed_result = Re.hill.speed;
 		}
 		else if (MI.state_out == garage_out) {
@@ -662,7 +666,7 @@ int main()
 		}
 		else {
 			float angle_result_tmp = 0;
-			angle_result_tmp = AC.output(deviation);
+			angle_result_tmp = AC.output(angle_deviation);
 			if((abs(angle_result - angle_result_tmp) > 500) && (angle_result * angle_result_tmp > 0))
 			{
 				angle_result = 0.9 * angle_result_tmp + 0.1 * angle_result;
@@ -782,7 +786,7 @@ int main()
 		#pragma endregion
 
 		//保存图像
-		if (Re.set.video_save) MI.show(deviation, angle_result, speed_result, real_speed_enc);
+		if (Re.set.video_save) MI.show(angle_deviation, angle_result, speed_result, real_speed_enc);
 
 		MI.store.save_num++;
 

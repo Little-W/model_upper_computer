@@ -13,6 +13,8 @@ typedef float out_t;
 extern float cur_kp;
 extern bool disable_motor;
 extern bool direct_motor_power_ctrl;
+extern float angle_deviation;
+extern float speed_deviation;
 
 class PartPdCtrl {
 private:

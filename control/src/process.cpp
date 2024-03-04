@@ -3,6 +3,7 @@
 #include "process.h"
 #include <chrono>
 #include "pid.h"
+#include "comm.h"
 
 #define USE_VIDEO 0
 
@@ -18,10 +19,58 @@ Mat get_frame(VideoCapture cap) {
 	return frame;
 }
 
-float MainImage::MidlineDeviation(int enc_speed)
+float MainImage::dy_forward_dist_up(float kp, float kd, float coef, float exp, float bias, 
+									float speed_thresh, float max)
+{
+	float speed_error = 0, last_speed_error = 0, new_forward_dist;
+	last_speed_error = last_enc_speed - speed_thresh;
+	if(enc_speed > speed_thresh)
+	{
+		speed_error = enc_speed - speed_thresh;
+		speed_error = kp * speed_error + kd * (speed_error - last_speed_error);
+		if(speed_error < 0)  speed_error = 0;
+		new_forward_dist = bias + coef * pow(speed_error,exp) / 1000.0;
+		if(new_forward_dist > max)
+		{
+			new_forward_dist = max;
+		}
+	}
+	else
+	{
+		new_forward_dist = bias;
+	}
+	return new_forward_dist;
+}
+
+float MainImage::dy_forward_dist_up_and_down(float kp, float kd, float coef_up, float coef_down, float exp_up, 
+											 float exp_down, float bias, float speed_thresh, float max, float min)
+{
+	float speed_error = 0, last_speed_error = 0, new_forward_dist;
+	last_speed_error = last_enc_speed - speed_thresh;
+	speed_error = enc_speed - speed_thresh;
+	speed_error = kp * speed_error + kd * (speed_error - last_speed_error);
+	if(speed_error >= 0)
+	{
+		new_forward_dist = bias + coef_up * pow(speed_error,exp_up) / 1000.0;
+		if(new_forward_dist > max)
+		{
+			new_forward_dist = max;
+		}
+	}
+	else
+	{
+		new_forward_dist = bias - coef_down * pow(-speed_error,exp_up) / 1000.0;
+		if(new_forward_dist < min)
+		{
+			new_forward_dist = min;
+		}
+	}
+	return new_forward_dist;
+}
+
+float MainImage::AngelDeviation(void)
 {
 	int i, j;
-	float deviation = 0;
 	int center = IMGW / 2;
 	// center += 10;
 	//int center=(IMGW/2+last_center)/2;
@@ -33,76 +82,132 @@ float MainImage::MidlineDeviation(int enc_speed)
 		for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - re.farm.up_scope; i--) {
 			sum += center_point[i];
 		}
-		deviation = re.main.forward_coef1 * (center - float(sum) / re.farm.up_scope);
+		angle_deviation = re.main.forward_coef1 * (center - float(sum) / re.farm.up_scope);
 		
 		sum = 0;
 		for (i = MainImage::deviation_thresh + re.farm.down_scope; i > MainImage::deviation_thresh; i--) {
 			sum += center_point[i];
 		}
-		deviation += re.main.forward_coef2 * (center - float(sum) / re.farm.down_scope);
-		cout << "deviation: " << deviation << endl;
+		angle_deviation += re.main.forward_coef2 * (center - float(sum) / re.farm.down_scope);
+		cout << "deviation: " << angle_deviation << endl;
 	}
 	else {
 		//速度大于阈值时对前瞻进行动态调整:forward_dist up_scope forward_coef1
 		double speed_error;
-		double new_forward_dist;
-		if(enc_speed > re.main.enc_forward_threshold)
+
+		if (state_out == right_circle) 
 		{
-			speed_error = enc_speed - re.main.enc_forward_threshold;
-			new_forward_dist = re.main.forward_dist + re.main.enc_forward_dist_coef * pow(speed_error,re.main.enc_forward_dist_exp) / 1000.0;
-			if(new_forward_dist > re.main.max_enc_forward_dist)
+			if (MI.state_r_circle == right_circle_inside_before ||
+				MI.state_r_circle == right_circle_in_circle ||
+				MI.state_r_circle == right_circle_in_strai)
 			{
-				new_forward_dist = re.main.max_enc_forward_dist;
+				MainImage::angle_new_forward_dist = 
+					dy_forward_dist_up_and_down(re.r_circle.angle_forward_dist_kp, re.r_circle.angle_forward_dist_kd,
+												re.r_circle.dy_forward_dist_coef_up, re.r_circle.dy_forward_dist_coef_down,
+												re.r_circle.dy_forward_dist_exp_up, re.r_circle.dy_forward_dist_exp_down,
+												re.r_circle.circle_dist, re.r_circle.speed * ENC_SPEED_SCALE,
+												re.r_circle.max_dy_forward_dist, re.r_circle.min_dy_forward_dist);
+				cout << "forward_dist is: " << MainImage::angle_new_forward_dist << endl;
+				MainImage::deviation_thresh = IMGH - MainImage::angle_new_forward_dist;
+			}
+			else
+			{
+				MainImage::deviation_thresh = IMGH - re.r_circle.circle_dist;
+			}
 		}
+		else if (state_out == left_circle) 
+		{
+			if (MI.state_l_circle == left_circle_inside_before ||
+				MI.state_l_circle == left_circle_in_circle ||
+				MI.state_l_circle == left_circle_in_strai)
+			{
+				MainImage::angle_new_forward_dist = 
+					dy_forward_dist_up_and_down(re.l_circle.angle_forward_dist_kp, re.l_circle.angle_forward_dist_kd,
+												re.l_circle.dy_forward_dist_coef_up, re.l_circle.dy_forward_dist_coef_down,
+												re.l_circle.dy_forward_dist_exp_up, re.l_circle.dy_forward_dist_exp_down,
+												re.l_circle.circle_dist, re.l_circle.speed * ENC_SPEED_SCALE,
+												re.l_circle.max_dy_forward_dist, re.l_circle.min_dy_forward_dist);
+				cout << "forward_dist is: " << MainImage::angle_new_forward_dist << endl;
+				MainImage::deviation_thresh = IMGH - MainImage::angle_new_forward_dist;
+			}
+			else
+			{
+				MainImage::deviation_thresh = IMGH - re.l_circle.circle_dist;
+			}
 		}
 		else
 		{
-			new_forward_dist = re.main.forward_dist;
+			MainImage::angle_new_forward_dist = 
+				dy_forward_dist_up(re.main.angle_dy_forward_dist_kp,re.main.angle_dy_forward_dist_kd,
+								   re.main.angle_enc_forward_dist_coef,re.main.angle_enc_forward_dist_exp,
+								   re.main.forward_dist, re.main.angle_enc_forward_threshold,
+								   re.main.angle_max_enc_forward_dist);
+			cout << "forward_dist is: " << MainImage::angle_new_forward_dist << endl;
+			MainImage::deviation_thresh = IMGH - MainImage::angle_new_forward_dist;
+		}
+		while ( MainImage::deviation_thresh < center_lost && MainImage::deviation_thresh < IMGH - 1)
+		{
+			MainImage::deviation_thresh ++;
 		}
 		
-		cout << "forward_dist is: " << new_forward_dist << endl;
-		MainImage::deviation_thresh = IMGH - new_forward_dist;
-		if (state_out == right_circle) {
-			MainImage::deviation_thresh = IMGH - re.r_circle.circle_dist;
-		}
-		if (state_out == left_circle) {
-			MainImage::deviation_thresh = IMGH - re.l_circle.circle_dist;
-		}
 		sum = 0;
-		//根据速度动态调整上半部分采样点个数
-		int new_up_scope;
-		new_up_scope = re.main.up_scope + re.main.enc_up_scope_coef * pow(speed_error,re.main.enc_up_scope_exp) / 1000.0;
-		if(new_up_scope > re.main.max_enc_up_scope)
-		{
-			new_up_scope = re.main.max_enc_up_scope;
-		}
-		cout << "up_scope is: " << new_up_scope << endl;
-		for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - new_up_scope; i--) {
+		for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - re.main.up_scope; i--) {
 			sum += center_point[i];
 		}
-		//根据速度动态调整权重
-		double new_forward_coef1;
-		new_forward_coef1 = re.main.forward_coef1 + re.main.enc_forward_coef1_coef * pow(speed_error,re.main.enc_forward_coef1_exp) / 1000.0;
-		if(new_forward_coef1 > re.main.max_enc_forward_coef1)
-		{
-			new_forward_coef1 = re.main.max_enc_forward_coef1;
-		}
-		cout << "new_forward_coef1 is: " << new_forward_coef1 << endl;	
-  		deviation = new_forward_coef1 * (center - float(sum) / new_up_scope);
+  		angle_deviation = re.main.forward_coef1 * (center - float(sum) / re.main.up_scope);
 		sum = 0;
 		for (i = MainImage::deviation_thresh + re.main.down_scope; i > MainImage::deviation_thresh; i--) {
 			sum += center_point[i];
 		}
-		deviation += re.main.forward_coef2 * (center - float(sum) / re.main.down_scope);
+		angle_deviation += re.main.forward_coef2 * (center - float(sum) / re.main.down_scope);
 		// deviation += 18.0;
 		//if (deviation < -15) deviation -= 4;
 		//else if (deviation > 15) deviation += 4;
-		cout << "deviation: " << deviation << endl;
+		cout << "deviation: " << angle_deviation << endl;
 	
 	}
-	return deviation;
+	return angle_deviation;
 }
+float MainImage::SpeedDeviation(void)
+{
+	
+	int i, j;
+	float speed_deviation = 0;
+	int center = IMGW / 2;
+	// center += 10;
+	//int center=(IMGW/2+last_center)/2;
+	long long sum;
 
+	//速度大于阈值时对前瞻进行动态调整:forward_dist forward_coef1
+	double new_forward_dist =
+		dy_forward_dist_up(re.main.speed_dy_forward_dist_kp, re.main.speed_dy_forward_dist_kd,
+						   re.main.speed_enc_forward_dist_coef, re.main.speed_enc_forward_dist_exp,
+						   re.main.speed_forward_dist, re.main.speed_enc_forward_threshold,
+						   re.main.speed_max_enc_forward_dist);
+						   
+	cout << "speed forward_dist is: " << new_forward_dist << endl;
+	MainImage::speed_deviation_thresh = IMGH - new_forward_dist;	
+
+	sum = 0;
+	// update_forward_dist();
+	for (i = MainImage::speed_deviation_thresh; i > MainImage::speed_deviation_thresh - re.main.up_scope; i--) {
+		sum += center_point[i];
+	}
+	//根据速度动态调整权重
+	
+	speed_deviation = re.main.forward_coef1 * (center - float(sum) / re.main.up_scope);
+	sum = 0;
+	for (i = MainImage::speed_deviation_thresh + re.main.down_scope; i > MainImage::speed_deviation_thresh; i--) {
+		sum += center_point[i];
+	}
+	speed_deviation += re.main.forward_coef2 * (center - float(sum) / re.main.down_scope);
+	// deviation += 18.0;
+	//if (deviation < -15) deviation -= 4;
+	//else if (deviation > 15) deviation += 4;
+	cout << "speed deviation: " << speed_deviation << endl;
+	
+	return speed_deviation;
+}
 ImageStorage::ImageStorage()
 {
 #if USE_VIDEO == 1
