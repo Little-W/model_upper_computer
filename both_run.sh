@@ -15,4 +15,4 @@ if [ $? -eq 0 ]; then
   ipcrm -S 0x00123457
 fi
 
-. con_run.sh | . ai_run.sh
+sh ./con_run.sh | sh ./ai_run.sh
