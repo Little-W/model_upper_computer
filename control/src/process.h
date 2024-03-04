@@ -73,6 +73,9 @@ public:
 	bool ai_tractor;
 	bool ai_corn;
 	bool ai_pig;
+	bool ai_bomb;
+	bool ai_right_garage;
+	bool ai_left_garage;
   
 	uchar state_out;
 	uchar state_l_circle;
@@ -85,6 +88,10 @@ public:
 	uchar state_last;
 	uchar state_hill;
 	uchar state_turn_state;
+
+	uchar state_bomb;
+	uchar state_right_garage;
+	uchar state_left_garage;
 	Reader re;
 	ImageStorage store;
 

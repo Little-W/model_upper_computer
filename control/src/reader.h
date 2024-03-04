@@ -70,6 +70,18 @@
 #define turn_inside 48
 #define turn_out 49
 
+#define right_garage_find 50
+#define right_garage_in 51
+#define right_garage_inside 52
+#define right_garage_try_out 53
+#define right_garage_out 54
+
+#define left_garage_find 60
+#define left_garage_in 61
+#define left_garage_inside 62
+#define left_garage_try_out 63
+#define left_garage_out 64
+
 typedef std::pair<int, int> pii;
 
 float expr2f(const std::string& expr);//字符串转浮点

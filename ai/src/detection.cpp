@@ -69,7 +69,7 @@ void boundaryCorrection(PredictResult &r, int width_range, int height_range) {
 void drawResults(cv::Mat &inputFrame, std::vector<PredictResult> &results) {
   for (int i = 0; i < results.size(); ++i) {
     PredictResult r = results[i];
-    boundaryCorrection(r, inputFrame.cols, inputFrame.rows);
+    // boundaryCorrection(r, inputFrame.cols, inputFrame.rows);
     if (r.type >= 0 && r.type < 6) {//6 attention
       cv::Point origin(r.x, r.y);
       // std::string label_name = g_model_config->labels[r.type];
@@ -148,7 +148,7 @@ int main(int argc, char const *argv[]) {
   // Scene sceneLast = Scene::NormalScene; // 记录上一次场景状态
   long preTime;
   // Mat img;
-  wri.open("detection.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(300, 200));
+  wri.open("/home/edgeboard/ftp_share/code/405/detection.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(300, 200));
   if (!wri.isOpened()) {
       std::cerr << "Error: VideoWriter not opened!" << std::endl;
       return -1;
@@ -190,6 +190,7 @@ int main(int argc, char const *argv[]) {
     if (state == 0 || count == count_last) {
 
       usleep(20 * 1000);
+      cerr<< "sleeping"<<endl;
       continue;
     }
   
@@ -218,7 +219,7 @@ int main(int argc, char const *argv[]) {
         pr.width = round(pr.width * (160.0/300));
         pr.y = round(pr.y * (120.0/200));
         pr.height = round(pr.x * (120.0/200));
-        cout << pr.type << ",(" << pr.x << "," << pr.y << ")," << pr.width << "," << pr.height << endl;
+        cerr << pr.type << ",(" << pr.x << "," << pr.y << ")," << pr.width << "," << pr.height << endl;
       }
       drawResults(frame, detection->predict_results);
       cout << endl;
@@ -232,23 +233,23 @@ int main(int argc, char const *argv[]) {
         }
       }
       if (cat_id != -1){
-        if (detection->predict_results[cat_id].type == 1){ //work
+        if (detection->predict_results[cat_id].type == 0){ //work
             if (detection->predict_results[cat_id].y + detection->predict_results[cat_id].width / 2 > 40) {
                 bomb_count++;
                 cout << "Bomb found!" << endl;
             }
         }
-        else if (detection->predict_results[cat_id].type == 2){ //fork
+        else if (detection->predict_results[cat_id].type == 1){ //fork
             if (detection->predict_results[cat_id].width>20){
                 bridge_count++;
                 cout << "Bridge found!" << endl;
             }
         }
-        else if (detection->predict_results[cat_id].type == 3 || detection->predict_results[cat_id].type == 5){ //station
+        else if (detection->predict_results[cat_id].type == 2 || detection->predict_results[cat_id].type == 4){ //station
             right_garage_count++;
-            cout << "Right garage found!" << endl;
+            cerr << "Right garage found!" << endl;
         }
-        else if (detection->predict_results[cat_id].type == 4 || detection->predict_results[cat_id].type == 6){ //hill
+        else if (detection->predict_results[cat_id].type == 3 || detection->predict_results[cat_id].type == 5){ //hill
             left_garage_count++;
             cout << "Left garage found!" << endl;
         }

@@ -327,6 +327,11 @@ MainImage::MainImage() : re("./config.yaml")
 	ai_tractor = false;
 	ai_corn = false;
 	ai_pig = false;
+
+    ai_bomb = false;
+	ai_right_garage = false;
+	ai_left_garage = false;
+
 }
 /**
  * @brief 初始化特征点

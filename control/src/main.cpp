@@ -185,10 +185,13 @@ int main()
 			MI.ai_tractor = false;
 			MI.ai_corn = false;
 			MI.ai_pig = false;
+			MI.ai_bomb = false;
+			MI.ai_right_garage = false;
+			MI.ai_left_garage = false;
 			if (addr[0] == 'B') { addr[0] = 'N'; MI.ai_bridge = true; }
-			else if (addr[0] == 'T') { addr[0] = 'N'; MI.ai_tractor = true; }
-			else if (addr[0] == 'C') { addr[0] = 'N'; MI.ai_corn = true; }
-			else if (addr[0] == 'P') { addr[0] = 'N'; MI.ai_pig = true; }
+			else if (addr[0] == 'O') { addr[0] = 'N'; MI.ai_bomb = true; }
+			else if (addr[0] == 'R') { addr[0] = 'N'; MI.ai_right_garage = true; }
+			else if (addr[0] == 'L') { addr[0] = 'N'; MI.ai_left_garage = true; }
 			semV(result_sem);
 		}
 		else
@@ -763,6 +766,7 @@ int main()
 			case turn_state: cout << "turn_state" << endl; break;
 			case garage_out: cout << "garage_out" << endl; break;
 			case hill_find: cout << "hill_find" << endl; break;
+			case right_garage_find: cout << "right_garage_find" << endl; break;
 			case right_circle:
 			{
 				switch (MI.state_r_circle)
