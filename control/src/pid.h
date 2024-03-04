@@ -19,13 +19,16 @@ private:
 	float kp;//读取
 	float kd;//读取
 	float ki;//读取
+	int count;//偏差过大时改
 	data_t last_error;//上一偏差
-	int count;//偏差过大时改kp
+	data_t integrade;//积分项记录
+	float dy_kp_bias;
 public:
 	PartPdCtrl(float kp_ = 0, float kd_ = 0, float ki_ = 0);
 	data_t output(data_t error);
+	data_t dynamic_pid(data_t error);
 	void reset(float kp, float kd, float ki) { this->kp = kp; this->kd = kd; this->ki = ki;}
-  float show(){return this->kp;}
+ 	float show(){return this->kp;}
 };
 
 
@@ -62,12 +65,24 @@ private:
 	float k;		// 速度的比例系数，斜坡
 	data_t minimum;// 输出的最小值	
 	data_t maximum;// 输出的最大值
+	// 速度曲线控制点
+	float dy_speed_bezier_p0_ctrl_x,dy_speed_bezier_p1_ctrl_x,dy_speed_bezier_p0_ctrl_y,dy_speed_bezier_p1_ctrl_y;
+	// 减速曲线控制点
+	float speed_delta_bezier_p0_ctrl_x,speed_delta_bezier_p1_ctrl_x,speed_delta_bezier_p0_ctrl_y,speed_delta_bezier_p1_ctrl_y;
+	// pid控制
+	float kp,ki,kd;
+	data_t last_error;//上一偏差
+	data_t integrade;//积分项记录
 
-	float p0_x;float p0_y;float p1_x;float p1_y;
-	float p0_ctrl_x;float p0_ctrl_y;float p1_ctrl_x;float p1_ctrl_y;
 public:
 	//@param k 速度的比例系数	@param max 输出的最大值	@param min 输出的最小值
-	SpeedControl(data_t start_error, data_t end_error, data_t max, data_t min);
+	SpeedControl(data_t _start_error, data_t _end_error, data_t _max, data_t _min,
+				float _kp ,float _ki ,float _kd,
+				float bezier_p0_ctrl_x,float bezier_p0_ctrl_y,float bezier_p1_ctrl_x,float bezier_p1_ctrl_y,
+				float slow_bezier_p0_ctrl_x,float slow_bezier_p0_ctrl_y,float slow_bezier_p1_ctrl_x,float slow_bezier_p1_ctrl_y
+				);
+	data_t pid_ctrl(data_t input);
+	out_t output_reduced(data_t speed_result,data_t real_speed_enc,float slow_down_kd);
 	/**
 	 * @brief 速度控制
 	 * @param input 输入中线偏离deviation

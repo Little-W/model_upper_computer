@@ -40,13 +40,12 @@ main:
     ki: 0
     kd: 35 #4.54
     dv: 0
+    sc_kp: 1
+    sc_ki: 0
+    sc_kd: 0.5
     slow_down_kd: 1.6
     max_ag: 1133 ## 250
     min_ag: -1133 ## 0
-    max_v: 14 #95
-    min_v: 6 #95
-    max_v_diff: 35 #40
-    min_v_diff: 4
     use_dv: false #false
     second_lap: false
     center_coef: 0
@@ -56,6 +55,9 @@ main:
     dy_kp_threshold: 25 #62
     dy_kp_coef: 0.6
     dy_kp_exp: 3
+    inc_dy_kp_threshold: 15 #30 #62
+    inc_dy_kp_coef: 0.4
+    inc_dy_kp_exp: 2
     dy_kd_threshold: 55 #62
     dy_kd_coef: 0
     

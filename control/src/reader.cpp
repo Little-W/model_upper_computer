@@ -175,6 +175,9 @@ Reader::Reader(string path) {
     main.dy_kp_coef = n_main.get<float>("dy_kp_coef");
     main.dy_kp_exp = n_main.get<float>("dy_kp_exp");
     main.dy_kp_max = n_main.get<float>("dy_kp_max");
+    main.inc_dy_kp_threshold = n_main.get<float>("inc_dy_kp_threshold");
+    main.inc_dy_kp_coef = n_main.get<float>("inc_dy_kp_coef");
+    main.inc_dy_kp_exp = n_main.get<float>("inc_dy_kp_exp");
     main.dy_kd_threshold = n_main.get<float>("dy_kd_threshold");
     main.dy_kd_coef = n_main.get<float>("dy_kd_coef");
     main.dy_speed_coef = n_main.get<float>("dy_speed_coef");
@@ -193,6 +196,10 @@ Reader::Reader(string path) {
     main.kd = n_main.get<float>("kd");
     main.ki = n_main.get<float>("ki");
     main.dv = n_main.get<int>("dv");
+    main.sc_kp = n_main.get<float>("sc_kp");
+    main.sc_ki = n_main.get<float>("sc_ki");
+    main.sc_kd = n_main.get<float>("sc_kd");
+
     main.max_ag = n_main.get<int>("max_ag");
     main.min_ag = n_main.get<int>("min_ag");
     main.max_v = n_main.get<float>("max_v");

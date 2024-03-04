@@ -17,7 +17,13 @@ using namespace cv;
 int stop = false;
 MainImage MI;
 AngleControl AC(Re.main.kp, Re.main.kd, Re.main.ki, Re.main.max_ag, Re.main.min_ag);
-SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v);
+SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v,
+				Re.main.sc_kp,Re.main.sc_ki,Re.main.sc_kd,
+				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
+				Re.main.dy_speed_bezier_p1_ctrl_x,Re.main.dy_speed_bezier_p1_ctrl_y,
+				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
+				Re.main.dy_speed_bezier_p1_ctrl_x,Re.main.dy_speed_bezier_p1_ctrl_y				
+				);
 
 std::chrono::time_point<std::chrono::high_resolution_clock> start_time_stamp;
 bool disable_motor = false;
@@ -673,27 +679,7 @@ int main()
 		}
 
 		//通过增量提升刹车性能
-		if(real_speed_enc > speed_result * ENC_SPEED_SCALE){
-			// 初始化边界值和控制点
-			float p0_x = 0 ,p0_y = 0;
-			float p1_x = Re.main.max_v * ENC_SPEED_SCALE ,p1_y = 1;
-			float p0_ctrl_x = Re.main.speed_delta_bezier_p0_ctrl_x ,p0_ctrl_y = Re.main.speed_delta_bezier_p0_ctrl_y;
-			float p1_ctrl_x = Re.main.speed_delta_bezier_p1_ctrl_x ,p1_ctrl_y = Re.main.speed_delta_bezier_p1_ctrl_y;
-
-			float bezier_x = abs(real_speed_enc) > p1_x ? p1_x : abs(real_speed_enc);
-			float bezier_t = SC.bezier_get_t(bezier_x,0,1,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
-
-			float bezier_out = (pow(1.0 - bezier_t, 3) * p0_y) + (3.0 * bezier_t * pow(1.0 - bezier_t, 2) * p0_ctrl_y) + (3.0 * pow(bezier_t, 2) * (1 - bezier_t) * p1_ctrl_y) + (pow(bezier_t, 3) * p1_y);
-
-			float speed_bias = bezier_out * Re.main.slow_down_kd * ((real_speed_enc)-speed_result * ENC_SPEED_SCALE) / ENC_SPEED_SCALE;
-
-			if(speed_bias < 0)
-			{
-				speed_bias = 0;
-			}
-							
-			speed_result = speed_result - speed_bias;
-		}
+		speed_result = SC.output_reduced(speed_result,real_speed_enc,slow_down_kd);
 
 		if (!Re.set.motor_use)speed_result = 0;
 		//环岛计数

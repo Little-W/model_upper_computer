@@ -145,6 +145,9 @@ public:
         float dy_kp_coef;
         float dy_kp_exp;
         float dy_kp_max;
+        float inc_dy_kp_threshold;
+        float inc_dy_kp_coef;
+        float inc_dy_kp_exp;
         float dy_kd_threshold;
         float dy_kd_coef;
         float dy_speed_coef;
@@ -157,6 +160,9 @@ public:
         float kd;
         float ki;
         int dv;
+        float sc_kp;
+        float sc_ki;
+        float sc_kd;
         int max_ag;
         int min_ag;
         float max_v;
