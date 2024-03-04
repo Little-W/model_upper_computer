@@ -161,7 +161,22 @@ int main()
 		semP(image_sem);
 		matWrite(image_addr, MI.store.image_BGR);
 		semV(image_sem);
-		
+	
+		// // TEST 上位机通信测试代码
+		// for(int i = -1450; i <= 1450; i+=5)
+		// {
+		// 	angle_result = i;
+		// 	speed_result = 3;
+		// 	encode_and_send();
+		// }
+		// for(int i = 1450; i >= -1450; i-=5)
+		// {
+		// 	angle_result = i;
+		// 	speed_result = 6;
+		// 	encode_and_send();
+		// }
+		// continue;
+
 		real_speed_enc = get_speed_enc();
 		cout << "true_speed_enc: " << real_speed_enc << endl;
 		if(smoothed_real_speed_enc != 0)
