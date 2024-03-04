@@ -27,6 +27,11 @@ public:
 
 class MainImage    //寻线
 {
+private:
+	struct CurvaturePoint {
+    	int x, y;
+	};
+	float calc_curvature(CurvaturePoint p1, CurvaturePoint p2, CurvaturePoint p3);
 public:
 	uchar left_edge_point[IMGH];        //左边界
 	uchar right_edge_point[IMGH];       //右边界
@@ -48,6 +53,9 @@ public:
 	int deviation_thresh;
 	int angle_new_forward_dist;
 	int speed_deviation_thresh;
+	int slope_thresh_near;
+	int slope_thresh_far;
+	int slop_direction_thresh;
 	float cur_kp_show;
 
 	bool zebra_far_find;
@@ -82,6 +90,13 @@ public:
 
 	int enc_speed;
 	int last_enc_speed;
+	//较近前瞻位置附近的曲率
+	float curvature_near;
+	//较远前瞻位置附近的曲率
+	float curvature_far;
+	float smoothed_curvature_near;
+	float smoothed_curvature_far;
+	float slope;
 	float angle_deviation;
 
 	MainImage();
@@ -112,6 +127,9 @@ public:
 	void refind_edge_point();
 	void find_center();
 	void find_center_in_farm(int begin = IMGH - 5);
+	float get_curvature_near(void);
+	float get_slope_near(void);
+	float get_curvature_far(void);
 	void refind_edge_in_farm_out(Point start);
 	void find_far_zebra();
 	void find_near_zebra();

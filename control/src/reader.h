@@ -190,6 +190,13 @@ public:
         float speed_delta_bezier_p1_ctrl_x;
         float speed_delta_bezier_p1_ctrl_y;
         float slow_down_kd;
+        //斜率和曲率暂时共用配置
+        int curvature_up_scope;
+	    int curvature_down_scope;
+        int slope_calc_dist;
+        int slope_forward_dist_near;
+        int slope_forward_dist_far;
+        int slope_direction_forward_dist;
     }main;
     struct {
         float kp;

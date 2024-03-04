@@ -218,6 +218,11 @@ Reader::Reader(string path) {
     main.speed_forward_dist = n_main.get<int>("speed_forward_dist");
     main.up_scope = n_main.get<int>("up_scope");
     main.down_scope = n_main.get<int>("down_scope");
+    main.curvature_up_scope = n_main.get<int>("curvature_up_scope");
+    main.curvature_down_scope = n_main.get<int>("curvature_down_scope");
+    main.slope_forward_dist_near = n_main.get<int>("slope_forward_dist_near");
+    main.slope_forward_dist_far = n_main.get<int>("slope_forward_dist_far");
+    main.slope_direction_forward_dist = n_main.get<int>("slope_direction_forward_dist");
     main.forward_coef1 = n_main.get<float>("forward_coef1");
     main.forward_coef2 = n_main.get<float>("forward_coef2");
     main.v_right_circle = n_main.get<pii>("v_right_circle");

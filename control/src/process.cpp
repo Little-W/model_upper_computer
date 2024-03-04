@@ -1,7 +1,9 @@
 #include <iostream>
 #include <stdlib.h>
-#include "process.h"
+#include <cmath>
+#include <array>
 #include <chrono>
+#include "process.h"
 #include "pid.h"
 #include "comm.h"
 
@@ -1056,6 +1058,350 @@ void MainImage::refind_edge_point()
 		}
 		count = 0;
 	}
+}
+
+float MainImage::calc_curvature(CurvaturePoint p1, CurvaturePoint p2, CurvaturePoint p3)
+{
+
+	// cout << "x1: " << p1.x << "  y1: " << p1.y << endl;
+	// cout << "x2: " << p2.x << "  y2: " << p2.y << endl;
+	// cout << "x3: " << p3.x << "  y3: " << p3.y << endl;
+
+ 	CurvaturePoint v1 = {p2.x - p1.x, p2.y - p1.y};
+    CurvaturePoint v2 = {p3.x - p2.x, p3.y - p2.y};
+
+    // 计算叉积
+    CurvaturePoint cross = {v1.x * v2.y - v1.y * v2.x};
+
+    // 计算叉积的模长
+    float cross_length = std::sqrt(cross.x * cross.x + cross.y * cross.y);
+
+    // 计算点积
+    float dot = v1.x * v2.x + v1.y * v2.y ;
+
+    // 计算曲率
+    float curvature = cross_length / (dot + 1e-10);  // 添加一个小的常数以防止除以零	
+	return curvature;
+}
+
+float MainImage::get_curvature_far(void)
+{
+	CurvaturePoint p1, p2, p3;
+	CurvaturePoint x1, x2;
+	slope_thresh_far = IMGH - re.main.slope_forward_dist_far;
+	if(center_lost > (IMGH - 2 - re.main.curvature_up_scope - re.main.curvature_down_scope))
+	{
+		return curvature_far;
+	}
+	while((slope_thresh_far - re.main.curvature_up_scope) < center_lost && 
+		  (slope_thresh_far + re.main.curvature_down_scope) > (IMGH - 1))
+	{
+		slope_thresh_far++;
+	}
+	p1.y = slope_thresh_far - re.main.curvature_up_scope;
+	// p3.y = slope_thresh_far + re.main.curvature_down_scope;
+
+	x1.y = slope_thresh_far - re.main.curvature_up_scope;
+	// p2.y = slope_thresh_far;
+	x2.y = slope_thresh_far + re.main.curvature_down_scope;
+	while(center_point[x1.y]<4 || center_point[x2.y]>IMGW-5 || x1.y < center_lost)
+	{
+		x1.y++;
+		x2.y++;
+	}
+	//左转
+	if(((center_point[x1.y]-center_point[x2.y])<0 ||lost_left) && !lost_right)
+	{
+		while(!exist_left_edge_point[p1.y])
+		{
+			p1.y++;
+		}
+		p2.y = p1.y + re.main.curvature_up_scope;
+		if(p2.y > IMGH -1)
+		{
+			return curvature_far;
+		}
+		while(!exist_left_edge_point[p2.y] || p2.y<=p1.y)
+		{
+			p2.y++;
+		}
+		p3.y = p2.y + re.main.curvature_down_scope;
+		if(p3.y > IMGH -1)
+		{
+			return curvature_far;
+		}
+		while(!exist_left_edge_point[p3.y] || p3.y<=p2.y)
+		{
+			p3.y++;
+		}
+		if(p3.y > IMGH -1)
+		{
+			return curvature_far;
+		}
+		p1.x = left_edge_point[p1.y];
+		p2.x = left_edge_point[p2.y];
+		p3.x = left_edge_point[p3.y];
+		curvature_far = calc_curvature(p1,p2,p3);
+	}
+//右转
+	else if(((center_point[x1.y]-center_point[x2.y])>=0 ||lost_right) && !lost_left)
+	{
+		while(!exist_right_edge_point[p1.y])
+		{
+			p1.y++;
+		}
+		p2.y = p1.y + re.main.curvature_up_scope;
+		if(p2.y > IMGH -1)
+		{
+			return slope;
+		}
+		while(!exist_right_edge_point[p2.y] || p2.y<=p1.y)
+		{
+			p2.y++;
+		}
+		p3.y = p2.y + re.main.curvature_down_scope;
+		if(p3.y > IMGH -1)
+		{
+			return slope;
+		}
+		while(!exist_right_edge_point[p3.y] || p3.y<=p2.y)
+		{
+			p3.y++;
+		}
+		if(p3.y > IMGH -1)
+		{
+			return slope;
+		}
+		p1.x = right_edge_point[p1.y];
+		p2.x = right_edge_point[p2.y];
+		p3.x = right_edge_point[p3.y];
+		curvature_far = calc_curvature(p1,p2,p3);
+	}
+	cout << "curvature_far: " << curvature_far << endl;
+	if(smoothed_curvature_far == 0)
+	{
+		smoothed_curvature_far = curvature_far;
+	}
+	else
+	{
+		smoothed_curvature_far = curvature_far * 0.7 + smoothed_curvature_far * 0.3;
+	}
+	cout << "smoothed_curvature_far: " << smoothed_curvature_far << endl;
+	return curvature_far;
+}
+
+float MainImage::get_curvature_near(void)
+{
+	CurvaturePoint p1, p2, p3;
+	CurvaturePoint x1, x2;
+	slope_thresh_near = IMGH - re.main.slope_forward_dist_near;
+	slop_direction_thresh = IMGH - re.main.slope_direction_forward_dist;
+	if(center_lost > (IMGH - 2 - re.main.curvature_up_scope - re.main.curvature_down_scope))
+	{
+		return curvature_near;
+	}
+	while((slope_thresh_near - re.main.curvature_up_scope) < center_lost && 
+		  (slope_thresh_near + re.main.curvature_down_scope) > (IMGH - 1))
+	{
+		slope_thresh_near++;
+	}
+	p1.y = slope_thresh_near - re.main.curvature_up_scope;
+	// p3.y = slope_thresh_near + re.main.curvature_down_scope;
+
+	x1.y = slop_direction_thresh - re.main.curvature_up_scope;
+	// p2.y = slope_thresh_near;
+	x2.y = slop_direction_thresh + re.main.curvature_down_scope;
+	while(center_point[x1.y]<4 || center_point[x2.y]>IMGW-5 || x1.y < center_lost)
+	{
+		x1.y++;
+		x2.y++;
+	}
+	//左转
+	if(((center_point[x1.y]-center_point[x2.y])<0 ||lost_left) && !lost_right)
+	{
+		while(!exist_left_edge_point[p1.y])
+		{
+			p1.y++;
+		}
+		p2.y = p1.y + re.main.curvature_up_scope;
+		if(p2.y > IMGH -1)
+		{
+			return curvature_near;
+		}
+		while(!exist_left_edge_point[p2.y] || p2.y<=p1.y)
+		{
+			p2.y++;
+		}
+		p3.y = p2.y + re.main.curvature_down_scope;
+		if(p3.y > IMGH -1)
+		{
+			return curvature_near;
+		}
+		while(!exist_left_edge_point[p3.y] || p3.y<=p2.y)
+		{
+			p3.y++;
+		}
+		if(p3.y > IMGH -1)
+		{
+			return curvature_near;
+		}
+		p1.x = left_edge_point[p1.y];
+		p2.x = left_edge_point[p2.y];
+		p3.x = left_edge_point[p3.y];
+		curvature_near = calc_curvature(p1,p2,p3);
+	}
+//右转
+	else if(((center_point[x1.y]-center_point[x2.y])>=0 ||lost_right) && !lost_left)
+	{
+		while(!exist_right_edge_point[p1.y])
+		{
+			p1.y++;
+		}
+		p2.y = p1.y + re.main.curvature_up_scope;
+		if(p2.y > IMGH -1)
+		{
+			return slope;
+		}
+		while(!exist_right_edge_point[p2.y] || p2.y<=p1.y)
+		{
+			p2.y++;
+		}
+		p3.y = p2.y + re.main.curvature_down_scope;
+		if(p3.y > IMGH -1)
+		{
+			return slope;
+		}
+		while(!exist_right_edge_point[p3.y] || p3.y<=p2.y)
+		{
+			p3.y++;
+		}
+		if(p3.y > IMGH -1)
+		{
+			return slope;
+		}
+		p1.x = right_edge_point[p1.y];
+		p2.x = right_edge_point[p2.y];
+		p3.x = right_edge_point[p3.y];
+		curvature_near = calc_curvature(p1,p2,p3);
+	}
+	cout << "curvature_near: " << curvature_near << endl;
+	if(smoothed_curvature_near == 0)
+	{
+		smoothed_curvature_near = curvature_near;
+	}
+	else
+	{
+			smoothed_curvature_near = curvature_near * 0.7 + smoothed_curvature_near * 0.3;
+	}
+	cout << "smoothed_curvature_near: " << smoothed_curvature_near << endl;
+	return curvature_near;
+}
+
+float MainImage::get_slope_near(void)
+{
+	CurvaturePoint p1, p2, p3;
+	CurvaturePoint x1, x2;
+	slope_thresh_near = IMGH - re.main.slope_forward_dist_near;	
+	if(center_lost > (IMGH - 2 - re.main.curvature_up_scope - re.main.curvature_down_scope))
+	{
+		return slope;
+	}
+	while((slope_thresh_near - re.main.curvature_up_scope) < center_lost && 
+		  (slope_thresh_near + re.main.curvature_down_scope) > (IMGH - 1))
+	{
+		slope_thresh_near++;
+	}
+	p1.y = slope_thresh_near - re.main.curvature_up_scope;
+	// p2.y = slope_thresh_near;
+	// p3.y = slope_thresh_near + re.main.curvature_down_scope;
+	// while(center_point[p1.y]<4||center_point[p1.y]>IMGW-5)
+	// {
+	// 	p1.y++;
+	// 	p3.y++;
+	// }
+	x1.y = slop_direction_thresh - re.main.curvature_up_scope;
+	// p2.y = slope_thresh_near;
+	x2.y = slop_direction_thresh + re.main.curvature_down_scope;
+	while(center_point[x1.y]<4 || center_point[x2.y]>IMGW-5 || x1.y < center_lost)
+	{
+		x1.y++;
+		x2.y++;
+	}
+	//左转
+	if(((center_point[x1.y]-center_point[x2.y])<0 ||lost_left) && !lost_right)
+	{
+		while(!exist_left_edge_point[p1.y])
+		{
+			p1.y++;
+		}
+		p2.y = p1.y + re.main.curvature_up_scope;
+		if(p2.y > IMGH -1)
+		{
+			return slope;
+		}
+		while(!exist_left_edge_point[p2.y] || p2.y<=p1.y)
+		{
+			p2.y++;
+		}
+		p3.y = p2.y + re.main.curvature_down_scope;
+		if(p3.y > IMGH -1)
+		{
+			return slope;
+		}
+		while(!exist_left_edge_point[p3.y] || p3.y<=p2.y)
+		{
+			p3.y++;
+		}
+		if(p3.y > IMGH -1)
+		{
+			return slope;
+		}
+		p1.x = left_edge_point[p1.y];
+		p2.x = left_edge_point[p2.y];
+		p3.x = left_edge_point[p3.y];
+		slope = ((float)(p1.x-p2.x) / (p1.y-p2.y) + (float)(p2.x-p3.x) / (p2.y-p3.y)) / 2.0;
+	}
+	//右转
+	else if(((center_point[x1.y]-center_point[x2.y])>=0 ||lost_right) && !lost_left)
+	{
+		while(!exist_right_edge_point[p1.y])
+		{
+			p1.y++;
+		}
+		p2.y = p1.y + re.main.curvature_up_scope;
+		if(p2.y > IMGH -1)
+		{
+			return slope;
+		}
+		while(!exist_right_edge_point[p2.y] || p2.y<=p1.y)
+		{
+			p2.y++;
+		}
+		p3.y = p2.y + re.main.curvature_down_scope;
+		if(p3.y > IMGH -1)
+		{
+			return slope;
+		}
+		while(!exist_right_edge_point[p3.y] || p3.y<=p2.y)
+		{
+			p3.y++;
+		}
+		if(p3.y > IMGH -1)
+		{
+			return slope;
+		}
+		p1.x = right_edge_point[p1.y];
+		p2.x = right_edge_point[p2.y];
+		p3.x = right_edge_point[p3.y];
+		slope = ((float)(p1.x-p2.x) / (p1.y-p2.y) + (float)(p2.x-p3.x) / (p2.y-p3.y)) / 2.0;
+		// slope = -sqrt(abs((float)((p1.x-p2.x)*(p2.x-p3.x))/((p1.y-p2.y)*(p2.y-p3.y))));
+	}
+
+	cout << "x1: " << p1.x << "  y1: " << p1.y << endl;
+	cout << "x2: " << p2.x << "  y2: " << p2.y << endl;
+	cout << "x3: " << p3.x << "  y3: " << p3.y << endl;
+	cout << "slope: " << slope << endl;
+	return slope;
 }
 
 void MainImage::find_center()

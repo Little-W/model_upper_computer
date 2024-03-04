@@ -32,6 +32,9 @@ float kp, kd, ki;
 int dv;
 float angle_deviation = 0;
 float speed_deviation = 0;
+float cur_curvature_far = 0;
+float cur_curvature_near = 0;
+float cur_slope = 0;
 float speed_result;
 float angle_result = 0;
 int circle_inside_count = 0;
@@ -189,6 +192,9 @@ int main()
 			semV(result_sem);
 		}
 
+		cur_curvature_near = MI.get_curvature_near();
+		cur_curvature_far = MI.get_curvature_far();
+		cur_slope = MI.get_slope_near();
 		//更新当前状态
 		MI.state_judge();
 		MI.update_control(kp, kd, ki, dv);
