@@ -260,6 +260,45 @@ Reader::Reader(string path) {
     r_circle.out_find_p = n_right_circle.get_bi<Point>("out_find", "p");
     r_circle.out_strai_find_pos = n_right_circle.get_bi<int>("out_strai", "find_pos");
     r_circle.out_ray_ag = n_right_circle.get_bi<float>("out", "ray_ag");
+
+    r_circle.in_find_kp = n_right_circle.get_bi<float>("in_find", "kp");
+    r_circle.in_find_kd = n_right_circle.get_bi<float>("in_find", "kd");
+    r_circle.in_find_ki = n_right_circle.get_bi<float>("in_find", "ki");
+
+    r_circle.in_strai_kp = n_right_circle.get_bi<float>("in_strai", "kp");
+    r_circle.in_strai_kd = n_right_circle.get_bi<float>("in_strai", "kd");
+    r_circle.in_strai_ki = n_right_circle.get_bi<float>("in_strai", "ki");
+
+    r_circle.in_circle_kp = n_right_circle.get_bi<float>("in_circle", "kp");
+    r_circle.in_circle_kd = n_right_circle.get_bi<float>("in_circle", "kd");
+    r_circle.in_circle_ki = n_right_circle.get_bi<float>("in_circle", "ki");
+
+    r_circle.inside_before_kp = n_right_circle.get_bi<float>("inside_before", "kp");
+    r_circle.inside_before_kd = n_right_circle.get_bi<float>("inside_before", "kd");
+    r_circle.inside_before_ki = n_right_circle.get_bi<float>("inside_before", "ki");
+
+    r_circle.inside_kp = n_right_circle.get_bi<float>("inside", "kp");
+    r_circle.inside_kd = n_right_circle.get_bi<float>("inside", "kd");
+    r_circle.inside_ki = n_right_circle.get_bi<float>("inside", "ki");
+    r_circle.in_find_speed = n_right_circle.get_bi<float>("in_find", "speed");
+
+    r_circle.out_find_kp = n_right_circle.get_bi<float>("out_find", "kp");
+    r_circle.out_find_kd = n_right_circle.get_bi<float>("out_find", "kd");
+    r_circle.out_find_ki = n_right_circle.get_bi<float>("out_find", "ki");
+
+    r_circle.out_strai_kp = n_right_circle.get_bi<float>("out_strai", "kp");
+    r_circle.out_strai_kd = n_right_circle.get_bi<float>("out_strai", "kd");
+    r_circle.out_strai_ki = n_right_circle.get_bi<float>("out_strai", "ki");
+
+    r_circle.out_kp = n_right_circle.get_bi<float>("out", "kp");
+    r_circle.out_kd = n_right_circle.get_bi<float>("out", "kd");
+    r_circle.out_ki = n_right_circle.get_bi<float>("out", "ki");
+
+    r_circle.out_out_kp = n_right_circle.get_bi<float>("out_out", "kp");
+    r_circle.out_out_kd = n_right_circle.get_bi<float>("out_out", "kd");
+    r_circle.out_out_ki = n_right_circle.get_bi<float>("out_out", "ki");
+
+    
     //left_circle
     l_circle.kp = n_left_circle.get<float>("kp");
     l_circle.kd = n_left_circle.get<float>("kd");
@@ -290,6 +329,44 @@ Reader::Reader(string path) {
     l_circle.out_find_p = n_left_circle.get_bi<Point>("out_find", "p");
     l_circle.out_strai_find_pos = n_left_circle.get_bi<int>("out_strai", "find_pos");
     l_circle.out_ray_ag = n_left_circle.get_bi<float>("out", "ray_ag");
+
+    l_circle.in_find_kp = n_left_circle.get_bi<float>("in_find", "kp");
+    l_circle.in_find_kd = n_left_circle.get_bi<float>("in_find", "kd");
+    l_circle.in_find_ki = n_left_circle.get_bi<float>("in_find", "ki");
+    l_circle.in_find_speed = n_left_circle.get_bi<float>("in_find", "speed");
+
+    l_circle.in_strai_kp = n_left_circle.get_bi<float>("in_strai", "kp");
+    l_circle.in_strai_kd = n_left_circle.get_bi<float>("in_strai", "kd");
+    l_circle.in_strai_ki = n_left_circle.get_bi<float>("in_strai", "ki");
+
+    l_circle.in_circle_kp = n_left_circle.get_bi<float>("in_circle", "kp");
+    l_circle.in_circle_kd = n_left_circle.get_bi<float>("in_circle", "kd");
+    l_circle.in_circle_ki = n_left_circle.get_bi<float>("in_circle", "ki");
+
+    l_circle.inside_before_kp = n_left_circle.get_bi<float>("inside_before", "kp");
+    l_circle.inside_before_kd = n_left_circle.get_bi<float>("inside_before", "kd");
+    l_circle.inside_before_ki = n_left_circle.get_bi<float>("inside_before", "ki");
+
+    l_circle.inside_kp = n_left_circle.get_bi<float>("inside", "kp");
+    l_circle.inside_kd = n_left_circle.get_bi<float>("inside", "kd");
+    l_circle.inside_ki = n_left_circle.get_bi<float>("inside", "ki");
+
+    l_circle.out_find_kp = n_left_circle.get_bi<float>("out_find", "kp");
+    l_circle.out_find_kd = n_left_circle.get_bi<float>("out_find", "kd");
+    l_circle.out_find_ki = n_left_circle.get_bi<float>("out_find", "ki");
+
+    l_circle.out_strai_kp = n_left_circle.get_bi<float>("out_strai", "kp");
+    l_circle.out_strai_kd = n_left_circle.get_bi<float>("out_strai", "kd");
+    l_circle.out_strai_ki = n_left_circle.get_bi<float>("out_strai", "ki");
+
+    l_circle.out_kp = n_left_circle.get_bi<float>("out", "kp");
+    l_circle.out_kd = n_left_circle.get_bi<float>("out", "kd");
+    l_circle.out_ki = n_left_circle.get_bi<float>("out", "ki");
+
+    l_circle.out_out_kp = n_left_circle.get_bi<float>("out_out", "kp");
+    l_circle.out_out_kd = n_left_circle.get_bi<float>("out_out", "kd");
+    l_circle.out_out_ki = n_left_circle.get_bi<float>("out_out", "ki");
+
     //repair
     repair.kp = n_repair.get<float>("kp");
     repair.kd = n_repair.get<float>("kd");

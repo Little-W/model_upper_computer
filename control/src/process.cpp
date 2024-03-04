@@ -439,6 +439,120 @@ void MainImage::state_judge()
 	}
 }
 
+void MainImage::circle_pid_update(uchar cur_status, float& kp, float& kd, float& ki)
+{
+	switch (cur_status) {
+		case left_circle_in_find: {
+			kp = re.l_circle.in_find_kp;
+			kd = re.l_circle.in_find_kd;
+			ki = re.l_circle.in_find_ki;
+			break;
+		}
+		case left_circle_in_strai: {
+			kp = re.l_circle.in_strai_kp;
+			kd = re.l_circle.in_strai_kd;
+			ki = re.l_circle.in_strai_ki;
+			break;
+		}
+		case left_circle_in_circle: {
+			kp = re.l_circle.in_circle_kp;
+			kd = re.l_circle.in_circle_kd;
+			ki = re.l_circle.in_circle_ki;
+			break;
+		}
+		case left_circle_inside_before: {
+			kp = re.l_circle.inside_before_kp;
+			kd = re.l_circle.inside_before_kd;
+			ki = re.l_circle.inside_before_ki;
+			break;
+		}
+		case left_circle_inside: {
+			kp = re.l_circle.inside_kp;
+			kd = re.l_circle.inside_kd;
+			ki = re.l_circle.inside_ki;
+			break;
+		}
+		case left_circle_out_find: {
+			kp = re.l_circle.out_find_kp;
+			kd = re.l_circle.out_find_kd;
+			ki = re.l_circle.out_find_ki;
+			break;
+		}
+		case left_circle_out_strai: {
+			kp = re.l_circle.out_strai_kp;
+			kd = re.l_circle.out_strai_kd;
+			ki = re.l_circle.out_strai_ki;
+			break;
+		}
+		case left_circle_out: {
+			kp = re.l_circle.out_kp;
+			kd = re.l_circle.out_kd;
+			ki = re.l_circle.out_ki;
+			break;
+		}
+		case left_circle_out_out: {
+			kp = re.l_circle.out_out_kp;
+			kd = re.l_circle.out_out_kd;
+			ki = re.l_circle.out_out_ki;
+			break;
+		}
+		case right_circle_in_find: {
+			kp = re.r_circle.in_find_kp;
+			kd = re.r_circle.in_find_kd;
+			ki = re.r_circle.in_find_ki;
+			break;
+		}
+		case right_circle_in_strai: {
+			kp = re.r_circle.in_strai_kp;
+			kd = re.r_circle.in_strai_kd;
+			ki = re.r_circle.in_strai_ki;
+			break;
+		}
+		case right_circle_in_circle: {
+			kp = re.r_circle.in_circle_kp;
+			kd = re.r_circle.in_circle_kd;
+			ki = re.r_circle.in_circle_ki;
+			break;
+		}
+		case right_circle_inside_before: {
+			kp = re.r_circle.inside_before_kp;
+			kd = re.r_circle.inside_before_kd;
+			ki = re.r_circle.inside_before_ki;
+			break;
+		}
+		case right_circle_inside: {
+			kp = re.r_circle.inside_kp;
+			kd = re.r_circle.inside_kd;
+			ki = re.r_circle.inside_ki;
+			break;
+		}
+		case right_circle_out_find: {
+			kp = re.r_circle.out_find_kp;
+			kd = re.r_circle.out_find_kd;
+			ki = re.r_circle.out_find_ki;
+			break;
+		}
+		case right_circle_out_strai: {
+			kp = re.r_circle.out_strai_kp;
+			kd = re.r_circle.out_strai_kd;
+			ki = re.r_circle.out_strai_ki;
+			break;
+		}
+		case right_circle_out: {
+			kp = re.r_circle.out_kp;
+			kd = re.r_circle.out_kd;
+			ki = re.r_circle.out_ki;
+			break;
+		}
+		case right_circle_out_out: {
+			kp = re.r_circle.out_out_kp;
+			kd = re.r_circle.out_out_kd;
+			ki = re.r_circle.out_out_ki;
+			break;
+		}
+	}
+}
+
 void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& slow_down_kd)
 {
 	switch (state_out) {

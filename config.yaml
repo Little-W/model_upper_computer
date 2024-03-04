@@ -116,13 +116,13 @@ main:
     v_left_circle: [175,90] #[175,70]
 
 right_circle:
-    kp: 15 #8 #1.6
+    kp: 25 #8 #1.6
     ki: 0
-    kd: 0 #20 #4.54
+    kd: 20 #20 #4.54
     dv: 0
-    speed: 6.2
-    circle_slow_down_kd: 25
-    circle_dist: 40
+    speed: 11
+    circle_slow_down_kd: 0.5
+    circle_dist: 50
     angle_forward_dist_kp: 1
     angle_forward_dist_kd: 0.4
     max_dy_forward_dist: 60
@@ -135,22 +135,23 @@ right_circle:
     big_circle: false 
     count_start: 2
     in_find:
-        kp: 25 #1.6
+        kp: 9 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 20 #4.54
         dv: 0
         ray_ag: 2
+        speed: 9
     in_strai:
-        kp: 15 #1.6
+        kp: 12 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 10 #4.54
         dv: 0
         ray_ag1: -0.94
         ray_ag2: -2.55 #-2.55
     in_circle:
-        kp: 13 #1.6
+        kp: 12 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 15 #4.54
         dv: 0
         ray_ag1: 0.64 #0.84
         ray_ag2: -0.94
@@ -158,47 +159,47 @@ right_circle:
         ray_ag4: -2.45
         ray_ag5: 0.44 #0.84
     inside_before:
-        kp: 10
+        kp: 12
         ki: 0
-        kd: 0 # 5.10
+        kd: 15 # 5.10
         dv: 0
         p: ['0','IMGH-5']
     inside:
-        kp: 15 #1.6
+        kp: 12 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 20 #4.54
         dv: 0 #2
     out_find:
-        kp: 15 #1.6
+        kp: 13 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0 #2
         p:  ['2.7*IMGW/3','IMGH/3'] #['2*IMGW/3','IMGH/2'] #['2*IMGW/3','IMGH/2-5']
     out_strai: 
-        find_pos: 12
-        kp: 15 #1.6
+        find_pos: 15
+        kp: 20 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 20 #4.54
         dv: 0
     out:
-        kp: 15 #1.6
+        kp: 10 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 10 #4.54
         ray_ag: 1.9
     out_out: 
-        kp: 15 #1.6
+        kp: 10 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0
 #
 left_circle:
-    kp: 12 #8 #1.6
+    kp: 25 #8 #1.6
     ki: 0
-    kd: 0 #20 #4.54
+    kd: 20 #20 #4.54
     dv: 0
-    speed: 4.8
-    circle_slow_down_kd: 25
-    circle_dist: 50
+    speed: 12
+    circle_slow_down_kd: 2
+    circle_dist: 42
     angle_forward_dist_kp: 1
     angle_forward_dist_kd: 0
     max_dy_forward_dist: 60
@@ -211,22 +212,23 @@ left_circle:
     big_circle: false 
     count_start: 2
     in_find:
-        kp: 10 #1.6
+        kp: 0 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 20 #4.54
         dv: 0
         ray_ag: 2
+        speed: 13
     in_strai:
-        kp: 10 #1.6
+        kp: 12 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 10 #4.54
         dv: 0
         ray_ag1: -0.94
         ray_ag2: -2.55 #-2.55
     in_circle:
         kp: 13 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 15 #4.54
         dv: 0
         ray_ag1: 0.64 #0.84
         ray_ag2: -0.94
@@ -234,15 +236,15 @@ left_circle:
         ray_ag4: -2.45
         ray_ag5: 0.44 #0.84
     inside_before:
-        kp: 10
+        kp: 12
         ki: 0
-        kd: 0 # 5.10
+        kd: 15 # 5.10
         dv: 0
         p: ['0','IMGH-5']
     inside:
-        kp: 15 #1.6
+        kp: 10 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 20 #4.54
         dv: 0 #2
     out_find:
         kp: 15 #1.6
@@ -251,18 +253,18 @@ left_circle:
         dv: 0 #2
         p:  ['2.7*IMGW/3','IMGH/3'] #['2*IMGW/3','IMGH/2'] #['2*IMGW/3','IMGH/2-5']
     out_strai: 
-        find_pos: 12
-        kp: 15 #1.6
+        find_pos: 15
+        kp: 20 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 20 #4.54
         dv: 0
     out:
-        kp: 15 #1.6
+        kp: 10 #1.6
         ki: 0
-        kd: 0 #4.54
+        kd: 10 #4.54
         ray_ag: 1.9
     out_out: 
-        kp: 15 #1.6
+        kp: 10 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0

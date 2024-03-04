@@ -225,6 +225,44 @@ public:
         float in_circle_ray_ag3;
         float in_circle_ray_ag4;
         float in_circle_ray_ag5;
+
+        float in_find_kp;
+        float in_find_kd;
+        float in_find_ki;
+        float in_find_speed;
+
+        float in_strai_kp;
+        float in_strai_kd;
+        float in_strai_ki;
+
+        float in_circle_kp;
+        float in_circle_kd;
+        float in_circle_ki;
+
+        float inside_before_kp;
+        float inside_before_kd;
+        float inside_before_ki;
+
+        float inside_kp;
+        float inside_kd;
+        float inside_ki;
+
+        float out_find_kp;
+        float out_find_kd;
+        float out_find_ki;
+
+        float out_strai_kp;
+        float out_strai_kd;
+        float out_strai_ki;
+
+        float out_kp;
+        float out_kd;
+        float out_ki;
+
+        float out_out_kp;
+        float out_out_kd;
+        float out_out_ki;
+
         cv::Point inside_before_p;
         cv::Point out_find_p;
         int out_strai_find_pos;

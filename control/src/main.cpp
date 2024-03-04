@@ -24,6 +24,13 @@ SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.m
 				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
 				Re.main.dy_speed_bezier_p1_ctrl_x,Re.main.dy_speed_bezier_p1_ctrl_y				
 				);
+SpeedControl SC_turn (Re.turn.min_v_diff, Re.turn.max_v_diff, Re.turn.speed_ceiling, Re.turn.speed_ground,
+						Re.turn.sc_kp,Re.turn.sc_ki,Re.turn.sc_kd,
+						Re.turn.dy_speed_bezier_p0_ctrl_x,Re.turn.dy_speed_bezier_p0_ctrl_y,
+						Re.turn.dy_speed_bezier_p1_ctrl_x,Re.turn.dy_speed_bezier_p1_ctrl_y,
+						Re.turn.dy_speed_bezier_p0_ctrl_x,Re.turn.dy_speed_bezier_p0_ctrl_y,
+						Re.turn.dy_speed_bezier_p1_ctrl_x,Re.turn.dy_speed_bezier_p1_ctrl_y								
+						);
 
 std::chrono::time_point<std::chrono::high_resolution_clock> start_time_stamp;
 bool disable_motor = false;
@@ -600,6 +607,11 @@ int main()
 				angle_result = circle_out_ag / float(circle_count - Re.r_circle.count_start);
 				speed_result = circle_out_sp / float(circle_count - Re.r_circle.count_start);
 			}
+			else if(MI.state_r_circle == right_circle_in_find)
+			{
+				angle_result = AC.output(angle_deviation);
+				speed_result = Re.r_circle.in_find_speed;
+			}
 			else
 			{
 				angle_result = AC.output(angle_deviation);
@@ -612,6 +624,11 @@ int main()
 			{
 				angle_result = circle_out_ag / float(circle_count - Re.l_circle.count_start);
 				speed_result = circle_out_sp / float(circle_count - Re.l_circle.count_start);
+			}
+			else if(MI.state_l_circle == left_circle_in_find)
+			{
+				angle_result = AC.output(angle_deviation);
+				speed_result = Re.l_circle.in_find_speed;
 			}
 			else
 			{

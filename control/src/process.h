@@ -104,7 +104,7 @@ public:
 	void update_image();//帧处理
 	void state_judge();	//状态判断
 	void update_control(float& kp, float& kd, float& ki, int& dv,float& slow_down_kd);
-
+	void circle_pid_update(uchar cur_status, float& kp, float& kd, float& ki);
 	void find_edge_point();    //搜索边界点
 	void find_end_point(); //搜索断点
 	void judge_lost();	//判断丢边
