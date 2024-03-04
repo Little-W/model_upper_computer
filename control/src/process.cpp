@@ -1890,9 +1890,16 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     if (r_c) for (int i = 0; i < right_cone.size(); i++) store.image_show.at<Vec3b>(right_cone[i].y, right_cone[i].x) = Vec3b(121, 77, 166);
     if (c_c) for (int i = 0; i < center_cone.size(); i++) store.image_show.at<Vec3b>(center_cone[i].y, center_cone[i].x) = Vec3b(0, 153, 255);
 
-	store.image_show.at<Vec3b>(MainImage::deviation_thresh, 80) = Vec3b(0, 0, 255);
-	store.image_show.at<Vec3b>((MainImage::deviation_thresh - re.main.up_scope), 80) = Vec3b(0, 255, 0);
-	store.image_show.at<Vec3b>((MainImage::deviation_thresh + re.main.down_scope),80) = Vec3b(255, 0, 0);
+	store.image_show.at<Vec3b>(MainImage::deviation_thresh, 80) = Vec3b(60, 90, 30);
+	store.image_show.at<Vec3b>((MainImage::deviation_thresh - re.main.up_scope), 80) = Vec3b(60, 90, 30);
+	store.image_show.at<Vec3b>((MainImage::deviation_thresh + re.main.down_scope),80) = Vec3b(60, 90, 30);
+
+	store.image_show.at<Vec3b>(MainImage::speed_deviation_thresh, 80) = Vec3b(0, 0, 255);
+	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh - re.main.up_scope), 80) = Vec3b(0, 0, 255);
+	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh + re.main.down_scope),80) = Vec3b(0, 0, 255);
+	store.image_show.at<Vec3b>((MI.center_lost),80) = Vec3b(127, 127, 255);
+	store.image_show.at<Vec3b>((slope_thresh_near),80) = Vec3b(255, 0, 255);
+	
 
     // 在图像顶部添加变量文本
     int fontFace = FONT_HERSHEY_SIMPLEX;
@@ -1911,26 +1918,47 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 
     putText(store.image_show, "state: " + 
 		string(((state_out == straight) ? "straight" :
-				(state_out == right_circle_in_find) ? "right_circle_in_find" :
-				(state_out == right_circle_in_strai) ? "right_circle_in_strai" :
-				(state_out == right_circle_in_circle) ? "right_circle_in_circle" :
-				(state_out == right_circle_inside_before) ? "right_circle_inside_before" :
-				(state_out == right_circle_inside) ? "right_circle_inside" :
-				(state_out == right_circle_out) ? "right_circle_out" :
-				(state_out == right_circle_out_find) ? "right_circle_out_find" :
-				(state_out == right_circle_out_strai) ? "right_circle_out_strai" :
-				(state_out == right_circle_out_out) ? "right_circle_out_out" :
-				(state_out == left_circle_in_find) ? "left_circle_in_find" :
-				(state_out == left_circle_in_strai) ? "left_circle_in_strai" :
-				(state_out == left_circle_in_circle) ? "left_circle_in_circle" :
-				(state_out == left_circle_inside_before) ? "left_circle_inside_before" :
-				(state_out == left_circle_inside) ? "left_circle_inside" :
-				(state_out == left_circle_out) ? "left_circle_out" :
-				(state_out == left_circle_out_find) ? "left_circle_out_find" :
-				(state_out == left_circle_out_strai) ? "left_circle_out_strai" :
+				(state_out == right_circle) ? "right_circle" :
+				(state_out == left_circle) ? "left_circle" :
+				(state_out == turn_state) ? "turn" :
 	 			"other")),
 				textOrg, fontFace, fontScale, mainColor, thickness, 8);
 	textOrg.y += textSize.height + interval;
+
+	if(state_out == right_circle || state_out == left_circle)
+	{
+		putText(store.image_show, "circle state: " + 
+		string(((MI.state_r_circle == right_circle_in_find) ? "right_circle_in_find" :
+				(MI.state_r_circle == right_circle_in_strai) ? "right_circle_in_strai" :
+				(MI.state_r_circle == right_circle_in_circle) ? "right_circle_in_circle" :
+				(MI.state_r_circle == right_circle_inside_before) ? "right_circle_inside_before" :
+				(MI.state_r_circle == right_circle_inside) ? "right_circle_inside" :
+				(MI.state_r_circle == right_circle_out) ? "right_circle_out" :
+				(MI.state_r_circle == right_circle_out_find) ? "right_circle_out_find" :
+				(MI.state_r_circle == right_circle_out_strai) ? "right_circle_out_strai" :
+				(MI.state_r_circle == right_circle_out_out) ? "right_circle_out_out" :
+				(MI.state_l_circle == left_circle_in_find) ? "left_circle_in_find" :
+				(MI.state_l_circle == left_circle_in_strai) ? "left_circle_in_strai" :
+				(MI.state_l_circle == left_circle_in_circle) ? "left_circle_in_circle" :
+				(MI.state_l_circle == left_circle_inside_before) ? "left_circle_inside_before" :
+				(MI.state_l_circle == left_circle_inside) ? "left_circle_inside" :
+				(MI.state_l_circle == left_circle_out) ? "left_circle_out" :
+				(MI.state_l_circle == left_circle_out_find) ? "left_circle_out_find" :
+				(MI.state_l_circle == left_circle_out_strai) ? "left_circle_out_strai" :
+	 			"other")),
+				textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	textOrg.y += textSize.height + interval;
+	}
+
+	if(state_out == turn_state)
+	{
+		putText(store.image_show, "turn state: " + 
+		string(((MI.state_turn_state == turn_inside) ? "turn_inside" :
+				(MI.state_turn_state == turn_slow_down) ? "turn_slow_down" :
+	 			"other")),
+				textOrg, fontFace, fontScale, mainColor, thickness, 8);
+		textOrg.y += textSize.height + interval;
+	}
 
     putText(store.image_show, "kp: " + to_string(cur_kp), textOrg, fontFace, fontScale, mainColor, thickness, 8);
     textOrg.y += textSize.height + interval;
@@ -1944,10 +1972,21 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     putText(store.image_show, "current_speed: " + to_string(current_speed), textOrg, fontFace, fontScale, mainColor, thickness, 8);
 	textOrg.y += textSize.height + interval;
 
-    putText(store.image_show, "deviation: " + to_string(deviation), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	putText(store.image_show, "angle forward dist: " + to_string(MainImage::angle_new_forward_dist), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	textOrg.y += textSize.height + interval;
+	
+    putText(store.image_show, "angle deviation: " + to_string(angle_deviation), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	textOrg.y += textSize.height + interval;
+	
+    putText(store.image_show, "speed deviation: " + to_string(speed_deviation), textOrg, fontFace, fontScale, mainColor, thickness, 8);
 	textOrg.y += textSize.height + interval;
 
-    putText(store.image_show, "end point size: " + to_string(right_end_point.size()), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+    putText(store.image_show, "slope: " + to_string(MainImage::slope), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	textOrg.y += textSize.height + interval;
+
+    putText(store.image_show, "curvature_near: " + to_string(MainImage::curvature_near), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+	textOrg.y += textSize.height + interval;
+    // putText(store.image_show, "end point size: " + to_string(right_end_point.size()), textOrg, fontFace, fontScale, mainColor, thickness, 8);
 
     resize(store.image_show, store.image_show, cv::Size(IMGW * 2, IMGH * 2));
     if (re.set.color)store.wri << store.image_BGR;
