@@ -1,3 +1,0 @@
-/root/big_boss/ai/build/CMakeFiles/rebuild_cache.dir
-/root/big_boss/ai/build/CMakeFiles/detection.dir
-/root/big_boss/ai/build/CMakeFiles/edit_cache.dir

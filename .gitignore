@@ -3,6 +3,7 @@
 *.o
 *.cmake
 control/build
+ai/build
 *.avi
 *.mp4
 result.txt
