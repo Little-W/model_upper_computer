@@ -711,14 +711,14 @@ int main()
 		{
 			angle_result = AC.output(Re.turn.angle_ctrl_deviation_coef * angle_deviation +
 								     Re.turn.angle_ctrl_slope_coef * cur_slope);
-			if(MI.state_out == turn_slow_down)
+			if(MI.state_turn_state == turn_slow_down)
 			{
 				// disable_motor = false;
 				if(speed_result > Re.turn.speed_in || speed_result == 0)
 					speed_result = Re.turn.speed_in;
 				cout <<"speed in" << Re.turn.speed_in << endl;
 			}
-			else if(MI.state_out == turn_inside)
+			else if(MI.state_turn_state == turn_inside)
 			{
 				speed_result = SC_turn.output(Re.turn.speed_ctrl_deviation_coef * speed_deviation + 
 									 	 Re.turn.speed_ctrl_slope_coef * cur_slope);
