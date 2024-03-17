@@ -78,19 +78,19 @@ float MainImage::AngelDeviation(void)
 	//int center=(IMGW/2+last_center)/2;
 	long long sum;
 	
-	if (state_out == farm_find) {
-		MainImage::deviation_thresh = IMGH - re.farm.dist;
+	if (state_out == cone_find) {
+		MainImage::deviation_thresh = IMGH - re.cone.dist;
 		sum = 0;
-		for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - re.farm.up_scope; i--) {
+		for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - re.cone.up_scope; i--) {
 			sum += center_point[i];
 		}
-		angle_deviation = re.main.forward_coef1 * (center - float(sum) / re.farm.up_scope);
+		angle_deviation = re.main.forward_coef1 * (center - float(sum) / re.cone.up_scope);
 		
 		sum = 0;
-		for (i = MainImage::deviation_thresh + re.farm.down_scope; i > MainImage::deviation_thresh; i--) {
+		for (i = MainImage::deviation_thresh + re.cone.down_scope; i > MainImage::deviation_thresh; i--) {
 			sum += center_point[i];
 		}
-		angle_deviation += re.main.forward_coef2 * (center - float(sum) / re.farm.down_scope);
+		angle_deviation += re.main.forward_coef2 * (center - float(sum) / re.cone.down_scope);
 		cout << "deviation: " << angle_deviation << endl;
 	}
 	else {
@@ -174,41 +174,65 @@ float MainImage::SpeedDeviation(void)
 {
 	
 	int i, j;
-	float speed_deviation = 0;
 	int center = IMGW / 2;
 	// center += 10;
 	//int center=(IMGW/2+last_center)/2;
 	long long sum;
 
 	//速度大于阈值时对前瞻进行动态调整:forward_dist forward_coef1
-	double new_forward_dist =
+	double new_forward_dist_far =
 		dy_forward_dist_up(re.main.speed_dy_forward_dist_kp, re.main.speed_dy_forward_dist_kd,
 						   re.main.speed_enc_forward_dist_coef, re.main.speed_enc_forward_dist_exp,
-						   re.main.speed_forward_dist, re.main.speed_enc_forward_threshold,
-						   re.main.speed_max_enc_forward_dist);
-						   
-	cout << "speed forward_dist is: " << new_forward_dist << endl;
-	MainImage::speed_deviation_thresh = IMGH - new_forward_dist;	
+						   re.main.speed_forward_dist_far, re.main.speed_enc_forward_threshold,
+						   re.main.speed_max_enc_forward_dist_far);
+	cout << "speed new_forward_dist_far is: " << new_forward_dist_far << endl;
+	double new_forward_dist_near =
+		dy_forward_dist_up(re.main.speed_dy_forward_dist_kp, re.main.speed_dy_forward_dist_kd,
+						   re.main.speed_enc_forward_dist_coef, re.main.speed_enc_forward_dist_exp,
+						   re.main.speed_forward_dist_near, re.main.speed_enc_forward_threshold,
+						   re.main.speed_max_enc_forward_dist_near);
+
+	cout << "speed new_forward_dist_near is: " << new_forward_dist_near << endl;
+	MainImage::speed_deviation_thresh_far = IMGH - new_forward_dist_far;	
+	MainImage::speed_deviation_thresh_near = IMGH - new_forward_dist_near;	
 
 	sum = 0;
 	// update_forward_dist();
-	for (i = MainImage::speed_deviation_thresh; i > MainImage::speed_deviation_thresh - re.main.up_scope; i--) {
+	for (i = MainImage::speed_deviation_thresh_far; i > MainImage::speed_deviation_thresh_far - re.main.up_scope; i--) {
 		sum += center_point[i];
 	}
 	//根据速度动态调整权重
 	
-	speed_deviation = re.main.forward_coef1 * (center - float(sum) / re.main.up_scope);
+	speed_deviation_far = re.main.forward_coef1 * (center - float(sum) / re.main.up_scope);
 	sum = 0;
-	for (i = MainImage::speed_deviation_thresh + re.main.down_scope; i > MainImage::speed_deviation_thresh; i--) {
+	for (i = MainImage::speed_deviation_thresh_far + re.main.down_scope; i > MainImage::speed_deviation_thresh_far; i--) {
 		sum += center_point[i];
 	}
-	speed_deviation += re.main.forward_coef2 * (center - float(sum) / re.main.down_scope);
+	speed_deviation_far += re.main.forward_coef2 * (center - float(sum) / re.main.down_scope);
 	// deviation += 18.0;
 	//if (deviation < -15) deviation -= 4;
 	//else if (deviation > 15) deviation += 4;
-	cout << "speed deviation: " << speed_deviation << endl;
+	cout << "speed speed_deviation_far: " << speed_deviation_far << endl;
+
+	sum = 0;
+	// update_forward_dist();
+	for (i = MainImage::speed_deviation_thresh_near; i > MainImage::speed_deviation_thresh_near - re.main.up_scope; i--) {
+		sum += center_point[i];
+	}
+	//根据速度动态调整权重
 	
-	return speed_deviation;
+	speed_deviation_near = re.main.forward_coef1 * (center - float(sum) / re.main.up_scope);
+	sum = 0;
+	for (i = MainImage::speed_deviation_thresh_near + re.main.down_scope; i > MainImage::speed_deviation_thresh_near; i--) {
+		sum += center_point[i];
+	}
+	speed_deviation_near += re.main.forward_coef2 * (center - float(sum) / re.main.down_scope);
+	// deviation += 18.0;
+	//if (deviation < -15) deviation -= 4;
+	//else if (deviation > 15) deviation += 4;
+	cout << "speed speed_deviation_near: " << speed_deviation_near << endl;
+	
+	return speed_deviation_near;
 }
 ImageStorage::ImageStorage()
 {
@@ -288,13 +312,16 @@ void ImageStorage::get_image(int x, int y, int w, int h, int ai_x, int ai_y, int
 	} while (!success);
 	//cv::Rect roi(50, 180, 540, 280);
 	cv::Rect roi(x, y, w, h);
+	frame = frame + Scalar(20, 20 ,20);
 	image_BGR = frame;
 	frame = frame(roi);
 	image_BGR_small = frame.clone();
 	resize(image_BGR_small, image_BGR_small, cv::Size(IMGW, IMGH));//120*160	
 	split(image_BGR_small, image_split);
 	image_R = image_split[2];
+	image_B = image_split[0];
 	threshold(image_R, image_mat, 0, 255, THRESH_BINARY | THRESH_OTSU);//大津法
+	threshold(image_B, image_mat_cone, 0, 255, THRESH_BINARY | THRESH_OTSU);//大津法
 
 	cv::Rect roi2(ai_x, ai_y, ai_w, ai_h);
 	image_BGR = image_BGR(roi2);
@@ -534,7 +561,7 @@ MainImage::MainImage() : re("./config.yaml")
 	state_end_line = end_line_find;
 	state_hill = hill_on;
 	state_right_garage = right_garage_before;
-	
+	state_cone = judge_side;//cone_common;
 	last_center = IMGW / 2;
 	count_circle = 0;
 	zebra_far_find = false;
@@ -573,6 +600,8 @@ void MainImage::init(bool complete = true)
 		right_cone.clear();
 		center_cone.clear();
 		cone_number.clear();
+		left_cone_point.clear();
+		right_cone_point.clear();
 		lost_left = false;
 		lost_right = false;
 		left_continue = true;
@@ -588,14 +617,14 @@ void MainImage::init(bool complete = true)
 */
 void MainImage::update_image()
 {
-	if (state_out == straight)
+	if (state_out == straight || state_out == turn_state)
 		store.get_image(re.set.cut_point_x, re.set.cut_point_y, re.set.cut_w, re.set.cut_h, re.set.ai_cut_x, re.set.ai_cut_y, re.set.ai_w, re.set.ai_h, false);
 	else
 		store.get_image(re.set.cut_point_x, re.set.cut_point_y, re.set.cut_w, re.set.cut_h, re.set.ai_cut_x, re.set.ai_cut_y, re.set.ai_w, re.set.ai_h, true);
 	init();
 	find_edge_point();//找边界点
 	find_end_point();//找断点
-	if (state_out == straight) edge_filter(12);
+	if (state_out == straight || state_out == turn_state) edge_filter(10);
 	find_end_point();
 	end_filter();
 	judge_lost();
@@ -636,32 +665,71 @@ void MainImage::state_judge()
 	// if (store.cone_flag == false){
 	// 	state_out = straight;
 	// }
-	if (state_out == straight||state_out == turn_state){
-		int yellow_count=0;
+	if (state_out == straight || state_out == turn_state)
+	{  
+		int b_count=0;
 		for(int i = IMGH-1; i > center_lost; i--){
-			
-			// uchar* row = store.image_BGR_small.ptr<uchar>(i);
-			for(int j = left_edge_point[i]; j < right_edge_point[i]; j++){
-				cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
-				if(val[0]<=50 && val[1]>=120 && val[2]>=120){
-					yellow_count++;
-				}
-				if(yellow_count > 5){
-					state_out = cone_find;
-					break;
+			uchar* row_b = store.image_mat_cone.ptr<uchar>(i);
+			uchar* row_r = store.image_mat.ptr<uchar>(i);
+			if(exist_left_edge_point[i]&& exist_right_edge_point[i]){
+				for(int j = left_edge_point[i]+2; j < right_edge_point[i]-2; j++){
+					// cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
+					
+					if(row_b[j] == 0&&row_r[j]!=0){
+						b_count++;
+					}
+					// if(val[0]<=150 && val[1]>=120 && val[2]>=120){
+					// 	yellow_count++;
+					// }
+					// if(val[0]< 150){
+					// int r = val[2];
+					// int g = val[1];
+					// int b = val[0];
+					// cout<<"b"<<b<<"g"<<g<<"r"<<r<<endl;
+					// }
+
+					// if(b_count > 10){
+					// 	cout<<"cone ppint find"<<b_count<<endl;;
+					// 	state_out = cone_find;
+					// 	// break;
+					// }
 				}
 			}
+			// if(state_out == cone_find){
+			// 	break;
+			// }
+
 		}
-	}
-	if (state_out == straight||state_out == turn_state)
-	{  
+		cout<<"bcount"<<b_count<<endl;
+		if(b_count > 50){
+			cout<<"cone ppint find"<<b_count<<endl;;
+			state_out = cone_find;
+			// break;
+			}
+
+		if(state_out == turn_state)
+		{
+			if((smoothed_curvature_near < re.turn.turn_curvature_thresh && 
+				smoothed_curvature_far < re.turn.turn_curvature_thresh) && 
+				abs(speed_deviation_near) <= re.turn.turn_deviation_thresh)
+			{
+				state_out = straight;
+			}
+			else if(smoothed_curvature_near > re.turn.turn_curvature_thresh || 
+					abs(angle_deviation) > re.turn.turn_deviation_thresh)
+			{
+				state_out = turn_state;
+				state_turn_state = turn_inside;
+			}
+		}
 
 		if (re.set.zebra_detect) {
 			find_far_zebra();
 			find_near_zebra();
 		}
+
 		if (zebra_far_find) {
-			state_out = state_end;//garage_find;
+			state_out = state_end; //garage_find;
 		}
 		// else if(store.cone_flag == true){
 		// 	state_out = cone_find;
@@ -693,60 +761,20 @@ void MainImage::state_judge()
 				state_out = left_circle;
 			}
 		}
-		else if(smoothed_curvature_near > re.turn.turn_curvature_thresh || 
-				abs(slope) >= re.turn.turn_slope_thresh || 
-				abs(angle_deviation) > re.turn.turn_deviation_thresh)
-		{
-			state_out = turn_state;
-			state_turn_state = turn_inside;
-		}
-		else if(smoothed_curvature_far > re.turn.turn_curvature_thresh)
+		else if (((abs(speed_deviation_far) > re.turn.turn_deviation_thresh &&
+				   abs(speed_deviation_near) < re.turn.turn_deviation_thresh)) &&
+				 !(center_lost > re.turn.inside_centerlost_thresh))
 		{
 			state_out = turn_state;
 			state_turn_state = turn_slow_down;
+			cout << "turn_slow_down" << endl;
 		}
-	}
-	if(state_out == turn_state)
-	{
-		if(smoothed_curvature_near < re.turn.turn_curvature_thresh && 
-				smoothed_curvature_far < re.turn.turn_curvature_thresh && 
-				abs(slope) < re.turn.turn_out_slope_thresh)
-		{
-			state_out = straight;
-		}
-		// else if (r_circle_use && right_end_point.size() >= 5 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)
-		// {
-		// 	bool f = true;
-		// 	int i;
-		// 	for (i = right_end_point[1].y - 10; i > right_end_point[4].y - 1; i--) {
-		// 		if (!(exist_left_edge_point[i] && abs(left_edge_point[i] - left_edge_point[i + 1]) < 3)) {
-		// 			f = false;
-		// 			break;
-		// 		}
-		// 	}
-		// 	if (f) {
-		// 		state_out = right_circle;
-		// 	}
-		// }
-		// else if (l_circle_use && left_end_point.size() >= 5 && left_branch_num >= 2 && abs(left_end_point[1].y - left_end_point[4].y) > 35) {
-		// 	bool f = true;
-		// 	int i;
-		// 	for (i = left_end_point[1].y - 10; i > left_end_point[4].y - 1; i--) {
-		// 		if (!(exist_right_edge_point[i] && abs(right_edge_point[i] - right_edge_point[i + 1]) < 3)) {
-		// 			f = false;
-		// 			break;
-		// 		}
-		// 	}
-		// 	if (f) {
-		// 		state_out = left_circle;
-		// 	}
-		// }
-		else if(smoothed_curvature_near > re.turn.turn_curvature_thresh || 
-		    	abs(slope) >= re.turn.turn_slope_thresh || 
-				abs(angle_deviation) > re.turn.turn_deviation_thresh)
+		else if(abs(speed_deviation_near) > re.turn.turn_deviation_thresh || 
+				center_lost > re.turn.inside_centerlost_thresh)
 		{
 			state_out = turn_state;
 			state_turn_state = turn_inside;
+			cout << "turn_inside" << endl;
 		}
 	}
 	else if (state_out == state_end) {
@@ -923,6 +951,18 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& 
 		}
 		return;
 	}
+	// case cone_find: {
+	// 	switch(state_cone){
+	// 		case judge_side:{
+	// 		kp = re.cone.kp;
+	// 		kd = re.cone.kd;
+	// 		ki = re.cone.ki;
+	// 		slow_down_kd = re.main.slow_down_kd;
+	// 		return;				
+	// 		}
+	// 	}
+	// 	return;
+	// }
 	case right_circle: {
 		slow_down_kd = re.r_circle.circle_slow_down_kd;
 		circle_pid_update(state_r_circle,kp,kd,ki);
@@ -1028,7 +1068,7 @@ void MainImage::mend_trunk()
 			}
 		}
 	}
-	if((left_end_point[0].y < 50 && left_end_point[0].x > 50)||(right_end_point[0].y < 50 && right_end_point[0].x < 110)){
+	if((left_end_point[0].y < 50 && left_end_point[0].x > 40)||(right_end_point[0].y < 50 && right_end_point[0].x < 120)){
 		line(store.image_mat, right_end_point[0], left_end_point[0]);
 	}
 }
@@ -1361,9 +1401,23 @@ void MainImage::find_edge_point()
 			if (this_row[j - 1] != 0 && this_row[j] == 0) {
 				if (j < last_right + 2)
 				{//j <= last_right + 2&&(abs(j-last_right)<20    abs(j-last_right) <=  5
+				    // bool right_edge = true;
+
+				    // for(int edge_refine = j; edge_refine < j + 10; j++){
+					// 	if(this_row[edge_refine] != 0){
+					// 		right_edge = false;
+					// 		cerr<<"here"<<endl;
+					// 		break;
+					// 	}
+					// }
+					// if(right_edge){
 					right_edge_point[i] = j;
 					exist_right_edge_point[i] = true;
 					last_right = j;
+					// }
+					// else {
+				// 	// exist_left_edge_point[i] = false;
+				// }
 				}
 				else {
 					exist_right_edge_point[i] = false;
@@ -1380,9 +1434,22 @@ void MainImage::find_edge_point()
 			if (this_row[j + 1] != 0 && this_row[j] == 0) {
 				if (j > last_left - 2)
 				{  //j >= last_left - 2abs(j - last_left) <= 5
+				    // bool left_edge = true;
+
+				    // for(int edge_refine = j; edge_refine > j - 10; j--){
+					// 	if(this_row[edge_refine] != 0){
+					// 		left_edge = false;
+					// 		break;
+					// 	}
+					// }
+					// if(left_edge){
 					left_edge_point[i] = j;
 					exist_left_edge_point[i] = true;
 					last_left = j;
+				// 	}
+				// 	else {
+				// 	exist_left_edge_point[i] = false;
+				// }
 				}
 				else {
 					exist_left_edge_point[i] = false;
@@ -1391,6 +1458,8 @@ void MainImage::find_edge_point()
 			}
 
 		}
+
+		
 		if (last_left > last_right) {
 			center_lost = i;
 			exist_left_edge_point[i] = false;
@@ -1427,6 +1496,22 @@ void MainImage::find_edge_point()
 				break;
 			}
 		}
+		// if(exist_left_edge_point[i] && exist_right_edge_point[i]&& i < IMGH-3){
+		// 	int count_zebra = 0;
+		// 	for(int zebra_judge = left_edge_point[i]; zebra_judge < right_edge_point[i]; zebra_judge++){
+		// 		uchar* zebra_row = mat.ptr(i-5);
+		// 		if(zebra_row[zebra_judge]!=zebra_row[zebra_judge+1]){
+		// 			count_zebra++;
+		// 		}
+		// 	}
+		// 	if(count_zebra > 8){
+		// 		for(int lost = i; lost > i - 5; lost--){
+		// 			exist_left_edge_point[lost] = false;
+		// 			exist_right_edge_point[lost] = false;	
+		// 		center_lost = i - 4;				
+		// 		}
+		// 	}
+		// }
 		count = 0;
 		center = (last_left + last_right) / 2;
 		center_point[i] = center;
@@ -1575,8 +1660,7 @@ float MainImage::get_curvature_far(void)
 	{
 		return curvature_far;
 	}
-	while((slope_thresh_far - re.main.curvature_up_scope) < center_lost && 
-		  (slope_thresh_far + re.main.curvature_down_scope) > (IMGH - 1))
+	while((slope_thresh_far - re.main.curvature_up_scope) < center_lost)
 	{
 		slope_thresh_far++;
 	}
@@ -1682,8 +1766,7 @@ float MainImage::get_curvature_near(void)
 	{
 		return curvature_near;
 	}
-	while((slope_thresh_near - re.main.curvature_up_scope) < center_lost && 
-		  (slope_thresh_near + re.main.curvature_down_scope) > (IMGH - 1))
+	while((slope_thresh_near - re.main.curvature_up_scope) < center_lost)
 	{
 		slope_thresh_near++;
 	}
@@ -1773,7 +1856,7 @@ float MainImage::get_curvature_near(void)
 	}
 	else
 	{
-			smoothed_curvature_near = curvature_near * 0.7 + smoothed_curvature_near * 0.3;
+		smoothed_curvature_near = curvature_near * 0.7 + smoothed_curvature_near * 0.3;
 	}
 	cout << "smoothed_curvature_near: " << smoothed_curvature_near << endl;
 	return curvature_near;
@@ -1788,11 +1871,11 @@ float MainImage::get_slope_near(void)
 	{
 		return slope;
 	}
-	while((slope_thresh_near - re.main.curvature_up_scope) < center_lost && 
-		  (slope_thresh_near + re.main.curvature_down_scope) > (IMGH - 1))
+	while((slope_thresh_near - re.main.curvature_up_scope) < center_lost)
 	{
 		slope_thresh_near++;
 	}
+	
 	p1.y = slope_thresh_near - re.main.curvature_up_scope;
 	// p2.y = slope_thresh_near;
 	// p3.y = slope_thresh_near + re.main.curvature_down_scope;
@@ -1954,6 +2037,8 @@ void MainImage::find_center()
 			*/
 		}
 	}
+
+
 	if (center_lost != -1) {
 		if (center_lost < IMGH - 1) {
 			for (int i = center_lost; i > -1; i--) {
@@ -1970,6 +2055,9 @@ void MainImage::find_center()
 	{
 		store.global_center[i]=center_point[i];
 	}
+
+
+
 }
 
 void MainImage::find_end_point() {
@@ -2154,6 +2242,16 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
             
         }
     }
+
+
+	for (int i = 0; i < left_cone_point.size(); i++){
+		store.image_show.at<Vec3b>(left_cone_point[i].y, left_cone_point[i].x) = Vec3b(0, 0, 0);
+	}
+	for (int i = 0; i < right_cone_point.size(); i++){
+		store.image_show.at<Vec3b>(right_cone_point[i].y, right_cone_point[i].x) = Vec3b(0, 0, 0);
+	}
+
+
 	for(int i = IMGH-1; i > center_lost; i--){
 		store.image_show.at<Vec3b>(i, center_point[i]) = Vec3b(0, 255, 255);
 	}
@@ -2170,9 +2268,14 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 	store.image_show.at<Vec3b>((MainImage::deviation_thresh - re.main.up_scope), 80) = Vec3b(60, 90, 30);
 	store.image_show.at<Vec3b>((MainImage::deviation_thresh + re.main.down_scope),80) = Vec3b(60, 90, 30);
 
-	store.image_show.at<Vec3b>(MainImage::speed_deviation_thresh, 80) = Vec3b(0, 0, 255);
-	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh - re.main.up_scope), 80) = Vec3b(0, 0, 255);
-	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh + re.main.down_scope),80) = Vec3b(0, 0, 255);
+	store.image_show.at<Vec3b>(MainImage::speed_deviation_thresh_near, 80) = Vec3b(74, 23, 145);
+	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh_near - re.main.up_scope), 80) = Vec3b(74, 23, 145);
+	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh_near + re.main.down_scope),80) = Vec3b(74, 23, 145);
+
+	store.image_show.at<Vec3b>(MainImage::speed_deviation_thresh_far, 80) = Vec3b(77, 80, 44);
+	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh_far - re.main.up_scope), 80) = Vec3b(77, 80, 44);
+	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh_far + re.main.down_scope),80) = Vec3b(77, 80, 44);
+
 	store.image_show.at<Vec3b>((MI.center_lost),80) = Vec3b(127, 127, 255);
 	store.image_show.at<Vec3b>((slope_thresh_near),80) = Vec3b(255, 0, 255);
 	store.image_show.at<Vec3b>(top_cone.y, top_cone.x) = Vec3b(0, 255, 0);
@@ -2199,6 +2302,7 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 				(state_out == left_circle) ? "left_circle" :
 				(state_out == turn_state) ? "turn" :
 				(state_out == start_state) ? "start_state" :
+				(state_out == cone_find) ? "cone_find" :
 	 			"other")),
 				textOrg, fontFace, fontScale, mainColor, thickness, 8);
 	textOrg.y += textSize.height + interval;
@@ -2238,6 +2342,16 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 		textOrg.y += textSize.height + interval;
 	}
 
+	if(state_out == cone_find)
+	{
+		putText(store.image_show, "cone state: " + 
+		string(((MI.state_turn_state == cone_slowdown) ? "cone_slowdown" :
+				(MI.state_turn_state == judge_side) ? "judge_side" :
+	 			"other")),
+				textOrg, fontFace, fontScale, mainColor, thickness, 8);
+		textOrg.y += textSize.height + interval;
+	}
+
     putText(store.image_show, "kp: " + to_string(cur_kp), textOrg, fontFace, fontScale, mainColor, thickness, 8);
     textOrg.y += textSize.height + interval;
 
@@ -2256,7 +2370,7 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
     putText(store.image_show, "angle deviation: " + to_string(angle_deviation), textOrg, fontFace, fontScale, mainColor, thickness, 8);
 	textOrg.y += textSize.height + interval;
 	
-    putText(store.image_show, "speed deviation: " + to_string(speed_deviation), textOrg, fontFace, fontScale, mainColor, thickness, 8);
+    putText(store.image_show, "speed deviation far: " + to_string(speed_deviation_far), textOrg, fontFace, fontScale, mainColor, thickness, 8);
 	textOrg.y += textSize.height + interval;
 
     putText(store.image_show, "slope: " + to_string(MainImage::slope), textOrg, fontFace, fontScale, mainColor, thickness, 8);
@@ -2652,12 +2766,12 @@ void MainImage::produce_dv(int error) {
 }
 
 
-bool j_start_line(const MainImage& mi, uchar& state_in){
+bool j_zebra_line(const MainImage& mi, uchar& state_in){
 	bool j_line = false;
 	for(int i = IMGH-1; i > 0; i--){
 		int cross_count=0;
 		const uchar* row = mi.store.image_mat.ptr<uchar>(i);
-		for(int j = 0; j < IMGW-2; j++){
+		for(int j = mi.left_edge_point[i]-5; j < mi.right_edge_point[i]+5; j++){
 			if(row[j]!=row[j+1]){
 				cross_count++;
 			}
@@ -3246,7 +3360,7 @@ void MainImage::find_far_zebra() {
 		for (; j < IMGW; j++) {
 			if (r[j] == 0 && r[j + 1] == 0 && r[j + 2] == 0 && r[j + 3] == 0 && r[j + 4] == 0 && r[j + 5] == 0 && r[j + 6] == 0 && r[j + 7] == 0 && r[j + 8] == 0) break;
 			if (r[j] != r[j + 1]) count++;
-			if ((r[j] != 0 && r[j + 1] == 0 && r[j + 2] != 0) || (r[j] != 0 && r[j + 1] == 0 && r[j + 2] == 0 && r[j + 3] != 0)) count = count - 2;
+			// if ((r[j] != 0 && r[j + 1] == 0 && r[j + 2] != 0) || (r[j] != 0 && r[j + 1] == 0 && r[j + 2] == 0 && r[j + 3] != 0)) count = count - 2;
 		}
 		if (count >= 10) {
 			r_count++;
@@ -3296,3 +3410,237 @@ void MainImage::find_near_zebra() {
 	zebra_near_find = false;
 
 }
+
+void MainImage::judge_cone_side(){
+	int right_b_count = 0;
+	int left_b_count=0;
+	int left_cone_x = 0;
+	int left_cone_y = 0;
+	int right_cone_x = 0;
+	int right_cone_y = 0;
+	Point left_cone;
+	Point right_cone;
+	left_cone.y = 0;
+	right_cone.y = 0;
+	int last_right_cone, last_left_cone;
+	int right_cone_num, left_cone_num=0;
+	int last_right_y = 0;
+	int last_left_y = 0;
+	int start_left, start_right = 0;
+	exist_right_cone = false;
+	exist_left_cone = false;
+	for(int i = IMGH-1; i > center_lost; i--){
+		uchar* row_b = store.image_mat_cone.ptr<uchar>(i);
+		uchar* row_r = store.image_mat.ptr<uchar>(i);
+		// if(b_count>35){
+		// 	break;
+		// }
+		if(exist_left_edge_point[i]&& exist_right_edge_point[i]){
+			for(int j = left_edge_point[i]+5; j < center_point[i]; j++){
+				if(row_b[j] == 0&&row_r[j]!=0){
+					if(last_left_y!=0 && abs(last_left_y - i) > 5 && exist_right_cone && exist_left_cone){
+						break;
+					}
+					if(left_b_count==0){
+						start_left = i;
+					}
+					left_cone.x = j;
+					left_cone.y = i;
+					left_cone_point.push_back(left_cone);
+					// store.image_mat.ptr<uchar>(i)[j] = 0;
+					left_cone_x+=j;
+					// cone_right+=abs(j-mi.right_edge_point[i]);
+					left_cone_y+=i;
+					left_b_count++;
+					last_left_y = i;
+					
+				}
+			}
+			for(int j = right_edge_point[i]-5; j > center_point[i]; j--){
+				if(row_b[j] == 0&&row_r[j]!=0){
+					if(last_right_y!=0 && abs(last_right_y - i) > 5 && exist_right_cone && exist_left_cone){
+						break;
+					}
+					if(right_b_count==0){
+						start_right = i;
+					}
+					right_cone.x = j;
+					right_cone.y = i;
+					right_cone_point.push_back(right_cone);
+					// cerr<<"hey"<<endl;
+					// store.image_mat.ptr<uchar>(i)[j] = 0;
+					right_cone_x+=j;
+					// cone_right+=abs(j-mi.right_edge_point[i]);
+					right_cone_y+=i;
+					right_b_count++;
+					last_right_y = i;
+					// cerr<<start_right<<endl;
+				}
+			}
+		}else if(!exist_right_edge_point[i]&&exist_left_edge_point[i]){
+			for(int j = left_edge_point[i]+5; j < center_point[i]; j++){
+				if(row_b[j] == 0&&row_r[j]!=0){
+					if(last_left_y!=0 && abs(last_left_y - i) > 5 && exist_right_cone && exist_left_cone){
+						break;
+					}
+					if(left_b_count==0){
+						start_left = i;
+					}
+					left_cone.x = j;
+					left_cone.y = i;
+					left_cone_point.push_back(left_cone);
+					// store.image_mat.ptr<uchar>(i)[j] = 0;
+					left_cone_x+=j;
+					// cone_right+=abs(j-mi.right_edge_point[i]);
+					left_cone_y+=i;
+					left_b_count++;
+					last_left_y = i;
+					
+				}
+			}
+			for(int j = IMGW-6; j > center_point[i]; j--){
+				if(row_b[j] == 0&&row_r[j]!=0){
+					if(last_right_y!=0 && abs(last_right_y - i) > 5 && exist_right_cone && exist_left_cone){
+						break;
+					}
+					if(right_b_count==0){
+						start_right = i;
+					}
+					right_cone.x = j;
+					right_cone.y = i;
+					right_cone_point.push_back(right_cone);
+					// cerr<<"hey"<<endl;
+					// store.image_mat.ptr<uchar>(i)[j] = 0;
+					right_cone_x+=j;
+					// cone_right+=abs(j-mi.right_edge_point[i]);
+					right_cone_y+=i;
+					right_b_count++;
+					last_right_y = i;
+					// cerr<<start_right<<endl;
+				}
+			}
+		}else if(exist_right_edge_point[i]&&!exist_left_edge_point[i]){
+			for(int j = 5; j < center_point[i]; j++){
+				if(row_b[j] == 0&&row_r[j]!=0){
+					if(last_left_y!=0 && abs(last_left_y - i) > 5 && exist_right_cone && exist_left_cone){
+						break;
+					}
+					if(left_b_count==0){
+						start_left = i;
+					}
+					left_cone.x = j;
+					left_cone.y = i;
+					left_cone_point.push_back(left_cone);
+					// store.image_mat.ptr<uchar>(i)[j] = 0;
+					left_cone_x+=j;
+					// cone_right+=abs(j-mi.right_edge_point[i]);
+					left_cone_y+=i;
+					left_b_count++;
+					last_left_y = i;
+					
+				}
+			}
+			for(int j = right_edge_point[i]-5; j > center_point[i]; j--){
+				if(row_b[j] == 0&&row_r[j]!=0){
+					if(last_right_y!=0 && abs(last_right_y - i) > 5 && exist_right_cone && exist_left_cone){
+						break;
+					}
+					if(right_b_count==0){
+						start_right = i;
+					}
+					right_cone.x = j;
+					right_cone.y = i;
+					right_cone_point.push_back(right_cone);
+					// cerr<<"hey"<<endl;
+					// store.image_mat.ptr<uchar>(i)[j] = 0;
+					right_cone_x+=j;
+					// cone_right+=abs(j-mi.right_edge_point[i]);
+					right_cone_y+=i;
+					right_b_count++;
+					last_right_y = i;
+					// cerr<<start_right<<endl;
+				}
+			}
+		}
+		if(left_b_count>20){
+			exist_left_cone = true;
+		}
+		if(right_b_count>20){
+			exist_right_cone = true;
+		}
+
+	}
+	// if(right_b_count>25&&left_b_count>25){
+	if((right_cone_y/right_b_count)>(left_cone_y/left_b_count)&&exist_right_cone){
+		right_cone_first = true;
+		left_cone_first = false;
+		// state_cone = first_right_cone;
+
+	}
+	else if((right_cone_y/right_b_count)<(left_cone_y/left_b_count)&&exist_left_cone){
+		// state_cone = first_left_cone;
+		left_cone_first = true;
+		right_cone_first = false;
+
+	}
+	else{
+		if(!exist_left_cone&&!exist_left_cone){
+			state_out = straight;
+		}
+	}
+	single_right_cone.x = right_cone_x/right_b_count;
+	single_right_cone.y = right_cone_y/right_b_count;
+	single_left_cone.x = left_cone_x/left_b_count;
+	single_left_cone.y = left_cone_x/left_b_count;
+	Point cone_edge_point;
+	Point cone_end_point;
+	if(left_cone_first){
+		cone_edge_point.x = single_left_cone.x;
+		cone_edge_point.y = single_left_cone.y;
+		// cone_end_point.x = right_edge_point[single_left_cone.y+10];
+		// cone_end_point.y = single_left_cone.y+10;
+		for(int i = IMGH-1; i >last_left_y ; i--){
+			exist_left_edge_point[i] = true;
+			left_edge_point[i] = center_point[i]+10;
+		}
+
+		// for(int i = start_right; i > last_right_y; i--){
+		// 	right_edge_point[i] = center_point[i];
+		// 	// cerr<<"hey"<<endl;
+		// }
+	}else{
+		cone_edge_point.x = single_right_cone.x;
+		cone_edge_point.y = single_right_cone.y;
+		// cone_end_point.x = right_edge_point[single_left_cone.y+10];
+		// cone_end_point.y = single_left_cone.y+10;
+		for(int i = IMGH-1; i > last_right_y; i--){
+			exist_right_edge_point[i] = true;
+			right_edge_point[i] = center_point[i]-10;
+		}
+		// for(int i = start_left; i > last_left_y; i--){
+		// 	left_edge_point[i] = center_point[i];
+		// }
+
+	}
+	find_center();
+	// }
+	// else if(rifht_b_cout)
+	// state_in = ((cone_left)>(cone_right)?first_right_cone:first_left_cone);
+	// if((cone_y/b_count) > Re.main.cone_slowdown_thresh){
+	// 	state_in = ((cone_left)>(cone_right)?first_right_cone:first_left_cone);
+	// }
+}
+
+// void MainImage::find_edge_point_for_cone(){
+// 	Point cone_edge_point;
+// 	Point cone_end_point;
+// 	if(left_cone_first){
+// 		cone_edge_point.x = single_left_cone.x;
+// 		cone_edge_point.y = single_left_cone.y;
+// 		cone_end_point.x = right_edge_point[single_left_cone.y+10];
+// 		cone_end_point.y = single_left_cone.y+10;
+// 		for(int i = IMGH-1; i > cone_edge_point.y; i--){
+// 			left_edge_point[i] = cone_edge_point.x;
+// 		}
+// 	}
+// }

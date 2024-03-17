@@ -25,6 +25,7 @@
 #define barn_find 7
 #define farm_find 8
 #define turn_state 9
+#define cone_find 10
 
 #define repair_in_find 11
 #define repair_out_out 12
@@ -88,10 +89,12 @@
 #define left_garage_stoped 66
 // #define right_garage_start_brake 56
 
-#define cone_find 70
+#define cone_common 70
 #define cone_out 71
 #define cone_slowdown 72
-
+#define first_right_cone 73
+#define first_left_cone 74
+#define judge_side 75
 #define start_state 81
 #define state_end 82
 #define end_line_find 83
@@ -139,6 +142,7 @@ private:
     BaseReader n_zebra;
     BaseReader n_hill;
     BaseReader n_turn;
+    BaseReader n_cone;
 public:
     struct pidv
     {
@@ -177,7 +181,8 @@ public:
         int speed_enc_forward_threshold;
         float speed_enc_forward_dist_coef;
         float speed_enc_forward_dist_exp;
-        int speed_max_enc_forward_dist;
+        int speed_max_enc_forward_dist_near;
+        int speed_max_enc_forward_dist_far;
         float speed_dy_forward_dist_kp;
         float speed_dy_forward_dist_kd;
         float dy_kp_threshold;
@@ -212,7 +217,8 @@ public:
         bool second_lap;
         float center_coef;
         int forward_dist;
-        int speed_forward_dist;
+        int speed_forward_dist_far;
+        int speed_forward_dist_near;
         int up_scope;
         int down_scope;
         float forward_coef1;
@@ -243,6 +249,9 @@ public:
         float deviation_coef;
         int cone_speed;
         int cone_slowdown_thresh;
+        float cone_trapezium_long;
+        float cone_trapezium_slope;
+        float cone_trapezium_slope_with_y;
     }main;
     struct {
         float kp;
@@ -260,6 +269,10 @@ public:
         float dy_forward_dist_coef_down;
         float dy_forward_dist_exp_down;
         float circle_slow_down_kd;
+        float slowdown_enhance_bezier_p0_ctrl_x;
+        float slowdown_enhance_bezier_p0_ctrl_y;
+        float slowdown_enhance_bezier_p1_ctrl_x;
+        float slowdown_enhance_bezier_p1_ctrl_y;
         bool use;
         bool big_circle;
         int count_start;
@@ -387,11 +400,20 @@ public:
         int mid_top_y;
         int frame;
     }hill;
+    struct {
+        float kp;
+        float kd;
+        float ki;
+        int dist;
+        int up_scope;
+        int down_scope;
+    }cone;
     struct{
         float turn_curvature_thresh;
         float turn_deviation_thresh;
         float turn_slope_thresh;
         float turn_out_slope_thresh;
+        int   inside_centerlost_thresh;
         float speed_ceiling;
         float speed_ground;
         float speed_in;

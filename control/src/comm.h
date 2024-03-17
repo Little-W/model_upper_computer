@@ -9,7 +9,9 @@
 // CRC-8 polynomial: x^8 + x^2 + x^1 + 1 (0x07)
 #define POLYNOMIAL 0x07
 #define INITIAL_REMAINDER 0x00
-#define TRANS_COUNT 20
+#define ANGLE_TRANS_COUNT 20
+#define SPEED_TRANS_COUNT 10
+#define ENC_SPEED_COUNT 5
 #define SPEED_TRANS_BEGIN 0xb6
 #define ANGLE_TRANS_BEGIN 0xd9
 #define TRANS_OVER 0xcc
@@ -17,7 +19,7 @@
 #define MAX_ANGLE_VAL 1133
 #define MAX_SPEED_VAL 682
 
-#define ENC_SPEED_SCALE 22.0
+#define ENC_SPEED_SCALE 14.0
 extern serial::Serial ser;
 extern float speed_result;
 extern float angle_result;

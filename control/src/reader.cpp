@@ -147,6 +147,7 @@ Reader::Reader(string path) {
     n_zebra=root["zebra"];
     n_hill=root["hill"];
     n_turn=root["turn"];
+    n_cone=root["cone"];
     //set
     set.video_save=n_set.get<bool>("video_save");
     set.color=n_set.get<bool>("color");
@@ -172,7 +173,8 @@ Reader::Reader(string path) {
     main.speed_enc_forward_threshold = n_main.get<int>("speed_enc_forward_threshold");
     main.speed_enc_forward_dist_coef = n_main.get<float>("speed_enc_forward_dist_coef");
     main.speed_enc_forward_dist_exp = n_main.get<float>("speed_enc_forward_dist_exp");
-    main.speed_max_enc_forward_dist = n_main.get<int>("speed_max_enc_forward_dist");
+    main.speed_max_enc_forward_dist_far = n_main.get<int>("speed_max_enc_forward_dist_far");
+    main.speed_max_enc_forward_dist_near = n_main.get<int>("speed_max_enc_forward_dist_near");
     main.speed_dy_forward_dist_kp = n_main.get<float>("speed_dy_forward_dist_kp");
     main.speed_dy_forward_dist_kd = n_main.get<float>("speed_dy_forward_dist_kd");
 
@@ -221,7 +223,8 @@ Reader::Reader(string path) {
     main.second_lap = n_main.get<bool>("second_lap");
     main.center_coef = n_main.get<float>("center_coef");
     main.forward_dist = n_main.get<int>("forward_dist");
-    main.speed_forward_dist = n_main.get<int>("speed_forward_dist");
+    main.speed_forward_dist_far = n_main.get<int>("speed_forward_dist_far");
+    main.speed_forward_dist_near = n_main.get<int>("speed_forward_dist_near");
     main.up_scope = n_main.get<int>("up_scope");
     main.down_scope = n_main.get<int>("down_scope");
     main.curvature_up_scope = n_main.get<int>("curvature_up_scope");
@@ -239,6 +242,9 @@ Reader::Reader(string path) {
     main.slope_coef = n_main.get<float>("slope_coef");
     main.cone_speed = n_main.get<int>("cone_speed");
     main.cone_slowdown_thresh = n_main.get<int>("cone_slowdown_thresh");
+    main.cone_trapezium_long = n_main.get<float>("cone_trapezium_long");
+    main.cone_trapezium_slope=n_main.get<float>("cone_trapezium_slope");
+    main.cone_trapezium_slope_with_y=n_main.get<float>("cone_trapezium_slope_with_y");
 
 
     //right_circle
@@ -256,6 +262,10 @@ Reader::Reader(string path) {
     r_circle.dy_forward_dist_coef_down = n_right_circle.get<float>("dy_forward_dist_coef_down");
     r_circle.dy_forward_dist_exp_down = n_right_circle.get<float>("dy_forward_dist_exp_down");
     r_circle.circle_slow_down_kd = n_right_circle.get<float>("circle_slow_down_kd");
+    r_circle.slowdown_enhance_bezier_p0_ctrl_x = n_right_circle.get<float>("slowdown_enhance_bezier_p0_ctrl_x");
+    r_circle.slowdown_enhance_bezier_p0_ctrl_y = n_right_circle.get<float>("slowdown_enhance_bezier_p0_ctrl_y");
+    r_circle.slowdown_enhance_bezier_p1_ctrl_x = n_right_circle.get<float>("slowdown_enhance_bezier_p1_ctrl_x");
+    r_circle.slowdown_enhance_bezier_p1_ctrl_y = n_right_circle.get<float>("slowdown_enhance_bezier_p1_ctrl_y");
     r_circle.use = n_right_circle.get<bool>("use");
     r_circle.big_circle = n_right_circle.get<bool>("big_circle");
     r_circle.count_start = n_right_circle.get<int>("count_start");
@@ -325,6 +335,10 @@ Reader::Reader(string path) {
     l_circle.dy_forward_dist_coef_down = n_left_circle.get<float>("dy_forward_dist_coef_down");
     l_circle.dy_forward_dist_exp_down = n_left_circle.get<float>("dy_forward_dist_exp_down");
     l_circle.circle_slow_down_kd = n_left_circle.get<float>("circle_slow_down_kd");
+    l_circle.slowdown_enhance_bezier_p0_ctrl_x = n_left_circle.get<float>("slowdown_enhance_bezier_p0_ctrl_x");
+    l_circle.slowdown_enhance_bezier_p0_ctrl_y = n_left_circle.get<float>("slowdown_enhance_bezier_p0_ctrl_y");
+    l_circle.slowdown_enhance_bezier_p1_ctrl_x = n_left_circle.get<float>("slowdown_enhance_bezier_p1_ctrl_x");
+    l_circle.slowdown_enhance_bezier_p1_ctrl_y = n_left_circle.get<float>("slowdown_enhance_bezier_p1_ctrl_y");
     l_circle.use = n_left_circle.get<bool>("use");
     l_circle.big_circle = n_left_circle.get<bool>("big_circle");
     l_circle.count_start = n_left_circle.get<int>("count_start");
@@ -443,6 +457,7 @@ Reader::Reader(string path) {
     turn.turn_deviation_thresh = n_turn.get<float>("turn_deviation_thresh");
     turn.turn_slope_thresh = n_turn.get<float>("turn_slope_thresh");
     turn.turn_out_slope_thresh = n_turn.get<float>("turn_out_slope_thresh");
+    turn.inside_centerlost_thresh = n_turn.get<int>("inside_centerlost_thresh");
     turn.speed_ceiling = n_turn.get<float>("speed_ceiling");
     turn.speed_ground = n_turn.get<float>("speed_ground");
     turn.speed_in = n_turn.get<float>("speed_in");
@@ -472,6 +487,13 @@ Reader::Reader(string path) {
     turn.slowdown_smooth_bezier_p1_ctrl_x = n_turn.get<float>("slowdown_smooth_bezier_p1_ctrl_x");
     turn.slowdown_smooth_bezier_p1_ctrl_y = n_turn.get<float>("slowdown_smooth_bezier_p1_ctrl_y");
     turn.slow_down_smooth_thresh = n_turn.get<float>("slow_down_smooth_thresh");
+
+    cone.kp = n_cone.get<float>("cone_kp");
+    cone.kd = n_cone.get<float>("cone_kd");
+    cone.ki = n_cone.get<float>("cone_ki");
+    cone.dist = n_cone.get<int>("dist");
+    cone.up_scope = n_cone.get<int>("up_scope");
+    cone.down_scope = n_cone.get<int>("down_scope");
 }
 
 struct Reader::pidv Reader::get_pidv(int state_out, int state_in) {

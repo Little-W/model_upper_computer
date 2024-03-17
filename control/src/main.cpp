@@ -17,6 +17,7 @@ using namespace cv;
 int stop = false;
 MainImage MI;
 AngleControl AC(Re.main.kp, Re.main.kd, Re.main.ki, Re.main.max_ag, Re.main.min_ag);
+AngleControl AC_cone(Re.main.kp, Re.main.kd, Re.main.ki, Re.main.max_ag, Re.main.min_ag);
 SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v,
 				Re.main.sc_kp,Re.main.sc_ki,Re.main.sc_kd,
 				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
@@ -26,7 +27,7 @@ SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.m
 				Re.main.slowdown_smooth_bezier_p0_ctrl_x,Re.main.slowdown_smooth_bezier_p0_ctrl_y,
 				Re.main.slowdown_enhance_bezier_p1_ctrl_x,Re.main.slowdown_enhance_bezier_p1_ctrl_y				
 				);
-SpeedControl SC_turn (Re.turn.min_v_diff, Re.turn.max_v_diff, Re.turn.speed_ceiling, Re.turn.speed_ground,
+SpeedControl SC_turn (Re.turn.min_v_diff, Re.turn.max_v_diff, Re.main.max_v, Re.turn.speed_ground,
 						Re.turn.sc_kp,Re.turn.sc_ki,Re.turn.sc_kd,
 						Re.turn.dy_speed_bezier_p0_ctrl_x,Re.turn.dy_speed_bezier_p0_ctrl_y,
 						Re.turn.dy_speed_bezier_p1_ctrl_x,Re.turn.dy_speed_bezier_p1_ctrl_y,
@@ -35,6 +36,26 @@ SpeedControl SC_turn (Re.turn.min_v_diff, Re.turn.max_v_diff, Re.turn.speed_ceil
 						Re.turn.slowdown_smooth_bezier_p0_ctrl_x,Re.turn.slowdown_smooth_bezier_p0_ctrl_y,
 						Re.turn.slowdown_enhance_bezier_p1_ctrl_x,Re.turn.slowdown_enhance_bezier_p1_ctrl_y									
 						);
+
+SpeedControl SC_circel_r(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v,
+				Re.main.sc_kp,Re.main.sc_ki,Re.main.sc_kd,
+				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
+				Re.main.dy_speed_bezier_p1_ctrl_x,Re.main.dy_speed_bezier_p1_ctrl_y,
+				Re.r_circle.slowdown_enhance_bezier_p0_ctrl_x,Re.r_circle.slowdown_enhance_bezier_p0_ctrl_y,
+				Re.r_circle.slowdown_enhance_bezier_p1_ctrl_x,Re.r_circle.slowdown_enhance_bezier_p1_ctrl_y,
+				Re.main.slowdown_smooth_bezier_p0_ctrl_x,Re.main.slowdown_smooth_bezier_p0_ctrl_y,
+				Re.main.slowdown_enhance_bezier_p1_ctrl_x,Re.main.slowdown_enhance_bezier_p1_ctrl_y				
+				);
+
+SpeedControl SC_circel_l(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v,
+				Re.main.sc_kp,Re.main.sc_ki,Re.main.sc_kd,
+				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
+				Re.main.dy_speed_bezier_p1_ctrl_x,Re.main.dy_speed_bezier_p1_ctrl_y,
+				Re.l_circle.slowdown_enhance_bezier_p0_ctrl_x,Re.l_circle.slowdown_enhance_bezier_p0_ctrl_y,
+				Re.l_circle.slowdown_enhance_bezier_p1_ctrl_x,Re.l_circle.slowdown_enhance_bezier_p1_ctrl_y,
+				Re.main.slowdown_smooth_bezier_p0_ctrl_x,Re.main.slowdown_smooth_bezier_p0_ctrl_y,
+				Re.main.slowdown_enhance_bezier_p1_ctrl_x,Re.main.slowdown_enhance_bezier_p1_ctrl_y				
+				);
 
 std::chrono::time_point<std::chrono::high_resolution_clock> start_time_stamp;
 bool disable_motor = false;
@@ -73,6 +94,7 @@ void callback(int signum) {
 
 int main()
 {
+	int shem_count = 0;
 	#pragma region 共享内存和信号
 	//ctrl-z操作对应SIGTSTP信号，触发回调函数，停止程序
 	signal(SIGTSTP, callback);
@@ -141,8 +163,8 @@ int main()
 	//初始化保存的视频文件Open操作
 	if (Re.set.video_save)
 	{
-		if (Re.set.color)MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(300, 200));
-		else MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(320, 240));
+		if (Re.set.color)MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 60, cv::Size(300, 200));
+		else MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 60, cv::Size(320, 240));
 		MI.store.Writer_Exist = true;
 	}
 
@@ -152,6 +174,7 @@ int main()
 	cerr<< "control ready!"<<endl;
 	while (!stop)
 	{
+		shem_count++;
 		// now = std::chrono::system_clock::now();
 		// time = std::chrono::system_clock::to_time_t(now);
 		// std::tm* tm;
@@ -167,6 +190,7 @@ int main()
 		semP(image_sem);
 		matWrite(image_addr, MI.store.image_BGR);
 		semV(image_sem);
+
 	
 		// // TEST 上位机通信测试代码
 		// for(int i = -1450; i <= 1450; i+=5)
@@ -196,7 +220,7 @@ int main()
 		MI.last_enc_speed = MI.enc_speed;
 		MI.enc_speed = smoothed_real_speed_enc;
 		//只有在straight状态下识别AI元素
-		if (MI.state_out == straight || MI.state_out == turn_state)
+		if (MI.state_out == straight || MI.state_out == turn_state || MI.state_out == cone_find)
 		{
 			semP(result_sem);
 			//开启AI识别
@@ -238,6 +262,7 @@ int main()
 		case straight:
 		case turn_state:
 		{
+			// MI.state_cone = judge_side;
 			MI.mend_trunk();
 			break;
 		}
@@ -385,147 +410,174 @@ int main()
 			break;
 		}
 		case cone_find: {
-			Point left_cone;
-			Point right_cone;
-			left_cone.x = MI.left_edge_point[60];
-			left_cone.y = 60;
-			right_cone.x = MI.right_edge_point[60];
-			right_cone.y = 60;
-			int left_count=0, right_count=0;
-			int left_temp=0, right_temp = 0;
-			for(int i = IMGH-1; i > MI.center_lost; i--){
+			switch (MI.state_cone){
+				case judge_side:
+				{
+					MI.judge_cone_side();
+					break;
+				}
+				// case first_left_cone:
+				// {
+				// 	MI.find_edge_point_for_cone();
+				// 	break;
+				// }
+				break;
+			}
+			// Point left_cone;
+			// Point right_cone;
+			// left_cone.x = MI.left_edge_point[60];
+			// left_cone.y = 60;
+			// right_cone.x = MI.right_edge_point[60];
+			// right_cone.y = 60;
+			// int left_count=0, right_count=0;
+			// int left_temp=0, right_temp = 0;
+			// int yellow_y_bottom = 0;
+			// for(int i = IMGH-1; i > MI.center_lost; i--){
 				
-				// uchar* row = store.image_BGR_small.ptr<uchar>(i);
-				for(int j = MI.left_edge_point[i]; j < MI.center_point[i]; j++){
-					cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
+			// 	uchar* row_b = MI.store.image_mat_cone.ptr<uchar>(i);
+			// 	uchar* row_r = MI.store.image_mat.ptr<uchar>(i);
+			// 	for(int j = MI.left_edge_point[i]; j < MI.center_point[i]; j++){
+			// 		// cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
 
-					if(val[0]<=50 && val[1]>=120 && val[2]>=120){
-						if(left_count==0 || (pow(left_cone.y-i,2)+pow(left_cone.x-j,2))<pow((20+0.15*i),2))
-						{
-							if(left_count==0)
-							{
-								left_cone.x=j;
-								left_cone.y=i;
-								left_temp=i;
-							}
-							else{
-								left_cone.x=(left_cone.x*(left_count-1)+j)/left_count;
-								left_cone.y=(left_cone.y*(left_count-1)+i)/left_count;
-								if(left_temp > i)
-								{
-									left_temp=i;
-								}
-							}
-							left_count++;
-						}
-					}
+			// 		if(row_b[j]==0&&row_r[j]!=0){
+			// 			if(yellow_y_bottom < i)
+			// 			{
+			// 				yellow_y_bottom = i;
+			// 			}
+			// 			if(left_count==0 || (pow(left_cone.y-i,2)+pow(left_cone.x-j,2))<pow((20+0.15*i),2))
+			// 			{
+			// 				if(left_count==0)
+			// 				{
+			// 					left_cone.x=j;
+			// 					left_cone.y=i;
+			// 					left_temp=i;
+			// 				}
+			// 				else{
+			// 					left_cone.x=(left_cone.x*(left_count-1)+j)/left_count;
+			// 					left_cone.y=(left_cone.y*(left_count-1)+i)/left_count;
+			// 					if(left_temp > i)
+			// 					{
+			// 						left_temp=i;
+			// 					}
+			// 				}
+			// 				left_count++;
+			// 			}
+			// 		}
+			// 	}
 
-				}
+			// 	for(int k = MI.right_edge_point[i]; k > MI.center_point[i]; k--){
+			// 		cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, k);
 
-				for(int k = MI.right_edge_point[i]; k > MI.center_point[i]; k--){
-					cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, k);
+			// 		if(val[0]<=150 && val[1]>=120 && val[2]>=120){
+			// 			if(right_count==0 || (pow(right_cone.y-i,2)+pow(right_cone.x-k,2))<pow((20+0.15*i),2))
+			// 			{
+			// 				if(right_count==0)
+			// 				{
+			// 					right_cone.x=k;
+			// 					right_cone.y=i;
+			// 					right_temp=i;
+			// 				}
+			// 				else{
+			// 					right_cone.x=(right_cone.x*(right_count-1)+k)/right_count;
+			// 					right_cone.y=(right_cone.y*(right_count-1)+i)/right_count;
+			// 					if(right_temp > i)
+			// 					{
+			// 						right_temp=i;
+			// 					}
+			// 				}
+			// 				right_count++;
+			// 			}
+			// 		}
 
-					if(val[0]<=50 && val[1]>=120 && val[2]>=120){
-						if(right_count==0 || (pow(right_cone.y-i,2)+pow(right_cone.x-k,2))<pow((20+0.15*i),2))
-						{
-							if(right_count==0)
-							{
-								right_cone.x=k;
-								right_cone.y=i;
-								right_temp=i;
-							}
-							else{
-								right_cone.x=(right_cone.x*(right_count-1)+k)/right_count;
-								right_cone.y=(right_cone.y*(right_count-1)+i)/right_count;
-								if(right_temp > i)
-								{
-									right_temp=i;
-								}
-							}
-							right_count++;
-						}
-					}
-
-				}
-			}
-			left_cone.y=left_temp;
-			right_cone.y=right_temp;
-			if(right_cone.x > MI.center_point[right_cone.y]+15){
-				right_cone.x = MI.center_point[right_cone.y]+15;
-			}
-			// cerr<<"right_count"<< right_count<<"right_cone.x"<< right_cone.x << "right_cone.y" << right_cone.y<<endl;
+			// 	}
+			// }
+			// cout << "yellow_y_bottom : " << yellow_y_bottom <<endl;
+			// if(yellow_y_bottom > Re.main.cone_slowdown_thresh)
+			// {
+			// 	MI.state_cone = cone_slowdown;
+			// }
+			// left_cone.y=left_temp;
+			// right_cone.y=right_temp;
+			// if(right_cone.x > MI.center_point[right_cone.y]+15){
+			// 	right_cone.x = MI.center_point[right_cone.y]+15;
+			// }
+			// // cerr<<"right_count"<< right_count<<"right_cone.x"<< right_cone.x << "right_cone.y" << right_cone.y<<endl;
 			
-			if(left_cone.x < MI.center_point[left_cone.y]-15){
-				left_cone.x = MI.center_point[left_cone.y]-15;
-			}
-			if(left_count < 5&& right_count < 5){
-				MI.state_out = straight;
-			}
-			if(left_count>5)
-			{
-				for(int nnrow=0;nnrow<IMGH;nnrow++)
-				{
-					for(int nncol=left_cone.x+15;nncol>MI.left_edge_point[nnrow]&&nncol>left_cone.x-25;nncol--)
-					{
+			// if(left_cone.x < MI.center_point[left_cone.y]-15){
+			// 	left_cone.x = MI.center_point[left_cone.y]-15;
+			// }
+			// if(left_count < 5&& right_count < 5){
+			// 	MI.state_out = straight;
+			// }
+			// if(left_count>5)
+			// {
+			// 	for(int nnrow=0;nnrow<IMGH;nnrow++)
+			// 	{
+			// 		for(int nncol=left_cone.x+15;nncol>MI.left_edge_point[nnrow]&&nncol>left_cone.x-35;nncol--)
+			// 		{
+			// 			int nowrow=nnrow;
+			// 			int nowcol=nncol;
+			// 			if(nowrow<1)
+			// 			{
+			// 				nowrow=1;
+			// 			}
+			// 			if(nowrow>119)
+			// 			{
+			// 				nowrow=119;
+			// 			}
+			// 			if(nowcol<1)
+			// 			{
+			// 				nowrow=1;
+			// 			}
+			// 			if(nowcol>159)
+			// 			{
+			// 				nowcol=159;
+			// 			}
+			// 			 if(nowcol<(left_cone.x-2+Re.main.cone_trapezium_long+0.25*left_cone.y-Re.main.cone_trapezium_slope*(abs(nowrow*1.0-left_cone.y*1.0)/(1-Re.main.cone_trapezium_slope_with_y*left_cone.y))))
+			// 			{
+			// 				if(nowcol<left_cone.x-5+0.25*left_cone.y)
+			// 				{
+			// 					MI.store.image_mat.at<uchar>(nowrow, nowcol) = uchar(0);
+			// 				}
+			// 			}
+			// 		}
+			// 	}
+			// }
+			// if(right_count>5)
+			// {
+			// 	for(int nnrow=0;nnrow<IMGH;nnrow++)
+			// 	{
+			// 		for(int nncol=right_cone.x-15;nncol<MI.right_edge_point[nnrow]&&nncol<right_cone.x+35;nncol++)
+			// 		{
 					
-						int nowrow=nnrow;
-						int nowcol=nncol;
-						if(nowrow<1)
-						{
-							nowrow=1;
-						}
-						if(nowrow>119)
-						{
-							nowrow=119;
-						}
-						if(nowcol<1)
-						{
-							nowrow=1;
-						}
-						if(nowcol>159)
-						{
-							nowcol=159;
-						}
-						 if(nowcol<(left_cone.x+3+0.25*left_cone.y-3*(abs(nowrow*1.0-left_cone.y*1.0)/(1+0.05*left_cone.y))))
-						{
-							MI.store.image_mat.at<uchar>(nowrow, nowcol) = uchar(0);
-						}
-					}
-				}
-			}
-			if(right_count>5)
-			{
-				for(int nnrow=0;nnrow<IMGH;nnrow++)
-				{
-					for(int nncol=right_cone.x-15;nncol<MI.right_edge_point[nnrow]&&nncol<right_cone.x+25;nncol++)
-					{
-					
-						int nowrow=nnrow;
-						int nowcol=nncol;
-						if(nowrow<1)
-						{
-							nowrow=1;
-						}
-						if(nowrow>119)
-						{
-							nowrow=119;
-						}
-						if(nowcol<1)
-						{
-							nowrow=1;
-						}
-						if(nowcol>159)
-						{
-							nowcol=159;
-						}
-						 if(nowcol>(right_cone.x-3-0.25*right_cone.y+3*(abs(nowrow*1.0-right_cone.y*1.0)/(1+0.05*right_cone.y))))
-						{
-							MI.store.image_mat.at<uchar>(nowrow, nowcol) = uchar(0);
-						}
-					}
-				}
-			}
-    
+			// 			int nowrow=nnrow;
+			// 			int nowcol=nncol;
+			// 			if(nowrow<1)
+			// 			{
+			// 				nowrow=1;
+			// 			}
+			// 			if(nowrow>119)
+			// 			{
+			// 				nowrow=119;
+			// 			}
+			// 			if(nowcol<1)
+			// 			{
+			// 				nowrow=1;
+			// 			}
+			// 			if(nowcol>159)
+			// 			{
+			// 				nowcol=159;
+			// 			}
+			// 			 if(nowcol>(right_cone.x+2-Re.main.cone_trapezium_long-0.25*right_cone.y+Re.main.cone_trapezium_slope*(abs(nowrow*1.0-right_cone.y*1.0)/(1-Re.main.cone_trapezium_slope_with_y*right_cone.y))))
+			// 			{
+			// 				if(nowcol>right_cone.x+5-0.25*right_cone.y)
+			// 				{
+			// 					MI.store.image_mat.at<uchar>(nowrow, nowcol) = uchar(0);
+			// 				}
+			// 			}
+			// 		}
+			// 	}
+			// }
 
 			// if(MI.store.cone_flag == false){
 			// 	MI.state_out = straight;
@@ -533,7 +585,7 @@ int main()
 			break;
 		}
 		case start_state:{
-			if(j_start_line(MI, MI.state_out)){
+			if(j_zebra_line(MI, MI.state_out)){
 				break;
 			}
 			else{
@@ -598,6 +650,7 @@ int main()
 				if (j_right_circle_in_circle(MI, MI.state_r_circle))
 				{
 					MI.state_r_circle = right_circle_in_circle;
+					MI.mend_right_circle_in_straight();
 					break;
 				}
 				MI.mend_right_circle_in_straight();
@@ -609,6 +662,8 @@ int main()
 				MI.lost_right = true;
 				if (j_right_circle_inside_before(MI, MI.state_r_circle))break;
 				MI.mend_right_circle_in_circle();
+				Point p = Re.r_circle.inside_before_p;
+				line(MI.store.image_mat, MI.left_end_point[0], p);
 				break;
 			}
 			case right_circle_inside_before: {
@@ -646,18 +701,20 @@ int main()
 				p2.x = 0;
 				p2.y = IMGH - 1;
 				line(MI.store.image_mat, p1, p2);
-				if (MI.left_end_point.size() != 0 && MI.left_end_point[0].y > IMGH - 10 && MI.left_end_point[1].y < IMGH - 40) {
-					MI.state_r_circle = right_circle_out;
+				line(MI.store.image_mat, MI.right_end_point[0], MI.right_end_point[1]);
+				line(MI.store.image_mat, MI.right_end_point[1], MI.right_end_point[2]);
+				if (MI.left_end_point.size() != 0 && (MI.left_end_point[0].y > IMGH - 10 || MI.left_end_point[1].x < IMGW/2) && MI.left_end_point[1].y < IMGH - 40) {
+					MI.state_r_circle = right_circle_out_out;
 				}
 				break;
 			}
-			case right_circle_out: {
-				j_right_circle_out_out(MI, MI.state_r_circle);
-				if (MI.right_end_point.size() != 0) {
-					ray(MI.store.image_mat, MI.right_end_point[0], Re.r_circle.out_ray_ag);
-				}
-				break;
-			}
+			// case right_circle_out: {
+			// 	j_right_circle_out_out(MI, MI.state_r_circle);
+			// 	if (MI.right_end_point.size() != 0) {
+			// 		ray(MI.store.image_mat, MI.right_end_point[0], Re.r_circle.out_ray_ag);
+			// 	}
+			// 	break;
+			// }
 			case right_circle_out_out: {
 				MI.mend_trunk();
 				MI.state_out = straight;
@@ -903,13 +960,13 @@ int main()
 				// if (count > IMGW - Re.end.end_whitecount) {
 				// 	MI.state_in_garage = garage_inside;
 				// }
-				if(j_start_line(MI,MI.state_end_line)){
+				if(j_zebra_line(MI,MI.state_end_line)){
 					break;
 				}
 				else{
 					MI.end_count++;
 				}
-				if(MI.end_count > 10){
+				if(MI.end_count > 5){
 					MI.state_end_line = race_end;
 				}
 				break;
@@ -925,7 +982,7 @@ int main()
 		}
 		}
 		//重补线
-		if (MI.state_out != right_garage_find && MI.state_out != left_garage_find && MI.state_out != hump_find) {
+		if (MI.state_out != right_garage_find && MI.state_out != left_garage_find && MI.state_out != hump_find && MI.state_out!=cone_find) {
 			MI.refind_edge_point();
 			MI.find_center();
 		}
@@ -1007,7 +1064,16 @@ int main()
 		}
 		else if (MI.state_out == cone_find){
 			angle_result = AC.output(angle_deviation);
-			speed_result = Re.main.cone_speed;
+			
+			if(MI.state_cone == cone_slowdown|| MI.state_cone == judge_side)
+			{
+				speed_result = Re.main.cone_speed;
+			}
+			else 
+			{
+				speed_result = SC.output(speed_deviation);	
+			}
+			
 		}
 		else if (MI.state_out == repair_find) {
 			angle_result = AC.output(angle_deviation);
@@ -1074,8 +1140,7 @@ int main()
 			if(MI.state_turn_state == turn_slow_down)
 			{
 				// disable_motor = false;
-				if(speed_result > Re.turn.speed_in || speed_result == 0)
-					speed_result = Re.turn.speed_in;
+				speed_result = Re.turn.speed_in;
 				cout <<"speed in: " << Re.turn.speed_in << endl;
 			}
 			else if(MI.state_turn_state == turn_inside)
@@ -1106,8 +1171,8 @@ int main()
 			{
 				angle_result = angle_result_tmp;
 			}
-			speed_result = SC.output(Re.main.deviation_coef * speed_deviation + 
-									 Re.main.slope_coef * cur_slope);
+			speed_result = SC.output(Re.main.deviation_coef * abs(speed_deviation) + 
+									 Re.main.slope_coef * abs(cur_slope));
 		}
 
 		//通过增量提升刹车性能

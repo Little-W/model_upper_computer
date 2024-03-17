@@ -115,26 +115,26 @@ void encode_and_send(void)
     crc_data[1] = servo_code_p2;
     angle_crc = crc8(crc_data,2);
 
-	for(int i = 0; i <= TRANS_COUNT; i++)
+	for(int i = 0; i <= ANGLE_TRANS_COUNT; i++)
 	{
         angle_data.push_back(ANGLE_TRANS_BEGIN); //舵机传输开始标志
 		angle_data.push_back(servo_code_p1);
 		angle_data.push_back(servo_code_p2);
         angle_data.push_back(angle_crc);
         angle_data.push_back(angle_crc);
-        angle_data.push_back(angle_crc);
+        // angle_data.push_back(0xFF);
 	}
     ser.write(angle_data);
 
 	
-	for(int i = 0; i <= TRANS_COUNT; i++)
+	for(int i = 0; i <= SPEED_TRANS_COUNT; i++)
 	{
         speed_data.push_back(SPEED_TRANS_BEGIN); //速度传输开始标志
         speed_data.push_back(speed_code_p1);
         speed_data.push_back(speed_code_p2);
         speed_data.push_back(speed_crc);
         speed_data.push_back(speed_crc);
-        speed_data.push_back(speed_crc);
+        // speed_data.push_back(0xFF);
     }
 	ser.write(speed_data);
 
@@ -232,13 +232,21 @@ int get_speed_enc(void)
 				}
 			}
             cnt ++;
-            if(cnt > 10)
+            if(cnt > ENC_SPEED_COUNT)
             {
                 break;
             }
 		}
-        last_real_speed_enc = speed_vals[0].val;
-        return speed_vals[0].val;
+        if(abs(last_real_speed_enc - speed_vals[0].val) > 150 || (abs(last_real_speed_enc) > 80 &&  speed_vals[0].val == 0))
+        {
+            return last_real_speed_enc;
+        }  
+        else
+        {
+            last_real_speed_enc = speed_vals[0].val;
+            return speed_vals[0].val;
+        }
+        
 	}
     else 
     {

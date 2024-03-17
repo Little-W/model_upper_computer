@@ -21,8 +21,10 @@ public:
 	Mat image_BGR;  //彩色图
 	Mat image_BGR_small;  //彩色图
 	Mat image_R;    //红色图
+	Mat image_B;
 	Mat image_mat;	//处理图
 	Mat image_show;	//展示图
+	Mat image_mat_cone;
 	bool cone_flag;
 	uchar global_center[IMGH];
 	int cnt=0;
@@ -57,7 +59,8 @@ public:
 
 	int deviation_thresh;
 	int angle_new_forward_dist;
-	int speed_deviation_thresh;
+	int speed_deviation_thresh_far;
+	int speed_deviation_thresh_near;
 	int slope_thresh_near;
 	int slope_thresh_far;
 	int slop_direction_thresh;
@@ -66,12 +69,21 @@ public:
 	bool zebra_far_find;
 	bool zebra_near_find;
 
+	Point single_left_cone;
+	Point single_right_cone;
+
 	vector<Point> left_cone;
 	vector<Point> right_cone;
 	vector<Point> center_cone;
 	vector<Point> cone_number;
 	int last_center_in_cone;
-
+	bool exist_left_cone;   //是否找到左边界点
+	bool exist_right_cone;  //是否找到右边界点
+	bool right_cone_first;
+	bool left_cone_first;
+	vector<Point> left_cone_point;       //左断点
+	vector<Point> right_cone_point;
+ 
 	Point repair_cone;
 	Point top_cone;
 	
@@ -123,6 +135,8 @@ public:
 	float smoothed_curvature_far;
 	float slope;
 	float angle_deviation;
+	float speed_deviation_far;
+	float speed_deviation_near;
 
 	int end_count;
 
@@ -164,9 +178,9 @@ public:
 	void find_near_zebra();
 	void refind_edge_point_in_garage();
 	void find_center_in_garage(Point top_cone);
-
+    void judge_cone_side();
 	void produce_dv(int deviation);
-
+    void find_edge_point_for_cone();
 	void show(float dev, float angle_result, float speed, int current_speed, bool c = true, bool l = false, bool r = false, bool l_e = true, bool r_e = true, bool l_c = false, bool r_c = false, bool c_c = false);//总显示方案
 
 	float AngelDeviation(void);
@@ -175,7 +189,7 @@ public:
 	float dy_forward_dist_up_and_down(float kp, float kd, float coef_up, float coef_down, float exp_up, 
 									  float exp_down, float bias, float speed_thresh, float max, float min);
 };
-bool j_start_line(const MainImage& mi, uchar& state_in);
+bool j_zebra_line(const MainImage& mi, uchar& state_in);
 bool j_right_circle_in_circle(const MainImage& mi, uchar& state_in);
 bool j_right_circle_inside_before(const MainImage& mi, uchar& state_in);
 bool j_right_circle_inside(const MainImage& mi, uchar& state_in);
