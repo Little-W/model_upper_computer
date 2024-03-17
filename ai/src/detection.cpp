@@ -46,7 +46,7 @@
 using namespace std;
 using namespace cv;
 
-#define THRESH 2
+#define THRESH 1
 
 bool stop = false;
 void callback(int signum){
@@ -190,7 +190,7 @@ int main(int argc, char const *argv[]) {
     if (state == 0 || count == count_last) {
 
       usleep(20 * 1000);
-      cerr<< "sleeping"<<endl;
+      cout<< "sleeping"<<endl;
       continue;
     }
   
@@ -225,7 +225,7 @@ int main(int argc, char const *argv[]) {
       cout << endl;
       found = true;
       cat_id = -1;
-      cat_max_y = 30;
+      cat_max_y = 5;
       for (int i = 0; i < detection->predict_results.size(); i++){
         if (detection->predict_results[i].y > cat_max_y) {
           cat_id = i;
@@ -247,7 +247,7 @@ int main(int argc, char const *argv[]) {
         }
         else if (detection->predict_results[cat_id].type == 2 || detection->predict_results[cat_id].type == 4){ //station
             right_garage_count++;
-            cerr << "Right garage found!" << endl;
+            cout << "Right garage found!" << endl;
         }
         else if (detection->predict_results[cat_id].type == 3 || detection->predict_results[cat_id].type == 5){ //hill
             left_garage_count++;
@@ -266,23 +266,27 @@ int main(int argc, char const *argv[]) {
     else {
       if (bomb_count >= THRESH){
         bomb_count = 0;
+        cout<<"sent bomb_count ai signal"<<endl;
         addr[0] = 'O';
       }
       else if (bridge_count >= THRESH){
         bridge_count = 0;
+        cout<<"sent bridge_count ai signal"<<endl;
         addr[0] = 'B';
       }
       else if (right_garage_count >= THRESH){
         right_garage_count = 0;
+        cout<<"sent right_garage_count ai signal"<<endl;
         addr[0] = 'R';
       }
       else if (left_garage_count >= THRESH){
         left_garage_count = 0;
+        cout<<"sent left_garage_count ai signal"<<endl;
         addr[0] = 'L';
       } 
     }
     semV(result_sem);
-    cerr<<"done"<<endl;
+    //cerr<<"done"<<endl;
     //[01] 视频源读取
     // if (motion.params.debug) // 综合显示调试UI窗口
     //   preTime = chrono::duration_cast<chrono::milliseconds>(
@@ -500,7 +504,7 @@ int main(int argc, char const *argv[]) {
   //     printf("-----> System Exit!!! <-----\n");
   //     exit(0); // 程序退出
   //   }
-  cerr<<"one turn"<<endl;
+  //cerr<<"one turn"<<endl;
   }
   wri.release();
   cout << "AI quitting..." << endl;

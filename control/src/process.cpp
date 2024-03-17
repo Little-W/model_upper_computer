@@ -241,6 +241,8 @@ ImageStorage::ImageStorage()
 
 void ImageStorage::get_image(int x, int y, int w, int h, int ai_x, int ai_y, int ai_w, int ai_h, bool f)
 {
+	cnt++;
+	cone_flag = false;
 	bool success;
 	static std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_ts = std::chrono::high_resolution_clock::now();
 	cv::Mat frame, frame_tmp;
@@ -288,15 +290,228 @@ void ImageStorage::get_image(int x, int y, int w, int h, int ai_x, int ai_y, int
 	cv::Rect roi(x, y, w, h);
 	image_BGR = frame;
 	frame = frame(roi);
-	split(frame, image_split);
+	image_BGR_small = frame.clone();
+	resize(image_BGR_small, image_BGR_small, cv::Size(IMGW, IMGH));//120*160	
+	split(image_BGR_small, image_split);
+	image_R = image_split[2];
+	threshold(image_R, image_mat, 0, 255, THRESH_BINARY | THRESH_OTSU);//大津法
 
 	cv::Rect roi2(ai_x, ai_y, ai_w, ai_h);
 	image_BGR = image_BGR(roi2);
 	resize(image_BGR, image_BGR, cv::Size(300, 200));
-	image_R = image_split[2];
 
-	resize(image_R, image_R, cv::Size(IMGW, IMGH));//120*160
-	threshold(image_R, image_mat, 0, 255, THRESH_BINARY | THRESH_OTSU);//大津法
+	// int conerow[3]={0,0,0},conecol[3]={0,0,0};
+	// int conenum[3]={0,0,0};
+	// int maxrow[3]={0,0,0},minrow[3]={IMGH,IMGH,IMGH},maxcol[3]={0,0,0},mincol[3]={IMGW,IMGW,IMGW};
+	// int grey[IMGH][IMGW];
+	// int cone[IMGH][IMGW]={0};
+	// int nncol = 0;
+	// cout << image_mat.size().height << "," << image_mat.size().width << endl;
+	// while(nncol < IMGW-1)  
+	// {  
+	// 	int nnrow = 0;
+	// 	while(nnrow < IMGH-1)  
+	// 	{  
+	// 		cv::Vec3b val = image_BGR_small.at<cv::Vec3b>(nnrow, nncol);
+	// 		if(val[0]<=50 && val[1]>=120 && val[2]>=120)
+	// 			{
+	// 				int row_up=0,row_down=0,col_up=0,col_down=0;
+	// 				int white_num=0;
+	// 				cv::Vec3b val2 = image_BGR_small.at<cv::Vec3b>(nnrow, nncol);
+	// 				while(!(val2[0]<=150 && val2[1]<=100 && val2[2]<=50)&&!(val2[0]>120 && val2[1]>=120 && val2[2]>=120))
+	// 				{
+	// 					row_up++;
+	// 					val2 = image_BGR_small.at<cv::Vec3b>((nnrow+row_up), nncol);
+	// 					if(val2[0]>120 && val2[1]>=120 && val2[2]>=120)
+	// 					{
+	// 						white_num++;
+	// 					}
+	// 				}
+	// 				val2 = image_BGR_small.at<cv::Vec3b>(nnrow, nncol);
+	// 				while(!(val2[0]<=150 && val2[1]<=100 && val2[2]<=50)&&!(val2[0]>120 && val2[1]>=120 && val2[2]>=120))
+	// 				{
+	// 					row_down++;
+	// 					val2 = image_BGR_small.at<cv::Vec3b>((nnrow-row_down), nncol);
+	// 					if(val2[0]>120 && val2[1]>=120 && val2[2]>=120)
+	// 					{
+	// 						white_num++;
+	// 					}
+	// 				}
+	// 				val2 = image_BGR_small.at<cv::Vec3b>(nnrow, nncol);
+	// 				while(!(val2[0]<=150 && val2[1]<=100 && val2[2]<=50)&&!(val2[0]>120 && val2[1]>=120 && val2[2]>=120))
+	// 				{
+	// 					col_up++;
+	// 					val2 = image_BGR_small.at<cv::Vec3b>(nnrow, (nncol+col_up));
+	// 					if(val2[0]>120 && val2[1]>=120 && val2[2]>=120)
+	// 					{
+	// 						white_num++;
+	// 					}
+	// 				}
+	// 				val2 = image_BGR_small.at<cv::Vec3b>(nnrow, nncol);
+	// 				while(!(val2[0]<=150 && val2[1]<=100 && val2[2]<=50)&&!(val2[0]>120 && val2[1]>=120 && val2[2]>=120))
+	// 				{
+	// 					col_down++;
+	// 					val2 = image_BGR_small.at<cv::Vec3b>(nnrow, (nncol-col_down));
+	// 					if(val2[0]>120 && val2[1]>=120 && val2[2]>=120)
+	// 					{
+	// 						white_num++;
+	// 					}
+	// 				}
+	// 				cout<<"white_num"<<white_num<<endl;
+	// 				if(white_num>=4)
+	// 				{
+	// 					grey[nnrow][nncol]=1;
+	// 					if(conenum[0]==0 || (pow(conerow[0]-nnrow,2)+pow(conecol[0]-nncol,2))<pow((20+0.15*nnrow),2))
+	// 					{
+	// 						conenum[0]++;
+	// 						// if(nncol>maxcol)
+	// 						// 	maxcol=nncol;
+	// 						// if(nncol<mincol)
+	// 						// 	mincol=nncol;
+	// 						if(nnrow>maxrow[0])
+	// 							maxrow[0]=nnrow;
+	// 						// if(nnrow<minrow)
+	// 						// 	minrow=nnrow;
+	// 						conerow[0]=(conerow[0]*(conenum[0]-1)+nnrow)/conenum[0];
+	// 						conecol[0]=(conecol[0]*(conenum[0]-1)+nncol)/conenum[0];
+	// 					}
+	// 					else if(conenum[1]==0 || (pow(conerow[1]-nnrow,2)+pow(conecol[1]-nncol,2))<pow((20+0.15*nnrow),2))
+	// 					{
+	// 						conenum[1]++;
+	// 						// if(nncol>maxcol)
+	// 						// 	maxcol=nncol;
+	// 						// if(nncol<mincol)
+	// 						// 	mincol=nncol;
+	// 						if(nnrow>maxrow[1])
+	// 							maxrow[1]=nnrow;
+	// 						// if(nnrow<minrow)
+	// 						// 	minrow=nnrow;
+	// 						conerow[1]=(conerow[1]*(conenum[1]-1)+nnrow)/conenum[1];
+	// 						conecol[1]=(conecol[1]*(conenum[1]-1)+nncol)/conenum[1];
+	// 					}
+	// 					else if(conenum[2]==0 || (pow(conerow[2]-nnrow,2)+pow(conecol[2]-nncol,2))<pow((20+0.15*nnrow),2))
+	// 					{
+	// 						conenum[2]++;
+	// 						// if(nncol>maxcol)
+	// 						// 	maxcol=nncol;
+	// 						// if(nncol<mincol)
+	// 						// 	mincol=nncol;
+	// 						if(nnrow>maxrow[2])
+	// 						maxrow[2]=nnrow;
+	// 						// if(nnrow<minrow)
+	// 						// 	minrow=nnrow;
+	// 						conerow[2]=(conerow[2]*(conenum[2]-1)+nnrow)/conenum[2];
+	// 						conecol[2]=(conecol[2]*(conenum[2]-1)+nncol)/conenum[2];
+	// 					}
+	// 				}
+	// 			}
+	// 		else
+	// 			{
+	// 				grey[nnrow][nncol]=0;
+	// 			}
+	// 		nnrow++;
+	// 	}  
+	// 	nncol++;
+	// } 
+	// conerow[0]=maxrow[0];
+	// // conecol=maxcol;
+	// // conecol[0]=(conecol[0]+160)/3;
+	// conerow[1]=maxrow[1];
+	// // conecol=maxcol;
+	// // conecol[1]=(conecol[1]+160)/3;
+	// conerow[2]=maxrow[2];
+	// // conecol=maxcol;
+	// // conecol[2]=(conecol[2]+160)/3;
+	// cout<<conerow[0]<<";"<<conecol[0]<<endl;
+	// cout<<conerow[1]<<";"<<conecol[1]<<endl;
+	// cout<<conerow[2]<<";"<<conecol[2]<<endl;
+	// cout<<conenum[0]<<conenum[1]<<conenum[2]<<endl;
+	// // int cone_used_center[IMGH]={0};
+	// for(int nn=0;nn<3;nn++)
+	// {
+	// 	if(conenum[nn]>5)
+	// 	{
+	// 		cone_flag = true;
+	// 		if(cnt==1)
+	// 		{
+	// 			for(int i=0;i<IMGH;i++)
+	// 			{
+	// 				global_center[i]=80;
+	// 			}
+	// 		}
+	// 		else
+	// 		{
+	// 			// for(int i=0;i<IMGH;i++)
+	// 			// {
+	// 			// 	cone_used_center[i]=global_center[i];
+	// 			// }
+	// 		}
+	// 		if(conecol[nn]>global_center[conerow[nn]])
+	// 		{
+	// 			for(int nnrow=conerow[nn]-120;nnrow<conerow[nn]+120;nnrow++)
+	// 			{
+	// 				for(int nncol=conecol[nn]-15;nncol<159;nncol++)
+	// 				{
+					
+	// 					int nowrow=nnrow;
+	// 					int nowcol=nncol;
+	// 					if(nowrow<1)
+	// 					{
+	// 						nowrow=1;
+	// 					}
+	// 					if(nowrow>119)
+	// 					{
+	// 						nowrow=119;
+	// 					}
+	// 					if(nowcol<1)
+	// 					{
+	// 						nowrow=1;
+	// 					}
+	// 					if(nowcol>159)
+	// 					{
+	// 						nowcol=159;
+	// 					}
+	// 					if(nowcol>(conecol[nn]-3-0.25*conerow[nn]+3*(abs(nowrow*1.0-conerow[nn]*1.0)/(1+0.05*conerow[nn]))))
+	// 					{
+	// 						image_mat.at<uchar>(nowrow, nowcol) = uchar(0);
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 		else
+	// 		{
+	// 			for(int nnrow=conerow[nn]-120;nnrow<conerow[nn]+120;nnrow++)
+	// 			{
+	// 				for(int nncol=conecol[nn]+15;nncol>0;nncol--)
+	// 				{
+					
+	// 					int nowrow=nnrow;
+	// 					int nowcol=nncol;
+	// 					if(nowrow<1)
+	// 					{
+	// 						nowrow=1;
+	// 					}
+	// 					if(nowrow>119)
+	// 					{
+	// 						nowrow=119;
+	// 					}
+	// 					if(nowcol<1)
+	// 					{
+	// 						nowrow=1;
+	// 					}
+	// 					if(nowcol>159)
+	// 					{
+	// 						nowcol=159;
+	// 					}
+	// 					 if(nowcol<(conecol[nn]+3+0.25*conerow[nn]-3*(abs(nowrow*1.0-conerow[nn]*1.0)/(1+0.05*conerow[nn]))))
+	// 					{
+	// 						image_mat.at<uchar>(nowrow, nowcol) = uchar(0);
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 	if (f)
 	{
 		Mat kernel = getStructuringElement(MORPH_RECT, Size(3, 3));
@@ -309,15 +524,17 @@ MainImage::MainImage() : re("./config.yaml")
 	init(true);
 	left_end_point.reserve(16);
 	right_end_point.reserve(16);
-	state_out = garage_out;
+	state_out = start_state;//straight;//garage_out;
 	state_r_circle = right_circle_in_find;
 	state_l_circle = left_circle_in_find;
 	state_turn_state = turn_slow_down;
 	state_repair = repair_in_find;
 	state_farm = farm_in_find;
 	state_hump = hump_in_find;
-	state_in_garage = garage_in_find;
+	state_end_line = end_line_find;
 	state_hill = hill_on;
+	state_right_garage = right_garage_before;
+	
 	last_center = IMGW / 2;
 	count_circle = 0;
 	zebra_far_find = false;
@@ -338,6 +555,7 @@ MainImage::MainImage() : re("./config.yaml")
 */
 void MainImage::init(bool complete = true)
 {
+
 	for (int i = 0; i < IMGH; i++)
 	{
 		left_edge_point[i] = 0;
@@ -354,6 +572,7 @@ void MainImage::init(bool complete = true)
 		left_cone.clear();
 		right_cone.clear();
 		center_cone.clear();
+		cone_number.clear();
 		lost_left = false;
 		lost_right = false;
 		left_continue = true;
@@ -406,6 +625,7 @@ void MainImage::state_judge()
 		ai_bomb = false;
 	}
 	else if (ai_right_garage){
+		cerr<<"right garage!!"<<endl;
 		ai_right_garage = false;
 		if (state_right_garage != right_garage_out)state_out = right_garage_find;
 	}
@@ -413,15 +633,39 @@ void MainImage::state_judge()
 		ai_left_garage = false;
 		if (state_left_garage != left_garage_out)state_out = left_garage_find;
 	}
-	if (state_out == straight)
-	{
+	// if (store.cone_flag == false){
+	// 	state_out = straight;
+	// }
+	if (state_out == straight||state_out == turn_state){
+		int yellow_count=0;
+		for(int i = IMGH-1; i > center_lost; i--){
+			
+			// uchar* row = store.image_BGR_small.ptr<uchar>(i);
+			for(int j = left_edge_point[i]; j < right_edge_point[i]; j++){
+				cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
+				if(val[0]<=50 && val[1]>=120 && val[2]>=120){
+					yellow_count++;
+				}
+				if(yellow_count > 5){
+					state_out = cone_find;
+					break;
+				}
+			}
+		}
+	}
+	if (state_out == straight||state_out == turn_state)
+	{  
+
 		if (re.set.zebra_detect) {
 			find_far_zebra();
 			find_near_zebra();
 		}
 		if (zebra_far_find) {
-			state_out = garage_find;
+			state_out = state_end;//garage_find;
 		}
+		// else if(store.cone_flag == true){
+		// 	state_out = cone_find;
+		// }
 		else if (r_circle_use && right_end_point.size() >= 6 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)
 		{
 			bool f = true;
@@ -462,7 +706,7 @@ void MainImage::state_judge()
 			state_turn_state = turn_slow_down;
 		}
 	}
-	else if(state_out == turn_state)
+	if(state_out == turn_state)
 	{
 		if(smoothed_curvature_near < re.turn.turn_curvature_thresh && 
 				smoothed_curvature_far < re.turn.turn_curvature_thresh && 
@@ -470,33 +714,33 @@ void MainImage::state_judge()
 		{
 			state_out = straight;
 		}
-		else if (r_circle_use && right_end_point.size() >= 5 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)
-		{
-			bool f = true;
-			int i;
-			for (i = right_end_point[1].y - 10; i > right_end_point[4].y - 1; i--) {
-				if (!(exist_left_edge_point[i] && abs(left_edge_point[i] - left_edge_point[i + 1]) < 3)) {
-					f = false;
-					break;
-				}
-			}
-			if (f) {
-				state_out = right_circle;
-			}
-		}
-		else if (l_circle_use && left_end_point.size() >= 5 && left_branch_num >= 2 && abs(left_end_point[1].y - left_end_point[4].y) > 35) {
-			bool f = true;
-			int i;
-			for (i = left_end_point[1].y - 10; i > left_end_point[4].y - 1; i--) {
-				if (!(exist_right_edge_point[i] && abs(right_edge_point[i] - right_edge_point[i + 1]) < 3)) {
-					f = false;
-					break;
-				}
-			}
-			if (f) {
-				state_out = left_circle;
-			}
-		}
+		// else if (r_circle_use && right_end_point.size() >= 5 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)
+		// {
+		// 	bool f = true;
+		// 	int i;
+		// 	for (i = right_end_point[1].y - 10; i > right_end_point[4].y - 1; i--) {
+		// 		if (!(exist_left_edge_point[i] && abs(left_edge_point[i] - left_edge_point[i + 1]) < 3)) {
+		// 			f = false;
+		// 			break;
+		// 		}
+		// 	}
+		// 	if (f) {
+		// 		state_out = right_circle;
+		// 	}
+		// }
+		// else if (l_circle_use && left_end_point.size() >= 5 && left_branch_num >= 2 && abs(left_end_point[1].y - left_end_point[4].y) > 35) {
+		// 	bool f = true;
+		// 	int i;
+		// 	for (i = left_end_point[1].y - 10; i > left_end_point[4].y - 1; i--) {
+		// 		if (!(exist_right_edge_point[i] && abs(right_edge_point[i] - right_edge_point[i + 1]) < 3)) {
+		// 			f = false;
+		// 			break;
+		// 		}
+		// 	}
+		// 	if (f) {
+		// 		state_out = left_circle;
+		// 	}
+		// }
 		else if(smoothed_curvature_near > re.turn.turn_curvature_thresh || 
 		    	abs(slope) >= re.turn.turn_slope_thresh || 
 				abs(angle_deviation) > re.turn.turn_deviation_thresh)
@@ -505,7 +749,7 @@ void MainImage::state_judge()
 			state_turn_state = turn_inside;
 		}
 	}
-	else if (state_out == garage_find) {
+	else if (state_out == state_end) {
 		find_far_zebra();
 		find_near_zebra();
 	}
@@ -628,6 +872,14 @@ void MainImage::circle_pid_update(uchar cur_status, float& kp, float& kd, float&
 void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& slow_down_kd)
 {
 	switch (state_out) {
+	case right_garage_find: {
+		kp = re.main.kp;
+		kd = re.main.kd;
+		ki = re.main.ki;
+		dv = re.main.dv;
+		slow_down_kd = re.main.slow_down_kd;
+		return;		
+	}
 	case garage_out: {
 		kp = re.start.kp;
 		kd = re.start.kd;
@@ -705,7 +957,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& 
 		slow_down_kd = re.main.slow_down_kd;
 		return;
 	}
-	case garage_find: {
+	case state_end: {
 		kp = re.zebra.kp;
 		kd = re.zebra.kd;
 		ki = re.zebra.ki;
@@ -775,6 +1027,9 @@ void MainImage::mend_trunk()
 				break;
 			}
 		}
+	}
+	if((left_end_point[0].y < 50 && left_end_point[0].x > 50)||(right_end_point[0].y < 50 && right_end_point[0].x < 110)){
+		line(store.image_mat, right_end_point[0], left_end_point[0]);
 	}
 }
 
@@ -1074,12 +1329,23 @@ void MainImage::find_edge_point()
 				if (this_row[(center + m < IMGW ? center + m : IMGW - 1)] != 0)
 				{
 					center = (center + m < IMGW ? center + m : IMGW - 1);
+					// for(int k = (center + m < IMGW ? center + m : IMGW - 1); k < IMGW-1; k++){
+					// 	if(this_row[k-1]==0&&this_row[k]!=0){
+					// 		center = k;
+					// 	}
+					// }
+
 					m = 1;
 					break;
 				}
 				if (this_row[center - m >= 0 ? center - m : 0] != 0)
 				{
 					center = center - m >= 0 ? center - m : 0;
+					// for(int k = (center - m < 0 ? center - m : 0); k > 0; k--){
+					// 	if(this_row[k+1]==0&&this_row[k]!=0){
+					// 		center = k;
+					// 	}
+					// }
 					m = 1;
 					break;
 				}
@@ -1700,6 +1966,10 @@ void MainImage::find_center()
 			}
 		}
 	}
+	for(int i=0;i<IMGH;i++)
+	{
+		store.global_center[i]=center_point[i];
+	}
 }
 
 void MainImage::find_end_point() {
@@ -1881,15 +2151,21 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
         {
             if (exist_left_edge_point[i]) store.image_show.at<Vec3b>(i, left_edge_point[i]) = Vec3b(255, 0, 0);
             if (exist_right_edge_point[i]) store.image_show.at<Vec3b>(i, right_edge_point[i]) = Vec3b(0, 255, 0);
-            store.image_show.at<Vec3b>(i, center_point[i]) = Vec3b(0, 255, 255);
+            
         }
     }
+	for(int i = IMGH-1; i > center_lost; i--){
+		store.image_show.at<Vec3b>(i, center_point[i]) = Vec3b(0, 255, 255);
+	}
     if (l_e) for (int i = 0; i < left_end_point.size(); i++) store.image_show.at<Vec3b>(left_end_point[i].y, left_end_point[i].x) = Vec3b(0, 0, 255);
     if (r_e) for (int i = 0; i < right_end_point.size(); i++) store.image_show.at<Vec3b>(right_end_point[i].y, right_end_point[i].x) = Vec3b(255, 0, 255);
     if (l_c) for (int i = 0; i < left_cone.size(); i++) store.image_show.at<Vec3b>(left_cone[i].y, left_cone[i].x) = Vec3b(19, 78, 39);
     if (r_c) for (int i = 0; i < right_cone.size(); i++) store.image_show.at<Vec3b>(right_cone[i].y, right_cone[i].x) = Vec3b(121, 77, 166);
     if (c_c) for (int i = 0; i < center_cone.size(); i++) store.image_show.at<Vec3b>(center_cone[i].y, center_cone[i].x) = Vec3b(0, 153, 255);
 
+	for(int i = 0; i < cone_number.size();i++){
+		store.image_show.at<Vec3b>(cone_number[i].y, cone_number[i].x) = Vec3b(19, 78, 39);
+	}
 	store.image_show.at<Vec3b>(MainImage::deviation_thresh, 80) = Vec3b(60, 90, 30);
 	store.image_show.at<Vec3b>((MainImage::deviation_thresh - re.main.up_scope), 80) = Vec3b(60, 90, 30);
 	store.image_show.at<Vec3b>((MainImage::deviation_thresh + re.main.down_scope),80) = Vec3b(60, 90, 30);
@@ -1899,6 +2175,7 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 	store.image_show.at<Vec3b>((MainImage::speed_deviation_thresh + re.main.down_scope),80) = Vec3b(0, 0, 255);
 	store.image_show.at<Vec3b>((MI.center_lost),80) = Vec3b(127, 127, 255);
 	store.image_show.at<Vec3b>((slope_thresh_near),80) = Vec3b(255, 0, 255);
+	store.image_show.at<Vec3b>(top_cone.y, top_cone.x) = Vec3b(0, 255, 0);
 	
 
     // 在图像顶部添加变量文本
@@ -1921,6 +2198,7 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 				(state_out == right_circle) ? "right_circle" :
 				(state_out == left_circle) ? "left_circle" :
 				(state_out == turn_state) ? "turn" :
+				(state_out == start_state) ? "start_state" :
 	 			"other")),
 				textOrg, fontFace, fontScale, mainColor, thickness, 8);
 	textOrg.y += textSize.height + interval;
@@ -2126,7 +2404,168 @@ void MainImage::count_cone(int begin) {
 	}
 	if (center_cone.size() > 1)last_center_in_cone = center_cone[1].x;
 }
+void MainImage::refind_edge_point_in_garage(){
+	//cerr<<"try to refind edge"<<endl;
+	Mat mat = store.image_mat;
+	int i, j, center = IMGW / 2;
+	int last_right = IMGW - 1;
+	int last_left = 0;
+	int count = 0;
+	int m = 1;
+	for (i = IMGH - 1; i > 0; i--) {
+		exist_left_edge_point[i] = false;
+		exist_right_edge_point[i] = false;
+	}
+	for (i = IMGH - 1; i > center_lost; i--)
+	{                     //从下向上开始巡线
+		uchar* this_row = mat.ptr(i);                  //指向第i行
+		if (this_row[center] == 0) {
+			if (count_white(store.image_mat, i) < 5) {
+				exist_left_edge_point[i] = false;
+				exist_right_edge_point[i] = false;
+				break;
+			}
+			while (true) {
+				if (this_row[(center + m < IMGW ? center + m : IMGW - 1)] != 0) {
+					center = (center + m < IMGW ? center + m : IMGW - 1);
+					m = 1;
+					break;
+				}
+				if (this_row[center - m >= 0 ? center - m : 0] != 0) {
+					center = center - m >= 0 ? center - m : 0;
+					m = 1;
+					break;
+				}
+				m++;
+			}
+		}
+		if (this_row[center] != 0)
+		{
+			if(lost_left){
+				for (j = center + 1; j < IMGW - 1; j++) {                                    //找寻右边界 
+					count++;
+					if (this_row[j - 1] != 0 && this_row[j] == 0) {
+						right_edge_point[i] = j;
+						exist_right_edge_point[i] = true;
+						last_right = j;
+						break;
+					}
+					if (j == IMGW - 1) {
+						exist_right_edge_point[i] = false;
+					}
+				}
+			}
+			if(lost_right){
+				for (j = center - 1; j > 0; j--) {                                            //找寻左边界
+					count++;
+					if (this_row[j + 1] != 0 && this_row[j] == 0) {
+						left_edge_point[i] = j;
+						exist_left_edge_point[i] = true;
+						last_left = j;
+						break;
+					}
+					if (j == 1)
+					{
+						exist_left_edge_point[i] = false;
+					}
+				}
+			}
 
+		}
+		center = (last_left + last_right) / 2;
+		if (last_left > last_right) {
+			center_lost = i;
+			break;
+		}
+		if (count < 3 * MINX) {    //3 * MINX
+			center_lost = i;
+			break;
+		}
+		if ((exist_left_edge_point[i] && left_edge_point[i] > IMGW - 8) || (exist_right_edge_point[i] && right_edge_point[i] < 8)) {
+			center_lost = i;
+			break;
+		}
+		if (exist_left_edge_point[i]) {
+			if (count_white(mat, i,
+				(left_edge_point[i] + 5 < IMGW ? left_edge_point[i] + 5 : IMGW), (left_edge_point[i] - 4 > -1 ? left_edge_point[i] - 4 : 0)) == 0) {
+				center_lost = i;
+				break;
+			}
+		}
+		if (exist_right_edge_point[i]) {
+			if (count_white(mat, i,
+				(right_edge_point[i] + 5 < IMGW ? right_edge_point[i] + 5 : IMGW), (right_edge_point[i] - 4 > -1 ? right_edge_point[i] - 4 : 0)) == 0) {
+				center_lost = i;
+				break;
+			}
+		}
+		count = 0;
+	}
+}
+void MainImage::find_center_in_garage(Point top_cone){
+	for (int i = IMGH - 1; i > 0; i--) {
+		exist_left_edge_point[i] = false;
+		exist_right_edge_point[i] = false;
+	}
+	Point car_center;
+	car_center.x = IMGW/2;
+	car_center.y = IMGH-1;
+	float garage_k;
+	int garage_last_center = IMGW/2;
+	float temp_center  = IMGW/2;
+	garage_k = abs(top_cone.x-car_center.x)/abs(top_cone.y-car_center.y);
+	for(int i = IMGH-1; i > top_cone.y; i--){
+		temp_center = temp_center + garage_k;
+		center_point[i] = temp_center;
+		garage_last_center = i;
+	}
+	center_lost = garage_last_center;
+	for (int i = center_lost; i > -1; i--) {
+	center_point[i] = center_point[center_lost + 1];
+    } 
+	// cerr<<"try to refind center"<<endl;
+	// for (int i = IMGH - 1; i >= 0; i--) {
+	// 	if(lost_right){
+	// 		int j;
+	// 		for (j = i; j >= 0; j--) {
+	// 			if (!exist_left_edge_point[j] || exist_right_edge_point[j]) break;
+	// 		}
+	// 		int mov, devide;
+	// 		float wid;
+	// 		if (i > IMGH - 5 && IMGW - left_edge_point[i] < 140) {
+	// 			wid = 125;//IMGW - left_edge_point[i];110
+	// 		}
+	// 		else wid = IMGW - left_edge_point[i];
+	// 		for (int k = i; k > j; k--) {
+	// 			wid -= 0.28;//0.43
+	// 			//devide = (left_edge_point[k] + IMGW) / 2;
+	// 			mov = (2 * left_edge_point[k] + round(wid)) / 2;
+	// 			center_point[k] = ((2 * mov) / 2 < IMGW ? (2 * mov) / 2 : IMGW - 1);
+	// 		}
+	// 		i = j + 1;
+	// 	}
+	// 	else if(lost_left){
+	// 			int j;
+	// 			for (j = i; j >= 0; j--) {
+	// 				if (!exist_right_edge_point[j] || exist_left_edge_point[j]) break;
+	// 			}
+	// 			int mov, devide;
+	// 			float wid;
+	// 			if (i > IMGH - 5 && right_edge_point[i] < 140) {
+	// 				wid = 125;//(2 * right_edge_point[i] - 100)/2;110
+	// 			}
+	// 			else wid = right_edge_point[i];
+
+	// 			for (int k = i; k > j; k--) {
+	// 				wid -= 0.28f;
+	// 				//devide = right_edge_point[k] / 2;
+	// 				mov = (2 * right_edge_point[k] - round(wid)) / 2;
+	// 				center_point[k] = ((2 * mov) / 2 > -1 ? (2 * mov) / 2 : 0);
+	// 			}
+	// 			i = j + 1;
+	// 	}
+	// }
+}
 void MainImage::find_center_in_farm(int begin) {
 	if (center_cone.size() > 0)
 	{
@@ -2213,6 +2652,27 @@ void MainImage::produce_dv(int error) {
 }
 
 
+bool j_start_line(const MainImage& mi, uchar& state_in){
+	bool j_line = false;
+	for(int i = IMGH-1; i > 0; i--){
+		int cross_count=0;
+		const uchar* row = mi.store.image_mat.ptr<uchar>(i);
+		for(int j = 0; j < IMGW-2; j++){
+			if(row[j]!=row[j+1]){
+				cross_count++;
+			}
+			if(cross_count>15){
+				break;
+			}
+		}
+		//cerr<<"cross_count"<< cross_count<<endl;
+		if(cross_count>15){
+			j_line = true;
+			break;
+		}
+	}
+	return j_line;
+}
 
 bool j_right_circle_in_circle(const MainImage& mi, uchar& state_in)
 {
@@ -2416,6 +2876,42 @@ void j_farm_inside(const MainImage& mi, uchar& state_in) {
 	{
 		state_in = farm_inside;
 	}
+}
+
+void j_left_garage_before(const MainImage& mi, uchar& state_in){
+	int cone_point = 0;
+	for(int i = IMGH-1; i > 0; i--){
+		const uchar* row = mi.store.image_mat.ptr<uchar>(i);
+		int cone_flag = 0;
+		for(int j = mi.left_edge_point[i]+1; j > mi.left_edge_point[i]+10; j++){
+			if(row[j]==0){
+				cone_flag++;
+			}
+			cv::Vec3b val = mi.store.image_BGR_small.at<cv::Vec3b>(i, j);
+
+			if(val[0]<=50 && val[1]>=120 && val[2]>=120){
+				// int r,g,b;
+				// b = val[0];
+				// g = val[1];
+				// r = val[2];
+				// cout<<"r "<<r<<" g "<<g<<" b "<<b<<endl;	
+				// cout<<i<<endl;
+				// cout<< "cone flag" << cone_flag << endl;
+				if(i > IMGH-5){
+					// mi.top_cone.x = j;
+					// mi.top_cone.y = i;
+					
+					state_in = left_garage_into;
+					break;
+				}
+			
+			}
+		}
+	}
+}
+
+void j_left_garage_into(const MainImage& mi, uchar& state_in){
+
 }
 
 void j_farm_out_find(const MainImage& mi, uchar& state_in) {

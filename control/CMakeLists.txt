@@ -10,7 +10,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 message(STATUS "OpenCV found (${OpenCV_INCLUDE_DIRS})")
 SET(BASE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../)
 # set(CXX_FLAGS_DEBUG "-O3")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -flto")
 link_directories(
   ${BASE_SOURCE_DIR}/lib
 )

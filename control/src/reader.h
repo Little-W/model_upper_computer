@@ -71,16 +71,33 @@
 #define turn_out 49
 
 #define right_garage_find 50
-#define right_garage_in 51
+#define right_garage_into 51
 #define right_garage_inside 52
 #define right_garage_try_out 53
 #define right_garage_out 54
+#define right_garage_before 55
+#define right_garage_stoped 56
+#define right_garage_start_brake 56
 
 #define left_garage_find 60
-#define left_garage_in 61
+#define left_garage_into 61
 #define left_garage_inside 62
 #define left_garage_try_out 63
 #define left_garage_out 64
+#define left_garage_before 65
+#define left_garage_stoped 66
+// #define right_garage_start_brake 56
+
+#define cone_find 70
+#define cone_out 71
+#define cone_slowdown 72
+
+#define start_state 81
+#define state_end 82
+#define end_line_find 83
+#define end_acc 84
+#define race_end 85
+
 
 typedef std::pair<int, int> pii;
 
@@ -204,20 +221,28 @@ public:
         pii v_left_circle;
         float left_ray;
         float right_ray;
-        float speed_delta_bezier_p0_ctrl_x;
-        float speed_delta_bezier_p0_ctrl_y;
-        float speed_delta_bezier_p1_ctrl_x;
-        float speed_delta_bezier_p1_ctrl_y;
+        float slowdown_enhance_bezier_p0_ctrl_x;
+        float slowdown_enhance_bezier_p0_ctrl_y;
+        float slowdown_enhance_bezier_p1_ctrl_x;
+        float slowdown_enhance_bezier_p1_ctrl_y;
         float slow_down_kd;
+        float slowdown_smooth_bezier_p0_ctrl_x;
+        float slowdown_smooth_bezier_p0_ctrl_y;
+        float slowdown_smooth_bezier_p1_ctrl_x;
+        float slowdown_smooth_bezier_p1_ctrl_y;
+        float slow_down_smooth_thresh;
         //斜率和曲率暂时共用配置
         int curvature_up_scope;
 	    int curvature_down_scope;
         int slope_calc_dist;
+        int slope_point_interval;
         int slope_forward_dist_near;
         int slope_forward_dist_far;
         int slope_direction_forward_dist;
         float slope_coef;
         float deviation_coef;
+        int cone_speed;
+        int cone_slowdown_thresh;
     }main;
     struct {
         float kp;
@@ -330,12 +355,16 @@ public:
         int x_thresh;
         pii v_left;
         pii v_right;
+        int start_speed;
+        int start_angle;
     }start;
     struct {
         int end_dist;
         int end_whitecount;
         pii v_left_garage;
         pii v_right_garage;  
+        int end_speed;
+        int end_angle;
     }end;
     struct {
         float speed;
@@ -381,10 +410,15 @@ public:
         float slow_down_kd;
         float max_v_diff;
         float min_v_diff;
-        float speed_delta_bezier_p0_ctrl_x;
-        float speed_delta_bezier_p0_ctrl_y;
-        float speed_delta_bezier_p1_ctrl_x;
-        float speed_delta_bezier_p1_ctrl_y;
+        float slowdown_enhance_bezier_p0_ctrl_x;
+        float slowdown_enhance_bezier_p0_ctrl_y;
+        float slowdown_enhance_bezier_p1_ctrl_x;
+        float slowdown_enhance_bezier_p1_ctrl_y;
+        float slowdown_smooth_bezier_p0_ctrl_x;
+        float slowdown_smooth_bezier_p0_ctrl_y;
+        float slowdown_smooth_bezier_p1_ctrl_x;
+        float slowdown_smooth_bezier_p1_ctrl_y;
+        float slow_down_smooth_thresh;
     }turn;
     
 };

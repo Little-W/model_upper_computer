@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#export CXX=/usr/bin/g++-8
-#export CC=/usr/bin/gcc-8
+# export CXX=/usr/bin/g++-8
+# export CC=/usr/bin/gcc-8
 cd control
 rm -r build
 mkdir build

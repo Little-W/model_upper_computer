@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <csignal>
 #include <unistd.h>
@@ -21,20 +21,25 @@ SpeedControl SC(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.m
 				Re.main.sc_kp,Re.main.sc_ki,Re.main.sc_kd,
 				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
 				Re.main.dy_speed_bezier_p1_ctrl_x,Re.main.dy_speed_bezier_p1_ctrl_y,
-				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
-				Re.main.dy_speed_bezier_p1_ctrl_x,Re.main.dy_speed_bezier_p1_ctrl_y				
+				Re.main.slowdown_enhance_bezier_p0_ctrl_x,Re.main.slowdown_enhance_bezier_p0_ctrl_y,
+				Re.main.slowdown_enhance_bezier_p1_ctrl_x,Re.main.slowdown_enhance_bezier_p1_ctrl_y,
+				Re.main.slowdown_smooth_bezier_p0_ctrl_x,Re.main.slowdown_smooth_bezier_p0_ctrl_y,
+				Re.main.slowdown_enhance_bezier_p1_ctrl_x,Re.main.slowdown_enhance_bezier_p1_ctrl_y				
 				);
 SpeedControl SC_turn (Re.turn.min_v_diff, Re.turn.max_v_diff, Re.turn.speed_ceiling, Re.turn.speed_ground,
 						Re.turn.sc_kp,Re.turn.sc_ki,Re.turn.sc_kd,
 						Re.turn.dy_speed_bezier_p0_ctrl_x,Re.turn.dy_speed_bezier_p0_ctrl_y,
 						Re.turn.dy_speed_bezier_p1_ctrl_x,Re.turn.dy_speed_bezier_p1_ctrl_y,
-						Re.turn.dy_speed_bezier_p0_ctrl_x,Re.turn.dy_speed_bezier_p0_ctrl_y,
-						Re.turn.dy_speed_bezier_p1_ctrl_x,Re.turn.dy_speed_bezier_p1_ctrl_y								
+						Re.turn.slowdown_enhance_bezier_p0_ctrl_x,Re.turn.slowdown_enhance_bezier_p0_ctrl_y,
+						Re.turn.slowdown_enhance_bezier_p1_ctrl_x,Re.turn.slowdown_enhance_bezier_p1_ctrl_y,
+						Re.turn.slowdown_smooth_bezier_p0_ctrl_x,Re.turn.slowdown_smooth_bezier_p0_ctrl_y,
+						Re.turn.slowdown_enhance_bezier_p1_ctrl_x,Re.turn.slowdown_enhance_bezier_p1_ctrl_y									
 						);
 
 std::chrono::time_point<std::chrono::high_resolution_clock> start_time_stamp;
 bool disable_motor = false;
 bool direct_motor_power_ctrl = false;
+bool turn_accelery = false;
 float kp, kd, ki;
 float slow_down_kd;
 int dv;
@@ -144,6 +149,7 @@ int main()
 	//主循环
 	// ser.write("Hello World!");
 	start_time_stamp = std::chrono::high_resolution_clock::now();
+	cerr<< "control ready!"<<endl;
 	while (!stop)
 	{
 		// now = std::chrono::system_clock::now();
@@ -166,13 +172,13 @@ int main()
 		// for(int i = -1450; i <= 1450; i+=5)
 		// {
 		// 	angle_result = i;
-		// 	speed_result = 3;
+		// 	speed_result = -3;
 		// 	encode_and_send();
 		// }
 		// for(int i = 1450; i >= -1450; i-=5)
 		// {
 		// 	angle_result = i;
-		// 	speed_result = 6;
+		// 	speed_result = -6;
 		// 	encode_and_send();
 		// }
 		// continue;
@@ -234,6 +240,305 @@ int main()
 		{
 			MI.mend_trunk();
 			break;
+		}
+		case right_garage_find:
+		{
+			switch(MI.state_right_garage)
+			{
+				case right_garage_before:
+				{
+					// Point cone;	
+					// cone.x = 0;
+					// cone.y = IMGH-1;
+					MI.mend_trunk();
+					MI.refind_edge_point();
+					MI.find_center();
+					int cone_point = 0;
+					for(int i = IMGH-1; i > 0; i--){
+						uchar* row = MI.store.image_mat.ptr<uchar>(i);
+						int cone_flag = 0;
+						for(int j = MI.right_edge_point[i]+1; j < MI.right_edge_point[i]+10; j++){
+							if(row[j]==0){
+								cone_flag++;
+							}
+							cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
+				
+							if(val[0]<=50 && val[1]>=120 && val[2]>=120){
+								// int r,g,b;
+								// b = val[0];
+								// g = val[1];
+								// r = val[2];
+							    // cout<<"r "<<r<<" g "<<g<<" b "<<b<<endl;	
+								// cout<<i<<endl;
+								// cout<< "cone flag" << cone_flag << endl;
+								if(i > IMGH-5){
+									MI.top_cone.x = j;
+									MI.top_cone.y = i;
+									
+									MI.state_right_garage = right_garage_into;
+									break;
+								}
+							
+							}
+						}
+					}
+					break;
+				}
+				case right_garage_into:
+				{
+					Point cone;	
+					cone.x = 120;
+					cone.y = 80;
+					Point start;
+					start.x = 0;
+					start.y = IMGH-1;
+					int cone_point = 0;
+					for(int i = IMGH/2; i > 1; i--){
+						uchar* row = MI.store.image_mat.ptr<uchar>(i);
+						int count_cone = 0;
+						for(int j = MI.right_edge_point[i]; j < IMGW-2; j++){							
+							if(row[j]!=0 && row[j+1]==0){
+								count_cone++;
+								// MI.cone_number[cone_point].x = j;
+								// MI.cone_number[cone_point].y = i;
+								cone_point++;
+								if(j > cone.x&&count_cone > 1){
+									cone.x = j;
+									cone.y = i;
+									MI.top_cone.x = j;
+									MI.top_cone.y = i;
+								}
+							}
+							
+						}
+						//cerr<< "cone count"<< count_cone<< endl;
+					}
+					line(MI.store.image_mat, start, cone);
+					MI.lost_right = true;
+					MI.lost_left = false;
+					MI.refind_edge_point_in_garage();
+					MI.find_center();
+					if(MI.center_lost > 110){
+						MI.state_right_garage = right_garage_inside;
+						break;
+					}
+					break;
+				}
+				case right_garage_inside:
+				{
+					// Point top_cone;
+					MI.top_cone.x = IMGW/2;
+					MI.top_cone.y = IMGH-20;
+					// int cone_point = 0;
+					for(int i = IMGH-1; i > 0; i--){
+						uchar* row = MI.store.image_mat.ptr<uchar>(i);
+						int cone_flag = 0;
+						for(int j = 0; j < IMGW-1; j++){
+							// if(row[j]==0){
+							// 	cone_flag++;
+							// }
+							cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
+							
+							// cout<< "row1 color"<< row[j] << "row2 color"<< row[j+1]<<endl;						
+							if(val[0]<=55 && val[1]>=120 && val[2]>=120){
+								//cerr<< "cone flag" << endl;
+								// int r,g,b;
+								// r = val[0];
+								// g = val[1];
+								// b = val[2];
+								// cout<<"r "<<r<<" g "<<g<<" b "<<b<<endl;
+								if(MI.top_cone.y > i){
+									MI.top_cone.y = i;
+									MI.top_cone.x = j;
+								}
+							
+							}
+						}
+					}
+					MI.find_center_in_garage(MI.top_cone);
+					if(MI.top_cone.y > 50){
+						MI.state_right_garage = right_garage_stoped;
+						MI.garage_count = 0;
+						break;
+					}
+					break;	
+				}
+				case right_garage_stoped: {
+					MI.garage_count++;
+					if(MI.garage_count>30){
+						MI.state_right_garage = right_garage_try_out;
+						break;
+					}
+					break;
+				}
+				case right_garage_try_out: {
+					if(MI.center_lost < 30&&MI.right_end_point[0].x > 100){
+						MI.state_right_garage = right_garage_out;
+						MI.state_out = straight;
+						break;
+					}
+					break;
+
+				}
+				break;
+			}
+			break;
+		}
+		case cone_find: {
+			Point left_cone;
+			Point right_cone;
+			left_cone.x = MI.left_edge_point[60];
+			left_cone.y = 60;
+			right_cone.x = MI.right_edge_point[60];
+			right_cone.y = 60;
+			int left_count=0, right_count=0;
+			int left_temp=0, right_temp = 0;
+			for(int i = IMGH-1; i > MI.center_lost; i--){
+				
+				// uchar* row = store.image_BGR_small.ptr<uchar>(i);
+				for(int j = MI.left_edge_point[i]; j < MI.center_point[i]; j++){
+					cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
+
+					if(val[0]<=50 && val[1]>=120 && val[2]>=120){
+						if(left_count==0 || (pow(left_cone.y-i,2)+pow(left_cone.x-j,2))<pow((20+0.15*i),2))
+						{
+							if(left_count==0)
+							{
+								left_cone.x=j;
+								left_cone.y=i;
+								left_temp=i;
+							}
+							else{
+								left_cone.x=(left_cone.x*(left_count-1)+j)/left_count;
+								left_cone.y=(left_cone.y*(left_count-1)+i)/left_count;
+								if(left_temp > i)
+								{
+									left_temp=i;
+								}
+							}
+							left_count++;
+						}
+					}
+
+				}
+
+				for(int k = MI.right_edge_point[i]; k > MI.center_point[i]; k--){
+					cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, k);
+
+					if(val[0]<=50 && val[1]>=120 && val[2]>=120){
+						if(right_count==0 || (pow(right_cone.y-i,2)+pow(right_cone.x-k,2))<pow((20+0.15*i),2))
+						{
+							if(right_count==0)
+							{
+								right_cone.x=k;
+								right_cone.y=i;
+								right_temp=i;
+							}
+							else{
+								right_cone.x=(right_cone.x*(right_count-1)+k)/right_count;
+								right_cone.y=(right_cone.y*(right_count-1)+i)/right_count;
+								if(right_temp > i)
+								{
+									right_temp=i;
+								}
+							}
+							right_count++;
+						}
+					}
+
+				}
+			}
+			left_cone.y=left_temp;
+			right_cone.y=right_temp;
+			if(right_cone.x > MI.center_point[right_cone.y]+15){
+				right_cone.x = MI.center_point[right_cone.y]+15;
+			}
+			// cerr<<"right_count"<< right_count<<"right_cone.x"<< right_cone.x << "right_cone.y" << right_cone.y<<endl;
+			
+			if(left_cone.x < MI.center_point[left_cone.y]-15){
+				left_cone.x = MI.center_point[left_cone.y]-15;
+			}
+			if(left_count < 5&& right_count < 5){
+				MI.state_out = straight;
+			}
+			if(left_count>5)
+			{
+				for(int nnrow=0;nnrow<IMGH;nnrow++)
+				{
+					for(int nncol=left_cone.x+15;nncol>MI.left_edge_point[nnrow]&&nncol>left_cone.x-25;nncol--)
+					{
+					
+						int nowrow=nnrow;
+						int nowcol=nncol;
+						if(nowrow<1)
+						{
+							nowrow=1;
+						}
+						if(nowrow>119)
+						{
+							nowrow=119;
+						}
+						if(nowcol<1)
+						{
+							nowrow=1;
+						}
+						if(nowcol>159)
+						{
+							nowcol=159;
+						}
+						 if(nowcol<(left_cone.x+3+0.25*left_cone.y-3*(abs(nowrow*1.0-left_cone.y*1.0)/(1+0.05*left_cone.y))))
+						{
+							MI.store.image_mat.at<uchar>(nowrow, nowcol) = uchar(0);
+						}
+					}
+				}
+			}
+			if(right_count>5)
+			{
+				for(int nnrow=0;nnrow<IMGH;nnrow++)
+				{
+					for(int nncol=right_cone.x-15;nncol<MI.right_edge_point[nnrow]&&nncol<right_cone.x+25;nncol++)
+					{
+					
+						int nowrow=nnrow;
+						int nowcol=nncol;
+						if(nowrow<1)
+						{
+							nowrow=1;
+						}
+						if(nowrow>119)
+						{
+							nowrow=119;
+						}
+						if(nowcol<1)
+						{
+							nowrow=1;
+						}
+						if(nowcol>159)
+						{
+							nowcol=159;
+						}
+						 if(nowcol>(right_cone.x-3-0.25*right_cone.y+3*(abs(nowrow*1.0-right_cone.y*1.0)/(1+0.05*right_cone.y))))
+						{
+							MI.store.image_mat.at<uchar>(nowrow, nowcol) = uchar(0);
+						}
+					}
+				}
+			}
+    
+
+			// if(MI.store.cone_flag == false){
+			// 	MI.state_out = straight;
+			// }
+			break;
+		}
+		case start_state:{
+			if(j_start_line(MI, MI.state_out)){
+				break;
+			}
+			else{
+				MI.state_out = straight;
+			}
 		}
 		case garage_out: {
 			uchar* row = MI.store.image_mat.ptr<uchar>(IMGH - Re.start.start_dist);
@@ -579,27 +884,37 @@ int main()
 			}
 			break;
 		}
-		case garage_find: {
-			switch (MI.state_in_garage)
+		case state_end: {
+			switch (MI.state_end_line)
 			{
-			case garage_in_find: {
+			case end_line_find: {
 				if (MI.zebra_near_find) {
-					MI.state_in_garage = garage_in;
+					MI.end_count = 0;
+					MI.state_end_line = end_acc;
 				}
 				break;
 			}
-			case garage_in: {
-				int count = 0;
-				uchar* r = MI.store.image_mat.ptr<uchar>(IMGH - Re.end.end_dist);
-				for (int i = 0; i < IMGW; i++) {
-					if (r[i] == 0)count++;
+			case end_acc: {
+				// int count = 0;
+				// uchar* r = MI.store.image_mat.ptr<uchar>(IMGH - Re.end.end_dist);
+				// for (int i = 0; i < IMGW; i++) {
+				// 	if (r[i] == 0)count++;
+				// }
+				// if (count > IMGW - Re.end.end_whitecount) {
+				// 	MI.state_in_garage = garage_inside;
+				// }
+				if(j_start_line(MI,MI.state_end_line)){
+					break;
 				}
-				if (count > IMGW - Re.end.end_whitecount) {
-					MI.state_in_garage = garage_inside;
+				else{
+					MI.end_count++;
+				}
+				if(MI.end_count > 10){
+					MI.state_end_line = race_end;
 				}
 				break;
 			}
-			case garage_inside: {
+			case race_end: {
 				stop = true;
 				break;
 			}
@@ -610,7 +925,7 @@ int main()
 		}
 		}
 		//重补线
-		if (MI.state_out != farm_find && MI.state_out != hump_find) {
+		if (MI.state_out != right_garage_find && MI.state_out != left_garage_find && MI.state_out != hump_find) {
 			MI.refind_edge_point();
 			MI.find_center();
 		}
@@ -655,6 +970,45 @@ int main()
 				speed_result = Re.l_circle.speed;
 			}
 		}
+		else if (MI.state_out == right_garage_find){
+			if(MI.state_right_garage == right_garage_inside)
+			{
+				angle_result = AC.output(angle_deviation);
+				speed_result = (MI.top_cone.y - 50) / 2;
+				MI.garage_speed.push_back(speed_result);
+				MI.garage_angle.push_back(angle_result);	
+			}
+			else if(MI.state_right_garage == right_garage_stoped){
+				angle_result = 0;
+				speed_result = 0;				
+			}
+			else if(MI.state_right_garage == right_garage_try_out){
+				if(MI.garage_speed.size()==1||MI.garage_angle.size()==1){
+					angle_result = MI.garage_angle.back();
+					speed_result = -MI.garage_speed.back();						
+				}
+				else{
+					angle_result = MI.garage_angle.back();
+					speed_result = -MI.garage_speed.back();	
+					MI.garage_speed.pop_back();
+					MI.garage_angle.pop_back();	
+				}
+			}
+			else if(MI.state_right_garage == right_garage_into){
+			angle_result = AC.output(angle_deviation);
+			speed_result = SC.output(speed_deviation);
+			MI.garage_speed.push_back(speed_result);
+			MI.garage_angle.push_back(angle_result);		
+			}
+			else{
+			angle_result = AC.output(angle_deviation);
+			speed_result = SC.output(speed_deviation);		
+			}
+		}
+		else if (MI.state_out == cone_find){
+			angle_result = AC.output(angle_deviation);
+			speed_result = Re.main.cone_speed;
+		}
 		else if (MI.state_out == repair_find) {
 			angle_result = AC.output(angle_deviation);
 			speed_result = Re.repair.speed;
@@ -675,6 +1029,10 @@ int main()
 			angle_result = AC.output(angle_deviation);
 			speed_result = Re.hill.speed;
 		}
+		else if (MI.state_out == start_state){
+			angle_result = AC.output(angle_deviation);//Re.start.start_angle;
+			speed_result = Re.start.start_speed;			
+		}
 		else if (MI.state_out == garage_out) {
 			if (Re.start.left) {
 				angle_result = Re.start.v_left.first;
@@ -685,28 +1043,30 @@ int main()
 				speed_result = Re.start.v_right.second;
 			}
 		}
-		else if ((MI.state_out == garage_find && MI.state_in_garage == garage_in_find) || (MI.state_out == garage_find && MI.state_in_garage == garage_in_before)) {
-			int start_left = Re.start.left;
-			if (start_left) {
-				angle_result = Re.zebra.v_left_zebra.first;
-				speed_result = Re.zebra.v_left_zebra.second;
-			}
-			else {
-				angle_result = Re.zebra.v_right_zebra.first;
-				speed_result = Re.zebra.v_right_zebra.second;
-			}
+		else if ((MI.state_out == state_end && MI.state_end_line == garage_in_find) || (MI.state_out == state_end && MI.state_end_line == end_acc)) {
+			// int start_left = Re.start.left;
+			// if (start_left) {
+			// 	angle_result = Re.zebra.v_left_zebra.first;
+			// 	speed_result = Re.zebra.v_left_zebra.second;
+			// }
+			// else {
+			// 	angle_result = Re.zebra.v_right_zebra.first;
+			// 	speed_result = Re.zebra.v_right_zebra.second;
+			angle_result = AC.output(angle_deviation);;//Re.end.end_angle; // Re.end.v_left_garage.first;
+			speed_result = Re.end.end_speed;//Re.end.v_left_garage.second;
+			// }
 		}
-		else if (MI.state_out == garage_find && MI.state_in_garage == garage_in) {
-			int start_left = Re.start.left;
-			if (start_left) {
-				angle_result = Re.end.v_left_garage.first;
-				speed_result = Re.end.v_left_garage.second;
-			}
-			else {
-				angle_result = Re.end.v_right_garage.first;
-				speed_result = Re.end.v_right_garage.second;
-			}
-		}
+		// else if (MI.state_out == garage_find && MI.state_in_garage == garage_in) {
+		// 	// int start_left = Re.start.left;
+		// 	// if (start_left) {
+		// 	angle_result = Re.end.end_angle; // Re.end.v_left_garage.first;
+		// 	speed_result = Re.end.end_speed;//Re.end.v_left_garage.second;
+		// 	// }
+		// 	// else {
+		// 	// 	angle_result = Re.end.v_right_garage.first;
+		// 	// 	speed_result = Re.end.v_right_garage.second;
+		// 	// }
+		// }
 		else if(MI.state_out == turn_state)
 		{
 			angle_result = AC.output(Re.turn.angle_ctrl_deviation_coef * angle_deviation +
@@ -716,12 +1076,13 @@ int main()
 				// disable_motor = false;
 				if(speed_result > Re.turn.speed_in || speed_result == 0)
 					speed_result = Re.turn.speed_in;
-				cout <<"speed in" << Re.turn.speed_in << endl;
+				cout <<"speed in: " << Re.turn.speed_in << endl;
 			}
 			else if(MI.state_turn_state == turn_inside)
 			{
 				speed_result = SC_turn.output(Re.turn.speed_ctrl_deviation_coef * speed_deviation + 
 									 	 Re.turn.speed_ctrl_slope_coef * cur_slope);
+				cout <<"turn speed: " << speed_result << endl;
 			}
 			else 
 			{
@@ -730,6 +1091,7 @@ int main()
 			}
 		}
 		else {
+			disable_motor = false;
 			float angle_result_tmp = 0;
 			angle_result_tmp = AC.output(angle_deviation);
 			if((abs(angle_result - angle_result_tmp) > 500) && (angle_result * angle_result_tmp > 0))
@@ -749,6 +1111,7 @@ int main()
 		}
 
 		//通过增量提升刹车性能
+		
 		speed_result = SC.output_reduced(speed_result,real_speed_enc,slow_down_kd);
 
 		if (!Re.set.motor_use)speed_result = 0;
@@ -777,11 +1140,20 @@ int main()
 		#pragma region 打印当前状态
 		switch (MI.state_out)
 		{
+			case start_state: cout << "start_state" << endl; break;
 			case straight: cout << "straight" << endl; break;
 			case turn_state: cout << "turn_state" << endl; break;
 			case garage_out: cout << "garage_out" << endl; break;
 			case hill_find: cout << "hill_find" << endl; break;
-			case right_garage_find: cout << "right_garage_find" << endl; break;
+			case right_garage_find:
+			{
+				switch (MI.state_right_garage)
+				{
+					case right_garage_before:{cout << "right_garage_before" << endl; break;}
+					case right_garage_into:{cout << "right_garage_into" << endl; break;}
+					case right_garage_inside:{cout << "right_garage_inside" << endl; break;}
+				}
+			}
 			case right_circle:
 			{
 				switch (MI.state_r_circle)
@@ -839,14 +1211,14 @@ int main()
 				}
 				break;
 			}
-			case garage_find:
+			case state_end:
 			{
-				switch (MI.state_in_garage)
+				switch (MI.state_end_line)
 				{
-				case garage_in_find: {cout << "garage_in_find" << endl; break; }
-				case garage_in_before: {cout << "garage_in_before" << endl; break; }
-				case garage_in: {cout << "garage_in" << endl; break; }
-				case garage_inside: {cout << "garage_inside" << endl; break; }
+				case end_line_find: {cout << "end_line_find" << endl; break; }
+				// case garage_in_before: {cout << "garage_in_before" << endl; break; }
+				case end_acc: {cout << "end_acc" << endl; break; }
+				case race_end: {cout << "race_end" << endl; break; }
 				}
 				break;
 			}

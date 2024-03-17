@@ -18,32 +18,43 @@ set:
 
 #    
 main:
-    garage_start: false
+    garage_start: true
     #根据偏差[min_v_diff,max_v_diff]动态调整当前速度[min_v,max_v]，幂函数形式
     dy_speed_coef: 0
     dy_speed_exp: 0
+    # max_v_diff应当尽量与turn_deviation_thresh相等
+    max_v_diff: 40 #40
+    min_v_diff: 5
+    max_v: 26 #95
+    min_v: 9 #95
     #根据偏差[min_v_diff,max_v_diff]动态调整当前速度[min_v,max_v]，Bezier曲线形式,p0在左上角，p1在右下角
-    dy_speed_bezier_p0_ctrl_x: 44 # 25 #30.0 # [p0_x=start_error,p1_ctrl_x]
-    dy_speed_bezier_p0_ctrl_y: 13 # 12 #12.0 # [p1_ctrl_y,p0_y=max_v] 
-    dy_speed_bezier_p1_ctrl_x: 32 # 40 #40.0 # [p0_ctrl_x,p1_x=end_error]
-    dy_speed_bezier_p1_ctrl_y: 5 # 12 #7.0 # [p1_y=min_v,p0_ctrl_y]
+    dy_speed_bezier_p0_ctrl_x: 37.47 #42.92 #18 # 25 #30.0 # [p0_x=start_error,p1_ctrl_x]
+    dy_speed_bezier_p0_ctrl_y: 24.84 #20.73  #11 # 12 #12.0 # [p1_ctrl_y,p0_y=max_v] 
+    dy_speed_bezier_p1_ctrl_x: 18.3 #22.74  #27 # 40 #40.0 # [p0_ctrl_x,p1_x=end_error]
+    dy_speed_bezier_p1_ctrl_y: 13.6 #10.4 #17 # 12 #7.0 # [p1_y=min_v,p0_ctrl_y]
     
-    speed_delta_bezier_p0_ctrl_x: 36
-    speed_delta_bezier_p0_ctrl_y: 0.64
-    speed_delta_bezier_p1_ctrl_x: 35
-    speed_delta_bezier_p1_ctrl_y: 1.42
+    slowdown_enhance_bezier_p0_ctrl_x: 142
+    slowdown_enhance_bezier_p0_ctrl_y: 0.14
+    slowdown_enhance_bezier_p1_ctrl_x: 31
+    slowdown_enhance_bezier_p1_ctrl_y: 1.8
+
+    slowdown_smooth_bezier_p0_ctrl_x: 142
+    slowdown_smooth_bezier_p0_ctrl_y: 0.14
+    slowdown_smooth_bezier_p1_ctrl_x: 31
+    slowdown_smooth_bezier_p1_ctrl_y: 1.8
+    slow_down_smooth_thresh: 5
 
     right_ray: -1.2
     left_ray: 1.0
 
     kp: 9 #1.6
     ki: 0
-    kd: 35 #4.54
+    kd: 20 #4.54
     dv: 0
     sc_kp: 1
     sc_ki: 0
     sc_kd: 0.5
-    slow_down_kd: 1.6
+    slow_down_kd: 0.2
     max_ag: 1133 ## 250
     min_ag: -1133 ## 0
     use_dv: false #false
@@ -51,20 +62,20 @@ main:
     center_coef: 0
 
     #舵机动态kp kd，根据偏差deviation调整
-    dy_kp_max: 15
-    dy_kp_threshold: 25 #62
-    dy_kp_coef: 0.6
-    dy_kp_exp: 3
+    dy_kp_max: 27
+    dy_kp_threshold: 20 #10 #62
+    dy_kp_coef: 2.6
+    dy_kp_exp: 2.8
     inc_dy_kp_threshold: 15 #30 #62
     inc_dy_kp_coef: 0.4
     inc_dy_kp_exp: 2
     dy_kd_threshold: 55 #62
     dy_kd_coef: 0
-    
+
     #计算deviation时的重要参数：
     #-以IMGH-forward_dist作为分界线，上取up_scope个中心点，下取down_scope个中心点来衡量
     #--该值越大前瞻整体越远
-    forward_dist: 45 #45 
+    forward_dist: 40 #45 
     #--前瞻上下部分取点个数
     up_scope: 4 #4
     down_scope: 4 #4
@@ -72,6 +83,13 @@ main:
     forward_coef1: 0.6
     forward_coef2: 0.4
 
+    curvature_up_scope: 10
+    curvature_down_scope: 8
+    deviation_coef: 1
+    slope_coef: 10
+    slope_forward_dist_near: 40
+    slope_forward_dist_far: 70
+    slope_direction_forward_dist: 80
     ## 角度控制的前瞻位置
     #根据速度动态调整前瞻的参数，幂函数形式
     #-速度动态调整前瞻的阈值
@@ -115,14 +133,16 @@ main:
     v_right_circle: [60,90] #[60,70]
     v_left_circle: [175,90] #[175,70]
 
+    cone_speed: 5
+
 turn:
-    turn_deviation_thresh: 30
+    turn_deviation_thresh: 40
     turn_curvature_thresh: 0.15
     turn_slope_thresh: 0.7
     turn_out_slope_thresh : 0.55
-    speed_ground: 8
+    speed_ground: 6
     speed_ceiling: 16
-    speed_in: 9
+    speed_in: 6
     motor_power: 25
     speed_ctrl_slope_coef: 15
     speed_ctrl_deviation_coef: 0.9
@@ -137,12 +157,17 @@ turn:
     dy_speed_bezier_p1_ctrl_y: 10.9
     max_v_diff: 70 #40
     min_v_diff: 5
-    slow_down_kd: 0.4
-    speed_delta_bezier_p0_ctrl_x: 201.5
-    speed_delta_bezier_p0_ctrl_y: 24.4
-    speed_delta_bezier_p1_ctrl_x: 165
-    speed_delta_bezier_p1_ctrl_y: 102.4
-    
+    slow_down_kd: 1.5
+    slowdown_enhance_bezier_p0_ctrl_x: 201.5
+    slowdown_enhance_bezier_p0_ctrl_y: 24.4
+    slowdown_enhance_bezier_p1_ctrl_x: 165
+    slowdown_enhance_bezier_p1_ctrl_y: 102.4
+
+    slowdown_smooth_bezier_p0_ctrl_x: 201.5
+    slowdown_smooth_bezier_p0_ctrl_y: 24.4
+    slowdown_smooth_bezier_p1_ctrl_x: 165
+    slowdown_smooth_bezier_p1_ctrl_y: 102.4
+    slow_down_smooth_thresh: 5
 right_circle:
     kp: 25 #8 #1.6
     ki: 0
@@ -154,7 +179,7 @@ right_circle:
     angle_forward_dist_kp: 1
     angle_forward_dist_kd: 0.4
     max_dy_forward_dist: 60
-    min_dy_forward_dist: 35
+    min_dy_forward_dist: 30
     dy_forward_dist_coef_up: 10
     dy_forward_dist_exp_up: 1.7
     dy_forward_dist_coef_down: 0.08
@@ -168,7 +193,7 @@ right_circle:
         kd: 20 #4.54
         dv: 0
         ray_ag: 2
-        speed: 9
+        speed: 13
     in_strai:
         kp: 12 #1.6
         ki: 0
@@ -338,6 +363,8 @@ start:
     x_thresh: 24
     v_left: [ 200, 75 ]
     v_right: [ 40, 75 ]
+    start_speed: 10
+    start_angle: 0
 #
 end:
     kp: 2
@@ -348,6 +375,8 @@ end:
     end_whitecount: 20
     v_left_garage: [220,50]
     v_right_garage: [5,50]
+    end_speed: 10
+    end_angle: 0
 #
 zebra:
     kp: 2

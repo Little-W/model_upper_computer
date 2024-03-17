@@ -104,8 +104,12 @@ out_t AngleControl::output(data_t dist_error) {
 SpeedControl::SpeedControl(data_t _start_error, data_t _end_error, data_t _max, data_t _min,
 							float _kp ,float _ki ,float _kd,
 							float bezier_p0_ctrl_x,float bezier_p0_ctrl_y,float bezier_p1_ctrl_x,float bezier_p1_ctrl_y,
-							float slow_bezier_p0_ctrl_x,float slow_bezier_p0_ctrl_y,float slow_bezier_p1_ctrl_x,float slow_bezier_p1_ctrl_y
-							) {
+							float slow_down_enhance_bezier_p0_ctrl_x,float slow_down_enhance_bezier_p0_ctrl_y,
+							float slow_down_enhance_bezier_p1_ctrl_x,float slow_down_enhance_bezier_p1_ctrl_y,
+							float slow_smooth_bezier_p0_ctrl_x,float slow_smooth_bezier_p0_ctrl_y,
+							float slow_smooth_bezier_p1_ctrl_x,float slow_smooth_bezier_p1_ctrl_y
+							)
+{
 	this->start_error = _start_error;
 	this->end_error = _end_error;
 	this->k = float(_max - _min) / (_end_error - _start_error);
@@ -123,10 +127,15 @@ SpeedControl::SpeedControl(data_t _start_error, data_t _end_error, data_t _max, 
 	this->last_error = 0;
 	this->integrade = 0;
 
-	this->speed_delta_bezier_p0_ctrl_x = slow_bezier_p0_ctrl_x;
-	this->speed_delta_bezier_p1_ctrl_x = slow_bezier_p1_ctrl_x;
-	this->speed_delta_bezier_p0_ctrl_y = slow_bezier_p0_ctrl_y;
-	this->speed_delta_bezier_p1_ctrl_y = slow_bezier_p1_ctrl_y;
+	this->speed_slow_down_enhance_bezier_p0_ctrl_x = slow_down_enhance_bezier_p0_ctrl_x;
+	this->speed_slow_down_enhance_bezier_p1_ctrl_x = slow_down_enhance_bezier_p1_ctrl_x;
+	this->speed_slow_down_enhance_bezier_p0_ctrl_y = slow_down_enhance_bezier_p0_ctrl_y;
+	this->speed_slow_down_enhance_bezier_p1_ctrl_y = slow_down_enhance_bezier_p1_ctrl_y;
+
+	this->speed_slow_down_smooth_bezier_p0_ctrl_x = slow_smooth_bezier_p0_ctrl_x;
+	this->speed_slow_down_smooth_bezier_p1_ctrl_x = slow_smooth_bezier_p1_ctrl_x;
+	this->speed_slow_down_smooth_bezier_p0_ctrl_y = slow_smooth_bezier_p0_ctrl_y;
+	this->speed_slow_down_smooth_bezier_p1_ctrl_y = slow_smooth_bezier_p1_ctrl_y;	
 }
 //二分查找解出三阶贝塞尔曲线当前x对应的参数t
 float SpeedControl::bezier_get_t(float x, float t_head, float t_tail,float p0_x,float p0_ctrl_x,float p1_ctrl_x,float p1_x) {
@@ -161,12 +170,27 @@ out_t SpeedControl::output(data_t input) {
 		out = minimum;
 	}
 	else {
+		//18th使用线性变化，过弯时减速效果并不好
+		//this->k = float(max_ - min_) / (end_error_ - start_error_);
+		// out = maximum - k * (input - start_error);
+
+		//幂函数deviation-speed曲线
+		//out = maximum - dy_speed_coef * pow(input - start_error,dy_speed_exp);
 
 		//为保证曲线在边界处连续，并且可以更加自由调节曲线形状，
 		//使用三阶贝塞尔曲线限制条件来拟合一条斜率逐渐增加的deviation-speed曲线
 		//限制范围，确保配置文件中赋值符合规定
 		float p0_x = start_error ,p0_y = maximum;
 		float p1_x = end_error ,p1_y = minimum;
+		// float p0_ctrl_x = limit2range(dy_speed_bezier_p0_ctrl_x,start_error,end_error);
+		// float p1_ctrl_x = limit2range(dy_speed_bezier_p1_ctrl_x,start_error,end_error);
+		// //限制p1_ctrl_x不小于p0_ctrl_x
+		// p1_ctrl_x = max(p0_ctrl_x,p1_ctrl_x);
+
+		// float p0_ctrl_y = limit2range(dy_speed_bezier_p0_ctrl_y,minimum,maximum);
+		// float p1_ctrl_y = limit2range(dy_speed_bezier_p1_ctrl_y,minimum,maximum);
+		// //限制p1_ctrl_y不超过p0_ctrl_y
+		// p1_ctrl_y = min(p0_ctrl_y,p1_ctrl_y);
 		float p0_ctrl_x = dy_speed_bezier_p0_ctrl_x ,p0_ctrl_y = dy_speed_bezier_p0_ctrl_y;
 		float p1_ctrl_x = dy_speed_bezier_p1_ctrl_x ,p1_ctrl_y = dy_speed_bezier_p1_ctrl_y;
 
@@ -188,8 +212,8 @@ out_t SpeedControl::output_reduced(data_t speed_result,data_t real_speed_enc,flo
 	// 初始化边界值和控制点
 	float p0_x = 0 ,p0_y = 0;
 	float p1_x = maximum * ENC_SPEED_SCALE ,p1_y = 100;
-	float p0_ctrl_x = speed_delta_bezier_p0_ctrl_x ,p0_ctrl_y = speed_delta_bezier_p0_ctrl_y;
-	float p1_ctrl_x = speed_delta_bezier_p1_ctrl_x ,p1_ctrl_y = speed_delta_bezier_p1_ctrl_y;
+	float p0_ctrl_x = speed_slow_down_enhance_bezier_p0_ctrl_x ,p0_ctrl_y = speed_slow_down_enhance_bezier_p0_ctrl_y;
+	float p1_ctrl_x = speed_slow_down_enhance_bezier_p1_ctrl_x ,p1_ctrl_y = speed_slow_down_enhance_bezier_p1_ctrl_y;
 
 	float bezier_x = abs(real_speed_enc) > p1_x ? p1_x : abs(real_speed_enc);
 	float bezier_t = bezier_get_t(bezier_x,0,1,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
@@ -203,4 +227,33 @@ out_t SpeedControl::output_reduced(data_t speed_result,data_t real_speed_enc,flo
 		speed_bias = 0;
 	}
 	return data_t(speed_result - speed_bias);
+}
+
+out_t SpeedControl::slow_down_smooth(data_t speed_result,data_t real_speed_enc,float slow_down_smooth_thresh)
+{
+	data_t out;
+	// 非减速状态，返回原值
+	if(real_speed_enc <= speed_result * ENC_SPEED_SCALE){
+		return speed_result;
+	} 
+	// 初始化边界值和控制点
+	float p0_x = 0 ,p0_y = 0;
+	float p1_x = maximum * ENC_SPEED_SCALE ,p1_y = 1;
+	float p0_ctrl_x = speed_slow_down_smooth_bezier_p0_ctrl_x ,p0_ctrl_y = speed_slow_down_smooth_bezier_p0_ctrl_y;
+	float p1_ctrl_x = speed_slow_down_smooth_bezier_p1_ctrl_x ,p1_ctrl_y = speed_slow_down_smooth_bezier_p1_ctrl_y;
+
+	float bezier_x = abs(real_speed_enc) > p1_x ? p1_x : abs(real_speed_enc);
+	float bezier_t = bezier_get_t(bezier_x,0,1,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
+
+	float bezier_out = (pow(1.0 - bezier_t, 3) * p0_y) + (3.0 * bezier_t * pow(1.0 - bezier_t, 2) * p0_ctrl_y) + (3.0 * pow(bezier_t, 2) * (1 - bezier_t) * p1_ctrl_y) + (pow(bezier_t, 3) * p1_y);
+
+	float speed_bias = bezier_out * slow_down_smooth_thresh;
+
+	out = real_speed_enc / ENC_SPEED_SCALE - speed_bias;
+
+	if(out < speed_result)
+	{
+		out = speed_result;
+	}
+	return out;
 }

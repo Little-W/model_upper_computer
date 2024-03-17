@@ -11,10 +11,10 @@ typedef float data_t;
 // 使用 float 作为输出类型
 typedef float out_t;
 extern float cur_kp;
-extern bool disable_motor;
-extern bool direct_motor_power_ctrl;
 extern float angle_deviation;
 extern float speed_deviation;
+extern bool disable_motor;
+extern bool direct_motor_power_ctrl;
 
 class PartPdCtrl {
 private:
@@ -68,9 +68,14 @@ private:
 	data_t minimum;// 输出的最小值	
 	data_t maximum;// 输出的最大值
 	// 速度曲线控制点
-	float dy_speed_bezier_p0_ctrl_x,dy_speed_bezier_p1_ctrl_x,dy_speed_bezier_p0_ctrl_y,dy_speed_bezier_p1_ctrl_y;
+	float dy_speed_bezier_p0_ctrl_x,dy_speed_bezier_p1_ctrl_x;
+	float dy_speed_bezier_p0_ctrl_y,dy_speed_bezier_p1_ctrl_y;
 	// 减速曲线控制点
-	float speed_delta_bezier_p0_ctrl_x,speed_delta_bezier_p1_ctrl_x,speed_delta_bezier_p0_ctrl_y,speed_delta_bezier_p1_ctrl_y;
+	float speed_slow_down_enhance_bezier_p0_ctrl_x,speed_slow_down_enhance_bezier_p1_ctrl_x;
+	float speed_slow_down_enhance_bezier_p0_ctrl_y,speed_slow_down_enhance_bezier_p1_ctrl_y;
+	// 减速平滑曲线控制点
+	float speed_slow_down_smooth_bezier_p0_ctrl_x,speed_slow_down_smooth_bezier_p1_ctrl_x;
+	float speed_slow_down_smooth_bezier_p0_ctrl_y,speed_slow_down_smooth_bezier_p1_ctrl_y;
 	// pid控制
 	float kp,ki,kd;
 	data_t last_error;//上一偏差
@@ -81,10 +86,14 @@ public:
 	SpeedControl(data_t _start_error, data_t _end_error, data_t _max, data_t _min,
 				float _kp ,float _ki ,float _kd,
 				float bezier_p0_ctrl_x,float bezier_p0_ctrl_y,float bezier_p1_ctrl_x,float bezier_p1_ctrl_y,
-				float slow_bezier_p0_ctrl_x,float slow_bezier_p0_ctrl_y,float slow_bezier_p1_ctrl_x,float slow_bezier_p1_ctrl_y
+				float slow_down_enhance_bezier_p0_ctrl_x,float slow_down_enhance_bezier_p0_ctrl_y,
+				float slow_down_enhance_bezier_p1_ctrl_x,float slow_down_enhance_bezier_p1_ctrl_y,
+				float slow_smooth_bezier_p0_ctrl_x,float slow_smooth_bezier_p0_ctrl_y,
+				float slow_smooth_bezier_p1_ctrl_x,float slow_smooth_bezier_p1_ctrl_y
 				);
 	data_t pid_ctrl(data_t input);
 	out_t output_reduced(data_t speed_result,data_t real_speed_enc,float slow_down_kd);
+	out_t slow_down_smooth(data_t speed_result,data_t real_speed_enc,float slow_down_smooth_thresh);
 	/**
 	 * @brief 速度控制
 	 * @param input 输入中线偏离deviation

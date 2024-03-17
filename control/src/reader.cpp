@@ -192,11 +192,16 @@ Reader::Reader(string path) {
     main.dy_speed_bezier_p1_ctrl_x = n_main.get<float>("dy_speed_bezier_p1_ctrl_x");
     main.dy_speed_bezier_p1_ctrl_y = n_main.get<float>("dy_speed_bezier_p1_ctrl_y");
     
-    main.speed_delta_bezier_p0_ctrl_x = n_main.get<float>("speed_delta_bezier_p0_ctrl_x");
-    main.speed_delta_bezier_p0_ctrl_y = n_main.get<float>("speed_delta_bezier_p0_ctrl_y");
-    main.speed_delta_bezier_p1_ctrl_x = n_main.get<float>("speed_delta_bezier_p1_ctrl_x");
-    main.speed_delta_bezier_p1_ctrl_y = n_main.get<float>("speed_delta_bezier_p1_ctrl_y");
+    main.slowdown_enhance_bezier_p0_ctrl_x = n_main.get<float>("slowdown_enhance_bezier_p0_ctrl_x");
+    main.slowdown_enhance_bezier_p0_ctrl_y = n_main.get<float>("slowdown_enhance_bezier_p0_ctrl_y");
+    main.slowdown_enhance_bezier_p1_ctrl_x = n_main.get<float>("slowdown_enhance_bezier_p1_ctrl_x");
+    main.slowdown_enhance_bezier_p1_ctrl_y = n_main.get<float>("slowdown_enhance_bezier_p1_ctrl_y");
     main.slow_down_kd = n_main.get<float>("slow_down_kd");
+    main.slowdown_smooth_bezier_p0_ctrl_x = n_main.get<float>("slowdown_smooth_bezier_p0_ctrl_x");
+    main.slowdown_smooth_bezier_p0_ctrl_y = n_main.get<float>("slowdown_smooth_bezier_p0_ctrl_y");
+    main.slowdown_smooth_bezier_p1_ctrl_x = n_main.get<float>("slowdown_smooth_bezier_p1_ctrl_x");
+    main.slowdown_smooth_bezier_p1_ctrl_y = n_main.get<float>("slowdown_smooth_bezier_p1_ctrl_y");
+    main.slow_down_smooth_thresh = n_main.get<float>("slow_down_smooth_thresh");
     main.kp = n_main.get<float>("kp");
     main.kd = n_main.get<float>("kd");
     main.ki = n_main.get<float>("ki");
@@ -232,6 +237,8 @@ Reader::Reader(string path) {
     main.right_ray = n_main.get<float>("right_ray");
     main.deviation_coef = n_main.get<float>("deviation_coef");
     main.slope_coef = n_main.get<float>("slope_coef");
+    main.cone_speed = n_main.get<int>("cone_speed");
+    main.cone_slowdown_thresh = n_main.get<int>("cone_slowdown_thresh");
 
 
     //right_circle
@@ -405,11 +412,15 @@ Reader::Reader(string path) {
     start.x_thresh = n_start.get<int>("x_thresh");
     start.v_left = n_start.get<pii>("v_left");
     start.v_right = n_start.get<pii>("v_right");
+    start.start_speed = n_start.get<int>("start_speed");
+    start.start_angle = n_start.get<int>("start_angle");
     //end
     end.end_dist = n_end.get<int>("end_dist");
     end.end_whitecount = n_end.get<int>("end_whitecount");
     end.v_left_garage = n_end.get<pii>("v_left_garage");
     end.v_right_garage = n_end.get<pii>("v_right_garage");  
+    end.end_speed = n_end.get<int>("end_speed");
+    end.end_angle = n_end.get<int>("end_angle");
     //zebra
     zebra.kp = n_zebra.get<float>("kp");
     zebra.kd = n_zebra.get<float>("kd");
@@ -452,10 +463,15 @@ Reader::Reader(string path) {
     turn.max_v_diff = n_turn.get<float>("max_v_diff");
     turn.min_v_diff = n_turn.get<float>("min_v_diff");
 
-    turn.speed_delta_bezier_p0_ctrl_x = n_turn.get<float>("speed_delta_bezier_p0_ctrl_x");
-    turn.speed_delta_bezier_p0_ctrl_y = n_turn.get<float>("speed_delta_bezier_p0_ctrl_y");
-    turn.speed_delta_bezier_p1_ctrl_x = n_turn.get<float>("speed_delta_bezier_p1_ctrl_x");
-    turn.speed_delta_bezier_p1_ctrl_y = n_turn.get<float>("speed_delta_bezier_p1_ctrl_y");
+    turn.slowdown_enhance_bezier_p0_ctrl_x = n_turn.get<float>("slowdown_enhance_bezier_p0_ctrl_x");
+    turn.slowdown_enhance_bezier_p0_ctrl_y = n_turn.get<float>("slowdown_enhance_bezier_p0_ctrl_y");
+    turn.slowdown_enhance_bezier_p1_ctrl_x = n_turn.get<float>("slowdown_enhance_bezier_p1_ctrl_x");
+    turn.slowdown_enhance_bezier_p1_ctrl_y = n_turn.get<float>("slowdown_enhance_bezier_p1_ctrl_y");
+    turn.slowdown_smooth_bezier_p0_ctrl_x = n_turn.get<float>("slowdown_smooth_bezier_p0_ctrl_x");
+    turn.slowdown_smooth_bezier_p0_ctrl_y = n_turn.get<float>("slowdown_smooth_bezier_p0_ctrl_y");
+    turn.slowdown_smooth_bezier_p1_ctrl_x = n_turn.get<float>("slowdown_smooth_bezier_p1_ctrl_x");
+    turn.slowdown_smooth_bezier_p1_ctrl_y = n_turn.get<float>("slowdown_smooth_bezier_p1_ctrl_y");
+    turn.slow_down_smooth_thresh = n_turn.get<float>("slow_down_smooth_thresh");
 }
 
 struct Reader::pidv Reader::get_pidv(int state_out, int state_in) {

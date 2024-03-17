@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/edgeboard/ftp_share/code/405/build",
+  "command": "/usr/bin/aarch64-linux-gnu-g++-8   -I/home/edgeboard/ftp_share/code/405/ai/include -I/usr/include/glib-2.0 -I/usr/lib/aarch64-linux-gnu/glib-2.0/include -isystem /usr/local/include -isystem /usr/local/include/opencv -I/usr/local/include/ppnc -I/usr/local/include/onnx  -O3 -Wall -mcpu=native -flto -pthread -g -g   -std=gnu++1z -o CMakeFiles/detection.dir/src/detection.cpp.o -c /home/edgeboard/ftp_share/code/405/ai/src/detection.cpp",
+  "file": "/home/edgeboard/ftp_share/code/405/ai/src/detection.cpp"
+}
+]
