@@ -494,6 +494,7 @@ Reader::Reader(string path) {
     cone.dist = n_cone.get<int>("dist");
     cone.up_scope = n_cone.get<int>("up_scope");
     cone.down_scope = n_cone.get<int>("down_scope");
+    cone.garage_dist = n_cone.get<int>("garage_dist");
 }
 
 struct Reader::pidv Reader::get_pidv(int state_out, int state_in) {

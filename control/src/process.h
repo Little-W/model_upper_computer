@@ -83,6 +83,8 @@ public:
 	bool left_cone_first;
 	vector<Point> left_cone_point;       //左断点
 	vector<Point> right_cone_point;
+	bool last_right_cone;
+	bool last_left_cone;
  
 	Point repair_cone;
 	Point top_cone;
@@ -180,7 +182,7 @@ public:
 	void find_center_in_garage(Point top_cone);
     void judge_cone_side();
 	void produce_dv(int deviation);
-    void find_edge_point_for_cone();
+    void find_edge_point_block();
 	void show(float dev, float angle_result, float speed, int current_speed, bool c = true, bool l = false, bool r = false, bool l_e = true, bool r_e = true, bool l_c = false, bool r_c = false, bool c_c = false);//总显示方案
 
 	float AngelDeviation(void);
@@ -188,6 +190,7 @@ public:
 	float dy_forward_dist_up(float kp, float kd, float coef, float exp, float bias, float speed_thresh, float max);
 	float dy_forward_dist_up_and_down(float kp, float kd, float coef_up, float coef_down, float exp_up, 
 									  float exp_down, float bias, float speed_thresh, float max, float min);
+	void find_edge_point_end();
 };
 bool j_zebra_line(const MainImage& mi, uchar& state_in);
 bool j_right_circle_in_circle(const MainImage& mi, uchar& state_in);

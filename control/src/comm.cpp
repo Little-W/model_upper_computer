@@ -59,6 +59,31 @@ uint8_t crc8(uint8_t* data, size_t length) {
     }
     return crc;
 }
+
+// 海明编码函数
+uint16_t hammingEncode(uint16_t data) {
+    uint16_t code = 0;
+    // 放置数据位
+    code |= (data & 0x1) << 2; // D1
+    code |= (data & 0xE) << 3; // D2-D4, 二进制的1110等于十六进制的E
+    code |= (data & 0x7F0) << 4; // D5-D11, 二进制的11111110000等于十六进制的7F0
+
+    cout << "code init: " << code << endl;
+    // 计算校验位
+    uint8_t p1 = ((code >> 2) & 1) ^ ((code >> 4) & 1) ^ ((code >> 6) & 1) ^ ((code >> 8) & 1) ^ ((code >> 10) & 1) ^ ((code >> 12) & 1) ^ ((code >> 14) & 1);
+    uint8_t p2 = ((code >> 2) & 1) ^ ((code >> 5) & 1) ^ ((code >> 6) & 1) ^ ((code >> 9) & 1) ^ ((code >> 10) & 1) ^ ((code >> 13) & 1) ^ ((code >> 14) & 1);
+    uint8_t p4 = ((code >> 4) & 1) ^ ((code >> 5) & 1) ^ ((code >> 6) & 1) ^ ((code >> 11) & 1) ^ ((code >> 12) & 1) ^ ((code >> 13) & 1) ^ ((code >> 14) & 1);
+    uint8_t p8 = ((code >> 8) & 1) ^ ((code >> 9) & 1) ^ ((code >> 10) & 1) ^ ((code >> 11) & 1) ^ ((code >> 12) & 1) ^ ((code >> 13) & 1) ^ ((code >> 14) & 1);
+
+    // 设置校验位
+    code |= (p1 & 1) << 0;
+    code |= (p2 & 1) << 1;
+    code |= (p4 & 1) << 3;
+    code |= (p8 & 1) << 7;
+
+    return code;
+}
+
 /**
  * @brief 编码器
  * @note  将上位机数据参考编码方案编码并发送给下位机 
@@ -67,13 +92,12 @@ uint8_t crc8(uint8_t* data, size_t length) {
 */
 void encode_and_send(void)
 {
-	vector<unsigned char> speed_data;
-    vector<unsigned char> angle_data;
-	uint speed_result_tmp;
-	uint angle_result_tmp = 0;
+	vector<unsigned char> uart_data;
+	uint16_t speed_result_tmp;
+	uint16_t angle_result_tmp;
     unsigned char speed_crc = 0, angle_crc = 0, angle_crc_p2 = 0;
     unsigned char crc_data[2];
-    unsigned char speed_code_p1,speed_code_p2,servo_code_p1,servo_code_p2;
+    unsigned char speed_code[3],servo_code[3];
 
     std::chrono::time_point<std::chrono::high_resolution_clock> uart_trans_begin_ts = std::chrono::high_resolution_clock::now();
 
@@ -81,62 +105,119 @@ void encode_and_send(void)
 	speed_result_tmp = ENC_SPEED_SCALE * (speed_result < 0 ? -speed_result : speed_result);
     if(disable_motor)
     {
-        speed_result_tmp = 777;
-        speed_code_p1 = (speed_result_tmp >> 6) & 0x1f;
-	    speed_code_p2 = speed_result_tmp & 0x3f;
+        crc_data[0] = (777 >> 8);
+        crc_data[1] = 777 & 0xff;
+        speed_crc = crc8(crc_data,2);
+        speed_result_tmp = hammingEncode(777);
+        speed_code[0] = (speed_result_tmp >> 9);
+	    speed_code[1] = (speed_result_tmp & 0x1f8) >> 3;
+        speed_code[2] = (speed_result_tmp & 0x7) << 3;
+        if(speed_crc & 0x80)
+        {
+            speed_code[2] |= 0x4;
+        }
+        speed_code[2] |= speed_crc >> 6;
+        speed_code[3] = speed_crc & 0x3f;
         // cout << "disable_motor" << endl;
     }
     else if(direct_motor_power_ctrl)
     {
-        speed_result_tmp += 1000;
-        speed_code_p1 = (speed_result_tmp >> 6) & 0x1f;
-        if(speed_result < 0) speed_code_p1 |= 0x20;
-	    speed_code_p2 = speed_result_tmp & 0x3f;        
+        speed_result_tmp += 900;
+        if(speed_result < 0) speed_result_tmp |= 0x400;
+        crc_data[0] = (speed_result_tmp >> 8);
+        crc_data[1] = speed_result_tmp & 0xff;
+        speed_crc = crc8(crc_data,2);
+        speed_result_tmp = hammingEncode(speed_result_tmp);
+        speed_code[0] = (speed_result_tmp >> 9);
+	    speed_code[1] = (speed_result_tmp & 0x1f8) >> 3;
+        speed_code[2] = (speed_result_tmp & 0x7) << 3;
+        if(speed_crc & 0x80)
+        {
+            speed_code[2] |= 0x4;
+        }
+        speed_code[2] |= speed_crc >> 6;
+        speed_code[3] = speed_crc & 0x3f;
     }
     else
     {
         if(speed_result_tmp > MAX_SPEED_VAL)   speed_result_tmp = MAX_SPEED_VAL;
-        speed_code_p1 = (speed_result_tmp >> 6) & 0x1f;
-	    if(speed_result < 0) speed_code_p1 |= 0x20;
-	    speed_code_p2 = speed_result_tmp & 0x3f;
+        if(speed_result < 0) speed_result_tmp |= 0x400;
+        cout << "data in: " << speed_result_tmp << endl;
+        crc_data[0] = (speed_result_tmp >> 8);
+        crc_data[1] = speed_result_tmp & 0xff;
+        speed_crc = crc8(crc_data,2);   
+        speed_result_tmp = hammingEncode(speed_result_tmp);
+        speed_code[0] = (speed_result_tmp >> 9);
+	    speed_code[1] = (speed_result_tmp & 0x1f8) >> 3;
+        speed_code[2] = (speed_result_tmp & 0x7) << 3;
+        if(speed_crc & 0x80)
+        {
+            speed_code[2] |= 0x4;
+        }
+        speed_code[2] |= speed_crc >> 6;
+        speed_code[3] = speed_crc & 0x3f;
     }
     
 	angle_result_tmp = angle_result < 0 ? -angle_result : angle_result;
 	if(angle_result_tmp > MAX_ANGLE_VAL) angle_result_tmp = MAX_ANGLE_VAL;
 
-	servo_code_p1 = (angle_result_tmp >> 6) & 0x1f;
-	if(angle_result < 0) servo_code_p1 |= 0x20;
-	servo_code_p2 = angle_result_tmp & 0x3f;
-    
-    crc_data[0] = speed_code_p1;
-    crc_data[1] = speed_code_p2;
-    speed_crc = crc8(crc_data,2);
-    crc_data[0] = servo_code_p1;
-    crc_data[1] = servo_code_p2;
+    if(angle_result < 0) angle_result_tmp |= 0x400;
+    crc_data[0] = (angle_result_tmp >> 8);
+    crc_data[1] = angle_result_tmp & 0xff;
     angle_crc = crc8(crc_data,2);
+    angle_result_tmp = hammingEncode(angle_result_tmp);
+    servo_code[0] = (angle_result_tmp >> 9);
+    servo_code[1] = (angle_result_tmp & 0x1f8) >> 3;
+    servo_code[2] = (angle_result_tmp & 0x7) << 3;
+    if(angle_crc & 0x80)
+    {
+        servo_code[2] |= 0x4;
+    }
+    servo_code[2] |= angle_crc >> 6;
+    servo_code[3] = angle_crc & 0x3f;
+
+
+    uart_data.push_back(BATCH_TRANS_BEGIN);
+    uart_data.push_back(BATCH_TRANS_BEGIN);
+    uart_data.push_back(BATCH_TRANS_BEGIN);
+    uart_data.push_back(BATCH_TRANS_BEGIN);
+    uart_data.push_back(BATCH_TRANS_BEGIN);
+    uart_data.push_back(BATCH_TRANS_BEGIN);
+    uart_data.push_back(BATCH_TRANS_BEGIN);
+    uart_data.push_back(BATCH_TRANS_BEGIN);
+    uart_data.push_back(BATCH_TRANS_BEGIN);
 
 	for(int i = 0; i <= ANGLE_TRANS_COUNT; i++)
 	{
-        angle_data.push_back(ANGLE_TRANS_BEGIN); //舵机传输开始标志
-		angle_data.push_back(servo_code_p1);
-		angle_data.push_back(servo_code_p2);
-        angle_data.push_back(angle_crc);
-        angle_data.push_back(angle_crc);
-        // angle_data.push_back(0xFF);
+        uart_data.push_back(SINGEL_TRANS_BEGIN); //舵机传输开始标志
+        uart_data.push_back(servo_code[0]);
+        uart_data.push_back(servo_code[1]);
+        uart_data.push_back(servo_code[2]);
+        uart_data.push_back(servo_code[3]);
+        // uart_data.push_back(angle_crc);
+        // uart_data.push_back(TRANS_OVER);
 	}
-    ser.write(angle_data);
-
-	
+    uart_data.push_back(TRANS_SPLIT);
+    uart_data.push_back(TRANS_SPLIT);
+    uart_data.push_back(TRANS_SPLIT);
+    uart_data.push_back(TRANS_SPLIT);
+    uart_data.push_back(TRANS_SPLIT);
+    uart_data.push_back(TRANS_SPLIT);
+    uart_data.push_back(TRANS_SPLIT);
+    uart_data.push_back(TRANS_SPLIT);
+    uart_data.push_back(TRANS_SPLIT);
+    
 	for(int i = 0; i <= SPEED_TRANS_COUNT; i++)
 	{
-        speed_data.push_back(SPEED_TRANS_BEGIN); //速度传输开始标志
-        speed_data.push_back(speed_code_p1);
-        speed_data.push_back(speed_code_p2);
-        speed_data.push_back(speed_crc);
-        speed_data.push_back(speed_crc);
-        // speed_data.push_back(0xFF);
+        uart_data.push_back(SINGEL_TRANS_BEGIN); //速度传输开始标志
+        uart_data.push_back(speed_code[0]);
+        uart_data.push_back(speed_code[1]);
+        uart_data.push_back(speed_code[2]);
+        uart_data.push_back(speed_code[3]);
+        // uart_data.push_back(speed_crc);
+        // uart_data.push_back(TRANS_OVER);
     }
-	ser.write(speed_data);
+	ser.write(uart_data);
 
 	std::chrono::duration<double, std::milli> elapsed = std::chrono::high_resolution_clock::now() - start_time_stamp;
     std::chrono::duration<double, std::milli> duration = std::chrono::high_resolution_clock::now() - uart_trans_begin_ts;
@@ -144,7 +225,7 @@ void encode_and_send(void)
 	cout << "now: " << elapsed.count() << "ms" <<endl;
 	cout << "Angle: " << dec << angle_result  << "	Speed: " << speed_result<< endl;
 	cout << "************************************************************************"<< endl;
-	cout << "HEX:   Angle: "  << hex << (uint)servo_code_p1  << (uint)servo_code_p2 << "	Speed: " << (uint)speed_code_p1 << (uint)speed_code_p2 <<  endl;
+	cout << "HEX:   Angle: "  << hex << (uint)angle_result_tmp << "	Speed: " << (uint)angle_result_tmp <<  endl;
     cout << "HEX:   Angle CRC: "  << hex << (uint)angle_crc  << "	Speed CRC: " << (uint)speed_crc <<  endl;
 	cout << "************************************************************************"<< dec << endl;
 }

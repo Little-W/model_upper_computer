@@ -8,7 +8,7 @@ set:
     motor_use: true
     zebra_detect: true
     cut_point_x: 100
-    cut_point_y: 70
+    cut_point_y: 80
     cut_w: 440
     cut_h: 270
     ai_cut_x: 20
@@ -47,7 +47,7 @@ main:
     right_ray: -1.2
     left_ray: 1.0
 
-    kp: 10 #1.6
+    kp: 9 #1.6
     ki: 0
     kd: 20 #4.54
     dv: 0
@@ -63,10 +63,10 @@ main:
 
     #舵机动态kp kd，根据偏差deviation调整
     dy_kp_max: 27
-    dy_kp_threshold: 20 #10 #62
+    dy_kp_threshold: 30 #10 #62
     dy_kp_coef: 1.5
     dy_kp_exp: 2.8
-    inc_dy_kp_threshold: 15 #30 #62
+    inc_dy_kp_threshold: 20 #30 #62
     inc_dy_kp_coef: 0.4
     inc_dy_kp_exp: 2
     dy_kd_threshold: 55 #62
@@ -182,13 +182,13 @@ right_circle:
     ki: 0
     kd: 20 #20 #4.54
     dv: 0
-    speed: 10.5
+    speed: 11.3
     circle_slow_down_kd: 0.6
     slowdown_enhance_bezier_p0_ctrl_x: 227
     slowdown_enhance_bezier_p0_ctrl_y: 5
     slowdown_enhance_bezier_p1_ctrl_x: 97.9
     slowdown_enhance_bezier_p1_ctrl_y: 173
-    circle_dist: 52
+    circle_dist: 55
     angle_forward_dist_kp: 1
     angle_forward_dist_kd: 0.4
     max_dy_forward_dist: 70
@@ -206,7 +206,7 @@ right_circle:
         kd: 20 #4.54
         dv: 0
         ray_ag: 2
-        speed: 10.9
+        speed: 11.5
     in_strai:
         kp: 12 #1.6
         ki: 0
@@ -231,9 +231,9 @@ right_circle:
         dv: 0
         p: ['0','IMGH-5']
     inside:
-        kp: 10 #1.6
+        kp: 10.5 #1.6
         ki: 0
-        kd: 10 #4.54
+        kd: 45 #4.54
         dv: 0 #2
     out_find:
         kp: 15 #1.6
@@ -416,10 +416,11 @@ hill:
     frame: 26
 #
 cone:
-    cone_kp: 28
+    cone_kp: 15
     cone_kd: 20
     cone_ki: 0
-    dist: 20
+    dist: 25
     up_scope: 4
     down_scope: 4
+    garage_dist: 40
 

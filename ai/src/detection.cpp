@@ -46,7 +46,7 @@
 using namespace std;
 using namespace cv;
 
-#define THRESH 1
+#define THRESH 2
 
 bool stop = false;
 void callback(int signum){
@@ -182,6 +182,13 @@ int main(int argc, char const *argv[]) {
 
   int dur;
   while (!stop) {
+
+    if(right_garage_count > 2)right_garage_count = 0;
+    if(left_garage_count > 2)left_garage_count = 0;
+    if(bridge_count > 2)bridge_count = 0;
+    if(bomb_count > 2)bomb_count = 0;
+    // cerr<<"right_garage_count"<<right_garage_count<<endl;
+    // cerr<<"bridge"<<bridge_count<<endl;
     semP(result_sem);
     state = addr[1];
     count = addr[2];
@@ -219,7 +226,7 @@ int main(int argc, char const *argv[]) {
         pr.width = round(pr.width * (160.0/300));
         pr.y = round(pr.y * (120.0/200));
         pr.height = round(pr.x * (120.0/200));
-        cerr << pr.type << ",(" << pr.x << "," << pr.y << ")," << pr.width << "," << pr.height << endl;
+        cout << pr.type << ",(" << pr.x << "," << pr.y << ")," << pr.width << "," << pr.height << endl;
       }
       drawResults(frame, detection->predict_results);
       cout << endl;
@@ -227,9 +234,10 @@ int main(int argc, char const *argv[]) {
       cat_id = -1;
       cat_max_y = 5;
       for (int i = 0; i < detection->predict_results.size(); i++){
-        if (detection->predict_results[i].y > cat_max_y) {
+        if (detection->predict_results[i].y > cat_max_y||(detection->predict_results[i].type == 0)||(detection->predict_results[i].type == 1)||(detection->predict_results[i].type == 6 || detection->predict_results[i].type == 11)||(detection->predict_results[i].type == 8 || detection->predict_results[i].type == 12)) {
           cat_id = i;
           cat_max_y = detection->predict_results[i].y;
+          cerr<<"cat_id"<<cat_id<<endl;
         }
       }
       if (cat_id != -1){
@@ -245,11 +253,11 @@ int main(int argc, char const *argv[]) {
                 cout << "Bridge found!" << endl;
             }
         }
-        else if (detection->predict_results[cat_id].type == 2 || detection->predict_results[cat_id].type == 4){ //station
+        else if (detection->predict_results[cat_id].type == 6 || detection->predict_results[cat_id].type == 11){ //station
             right_garage_count++;
             cout << "Right garage found!" << endl;
         }
-        else if (detection->predict_results[cat_id].type == 3 || detection->predict_results[cat_id].type == 5){ //hill
+        else if (detection->predict_results[cat_id].type == 8 || detection->predict_results[cat_id].type == 12){ //hill
             left_garage_count++;
             cout << "Left garage found!" << endl;
         }

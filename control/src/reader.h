@@ -95,6 +95,9 @@
 #define first_right_cone 73
 #define first_left_cone 74
 #define judge_side 75
+#define right_block 76
+#define left_block 77
+
 #define start_state 81
 #define state_end 82
 #define end_line_find 83
@@ -407,6 +410,7 @@ public:
         int dist;
         int up_scope;
         int down_scope;
+        int garage_dist;
     }cone;
     struct{
         float turn_curvature_thresh;
