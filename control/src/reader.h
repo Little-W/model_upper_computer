@@ -89,8 +89,9 @@
 #define left_garage_stoped 66
 // #define right_garage_start_brake 56
 
-#define cone_common 70
-#define cone_out 71
+#define bomb_find 70
+// #define cone_common 70
+#define bomb_out 71
 #define cone_slowdown 72
 #define first_right_cone 73
 #define first_left_cone 74
@@ -146,6 +147,7 @@ private:
     BaseReader n_hill;
     BaseReader n_turn;
     BaseReader n_cone;
+    BaseReader n_garage;
 public:
     struct pidv
     {
@@ -411,6 +413,11 @@ public:
         int up_scope;
         int down_scope;
         int garage_dist;
+
+        int judge_up_scope;
+        int judge_down_scope;
+        int b_cone_count;
+        int cone_state_count;
     }cone;
     struct{
         float turn_curvature_thresh;
@@ -446,6 +453,22 @@ public:
         float slowdown_smooth_bezier_p1_ctrl_y;
         float slow_down_smooth_thresh;
     }turn;
+
+    struct{
+        float slowdown_enhance_bezier_p0_ctrl_x;
+        float slowdown_enhance_bezier_p0_ctrl_y;
+        float slowdown_enhance_bezier_p1_ctrl_x;
+        float slowdown_enhance_bezier_p1_ctrl_y;
+        float slow_down_kd;
+        int find_speed;
+        int into_speed;
+        int out_speed;
+        int right_out_angle;
+        int left_out_angle;
+        int into_thresh;
+        int top_y;
+
+    }garage;
     
 };
 

@@ -78,7 +78,7 @@ float MainImage::AngelDeviation(void)
 	//int center=(IMGW/2+last_center)/2;
 	long long sum;
 	
-	if (state_out == cone_find) {
+	if (state_out == bomb_find) {
 		MainImage::deviation_thresh = IMGH - re.cone.dist;
 		sum = 0;
 		for (i = MainImage::deviation_thresh; i > MainImage::deviation_thresh - re.cone.up_scope; i--) {
@@ -272,7 +272,7 @@ ImageStorage::ImageStorage()
 	cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));  //'M', 'J', 'P', 'G'
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);
 	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
-	cap.set(cv::CAP_PROP_FPS, 60);
+	cap.set(cv::CAP_PROP_FPS, 30);
 
 	fut = async(launch::async, get_frame, cap);
 }
@@ -576,7 +576,7 @@ MainImage::MainImage() : re("./config.yaml")
 	state_hill = hill_on;
 	state_right_garage = right_garage_before;
 	state_left_garage = left_garage_before;
-	state_cone = judge_side;//cone_common;
+	state_cone = cone_slowdown;//cone_common;
 	last_center = IMGW / 2;
 	count_circle = 0;
 	zebra_far_find = false;
@@ -639,7 +639,7 @@ void MainImage::update_image()
 	init();
 	find_edge_point();//找边界点
 	find_end_point();//找断点
-	if (state_out == straight || state_out == turn_state || (state_out == cone_find && (state_cone == left_block || state_cone == right_block))) edge_filter(10);
+	if (state_out == straight || state_out == turn_state || (state_out == bomb_find && (state_cone == left_block || state_cone == right_block))) edge_filter(10);
 	find_end_point();
 	end_filter();
 	judge_lost();
@@ -667,6 +667,8 @@ void MainImage::state_judge()
 	}
 	else if (ai_bomb) {
 		ai_bomb = false;
+		cerr<<"switch state to bomb_find"<<endl;
+		if (state_cone != bomb_out)state_out = bomb_find;
 	}
 	else if (ai_right_garage){
 		cerr<<"right garage!!"<<endl;
@@ -675,26 +677,27 @@ void MainImage::state_judge()
 	}
 	else if (ai_left_garage){
 		ai_left_garage = false;
+		cerr<<"switch state to left_garage_find"<<endl;
 		if (state_left_garage != left_garage_out)state_out = left_garage_find;
 	}
 	// if (store.cone_flag == false){
 	// 	state_out = straight;
 	// }
-	if (state_out == straight || state_out == turn_state)
+	if ((state_out == straight || state_out == turn_state))
 	{  
 		int b_count=0;
-		for(int i = IMGH-1; i > center_lost-5; i--){
-			uchar* row_b = store.image_mat_cone.ptr<uchar>(i);
-			uchar* row_r = store.image_mat.ptr<uchar>(i);
-			if(exist_left_edge_point[i]&& exist_right_edge_point[i]){
-				for(int j = left_edge_point[i]+2; j < right_edge_point[i]-2; j++){
+		for(int i = IMGH-1; i > MI.center_lost-5; i--){
+			uchar* row_b = MI.store.image_mat_cone.ptr<uchar>(i);
+			uchar* row_r = MI.store.image_mat.ptr<uchar>(i);
+			if(MI.exist_left_edge_point[i]&& MI.exist_right_edge_point[i]){
+				for(int j = MI.left_edge_point[i]+2; j < MI.right_edge_point[i]-2; j++){
 					cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
 					
 					if(row_b[j] == 0&&row_r[j]!=0){//&&val[0]<140
 						Point p;
 						p.x = j;
 						p.y = i;
-						right_cone_point.push_back(p);
+						MI.right_cone_point.push_back(p);
 						// cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
 						// int r = val[2];
 						// int g = val[1];
@@ -723,13 +726,15 @@ void MainImage::state_judge()
 			// 	break;
 			// }
 
-		}
-		cout<<"bcount"<<b_count<<endl;
-		if(b_count > 60){
-			cout<<"cone ppint find"<<b_count<<endl;;
-			state_out = cone_find;
-			// break;
 			}
+			cout<<"bcount"<<b_count<<endl;
+			if(b_count > Re.cone.cone_state_count){
+				cout<<"cone ppint find"<<b_count<<endl;;
+				MI.state_out = bomb_find;
+				MI.state_cone = judge_side;
+			}		
+			
+
 
 		if(state_out == turn_state)
 		{
@@ -758,16 +763,49 @@ void MainImage::state_judge()
 		// else if(store.cone_flag == true){
 		// 	state_out = cone_find;
 		// }
-		else if (r_circle_use && right_end_point.size() >= 6 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)
+		else if ((r_circle_use && right_end_point.size() >= 6 && right_branch_num >= 2 && abs(right_end_point[1].y - right_end_point[4].y) > 35)|| (abs(right_end_point[0].y-right_end_point[3].y)>35&& abs(right_end_point[0].y-right_end_point[1].y)>15&&right_end_point[0].y < IMGH-20 && right_end_point.size()==4&&left_end_point.size()==2&&(abs(left_end_point[0].y-left_end_point[1].y)>50)))//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		{
 			bool f = true;
 			int i;
-			for (i = right_end_point[1].y - 10; i > right_end_point[4].y - 1; i--) {
+			for (i = right_end_point[1].y - 10; i > right_end_point[4].y + 10; i--) {
 				if (!(exist_left_edge_point[i] && abs(left_edge_point[i] - left_edge_point[i + 1]) < 3)) {
 					f = false;
 					break;
 				}
 			}
+			if(right_end_point.size()==4){
+				for (i = right_end_point[1].y-2; i > right_end_point[1].y - 12; i--) {
+					uchar* this_row = store.image_mat.ptr(i); 
+					if (this_row[right_end_point[1].x]==0) {
+						f = false;
+						int jj = f;
+						cerr<<"first j"<<jj<<"point"<<endl;;
+						break;
+					}
+				}
+				uchar* this_row = store.image_mat.ptr(IMGH-5);
+				int w_count=0;
+				for(i = 0; i < IMGW-1; i++){
+					if(this_row[i]!=0)w_count++;
+					
+				}
+				cerr<<"white_count"<<w_count<<endl;
+				if(w_count<IMGW-37)f = false;
+				// for (i = (right_end_point[0].y+10>IMGH-1?IMGH-1:right_end_point[0].y+10); i > (right_end_point[0].y+5>IMGH-1?IMGH-1:right_end_point[0].y+5); i--) {
+				// 	uchar* this_row = store.image_mat.ptr(i); 
+				// 	for(int j = right_end_point[0].x; j > right_end_point[0].x-10; j--){
+				// 		if (this_row[j]==0) {
+				// 			cerr<<"i is"<<i << "j is"<< j<<endl;
+				// 			f = false;
+				// 			int jj = f;
+				// 			cerr<<"second j"<<jj<<endl;
+				// 			break;
+				// 		}
+				// 	}
+
+				// }
+			}
+
 			if (f) {
 				state_out = right_circle;
 			}
@@ -775,7 +813,7 @@ void MainImage::state_judge()
 		else if (l_circle_use && left_end_point.size() >= 6 && left_branch_num >= 2 && abs(left_end_point[1].y - left_end_point[4].y) > 35) {
 			bool f = true;
 			int i;
-			for (i = left_end_point[1].y - 10; i > left_end_point[4].y - 1; i--) {
+			for (i = left_end_point[1].y - 10; i > left_end_point[4].y + 10; i--) {
 				if (!(exist_right_edge_point[i] && abs(right_edge_point[i] - right_edge_point[i + 1]) < 3)) {
 					f = false;
 					break;
@@ -924,20 +962,13 @@ void MainImage::circle_pid_update(uchar cur_status, float& kp, float& kd, float&
 void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& slow_down_kd)
 {
 	switch (state_out) {
+	case left_garage_find:
 	case right_garage_find: {
 		kp = re.main.kp;
 		kd = re.main.kd;
 		ki = re.main.ki;
 		dv = re.main.dv;
-		slow_down_kd = re.main.slow_down_kd;
-		return;		
-	}
-	case left_garage_find: {
-		kp = re.main.kp;
-		kd = re.main.kd;
-		ki = re.main.ki;
-		dv = re.main.dv;
-		slow_down_kd = re.main.slow_down_kd;
+		slow_down_kd = re.garage.slow_down_kd;
 		return;		
 	}
 	case garage_out: {
@@ -983,14 +1014,23 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& 
 		}
 		return;
 	}
-	case cone_find: {
+	case bomb_find: {
 		switch(state_cone){
-			case judge_side:{
+			case judge_side:
+			case right_block:
+			case left_block:{
 			kp = re.cone.kp;
 			kd = re.cone.kd;
 			ki = re.cone.ki;
-			slow_down_kd = re.main.slow_down_kd;
+			slow_down_kd = re.garage.slow_down_kd;
 			return;				
+			}
+			case cone_slowdown:
+			{
+			kp = re.main.kp;
+			kd = re.main.kd;
+			ki = re.main.ki;
+			slow_down_kd = re.garage.slow_down_kd;				
 			}
 		}
 		return;
@@ -1034,7 +1074,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& 
 		kd = re.zebra.kd;
 		ki = re.zebra.ki;
 		dv = re.zebra.dv;
-		slow_down_kd = re.main.slow_down_kd;
+		slow_down_kd = re.garage.slow_down_kd;
 		return;
 	}
 	case hill_find: {
@@ -1045,6 +1085,7 @@ void MainImage::update_control(float& kp, float& kd, float& ki, int& dv, float& 
 		slow_down_kd = re.main.slow_down_kd;
 		return;
 	}
+
 	}
 }
 
@@ -1147,10 +1188,20 @@ void MainImage::mend_right_circle_in_circle()
 				}
 				ray(store.image_mat, p1, re.r_circle.in_circle_ray_ag2);
 				ray(store.image_mat, right_end_point[2], re.r_circle.in_circle_ray_ag3);
+				for (int j = right_end_point[2].y; j > 0; j--){
+					exist_left_edge_point[j] = false;
+					exist_right_edge_point[j] = false;
+
+				}
 			}
 		}
 		else {
 			ray(store.image_mat, right_end_point[0], re.r_circle.in_circle_ray_ag4);
+			for (int j = right_end_point[0].y; j > 0; j--){
+				exist_left_edge_point[j] = false;
+				exist_right_edge_point[j] = false;
+
+			}
 		}
 	}
 	else {
@@ -1366,17 +1417,17 @@ void MainImage::find_edge_point()
 	int last_left = 0;
 	int count = 0;
 	int m = 1;
-	if(state_out==cone_find&&state_cone==right_block){
+	if(state_out==bomb_find&&state_cone==right_block){
 		i, j, center = IMGW/10;
 		last_right = IMGW/2;
 		
-	}else if(state_out==cone_find&&state_cone==left_block){
+	}else if(state_out==bomb_find&&state_cone==left_block){
 		i, j, center = IMGW/10*9;
 		last_left = IMGW/2;		
 	}
 
 	uchar* r = mat.ptr<uchar>(IMGH - 1);           //指向最下面一行
-	if(state_out==cone_find&&state_cone==right_block){
+	if(state_out==bomb_find&&state_cone==right_block){
 		for (j = IMGW/10 + 1; j < IMGW; j++) {                 //中线向右找寻右边界
 			if (j == IMGW - 1) {
 				last_right = IMGW - 1;
@@ -1395,7 +1446,7 @@ void MainImage::find_edge_point()
 				break;
 			}
 		}
-	}else if(state_out==cone_find&&state_cone==left_block){
+	}else if(state_out==bomb_find&&state_cone==left_block){
 		for (j = IMGW/10*9 + 1; j < IMGW; j++) {                 //中线向右找寻右边界
 			if (j == IMGW - 1) {
 				last_right = IMGW - 1;
@@ -1436,10 +1487,10 @@ void MainImage::find_edge_point()
 	}
 	for (i = IMGH - 1; i > center_lost; i--) {                     //从下向上开始巡线
 		uchar* this_row = mat.ptr(i);  
-		if(state_out==cone_find&&state_cone==right_block){
+		if(state_out==bomb_find&&state_cone==right_block){
 			center = IMGW/10;
 
-		}else if(state_out==cone_find&&state_cone==left_block){
+		}else if(state_out==bomb_find&&state_cone==left_block){
 			center = IMGW/10*9;	
 		}                //指向第i行
 		if (this_row[center] == 0) {
@@ -1452,10 +1503,10 @@ void MainImage::find_edge_point()
 			}
 			while (true)
 			{
-				if(state_out==cone_find&&state_cone==right_block){
+				if(state_out==bomb_find&&state_cone==right_block){
 					center = IMGW/10;
 
-				}else if(state_out==cone_find&&state_cone==left_block){
+				}else if(state_out==bomb_find&&state_cone==left_block){
 					center = IMGW/10*9;	
 				}
 				//将中心点挪到白色位置
@@ -2400,7 +2451,7 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 				(state_out == left_circle) ? "left_circle" :
 				(state_out == turn_state) ? "turn" :
 				(state_out == start_state) ? "start_state" :
-				(state_out == cone_find) ? "cone_find" :
+				(state_out == bomb_find) ? "bomb_find" :
 	 			"other")),
 				textOrg, fontFace, fontScale, mainColor, thickness, 8);
 	textOrg.y += textSize.height + interval;
@@ -2441,7 +2492,7 @@ void MainImage::show(float dev, float angle_result, float speed, int current_spe
 		textOrg.y += textSize.height + interval;
 	}
 
-	if(state_out == cone_find)
+	if(state_out == bomb_find)
 	{
 		putText(store.image_show, "cone state: " + 
 		string(((MI.state_turn_state == cone_slowdown) ? "cone_slowdown" :
@@ -2912,7 +2963,7 @@ bool j_right_circle_in_circle(const MainImage& mi, uchar& state_in)
 				max = mi.right_edge_point[i];
 			}
 		}
-		if ((max != IMGW - 1 && max > IMGW - 30) || mi.right_end_point[1].y > IMGH - 30)return true;
+		if ((max != IMGW - 1 && max > IMGW - 30 && mi.right_end_point[0].y>IMGH-25) || mi.right_end_point[1].y > IMGH - 30)return true;
 	}
 	else return true;
 	return false;
@@ -2920,7 +2971,7 @@ bool j_right_circle_in_circle(const MainImage& mi, uchar& state_in)
 
 bool j_right_circle_inside_before(const MainImage& mi, uchar& state_in)
 {
-	if (mi.left_end_point.size() > 0 && mi.left_end_point[1].x > IMGW - 40) {
+	if (mi.left_end_point.size() > 0 && mi.left_end_point[1].x > IMGW - 60 && mi.left_end_point[0].y <IMGH-20) {//50, 30
 		state_in = right_circle_inside_before;
 		return true;
 	}
@@ -2956,7 +3007,7 @@ void j_right_circle_out_strai(const MainImage& mi, uchar& state_in)
 {
 	int count = 0;
 	//const uchar* r = mi.store.image_mat.ptr<uchar>(IMGH - mi.re.r_circle.out_strai_find_pos);
-	const uchar* r = mi.store.image_mat.ptr<uchar>(mi.left_end_point[1].y - 20);
+	const uchar* r = mi.store.image_mat.ptr<uchar>(mi.left_end_point[1].y - 10); //before .y-20
 	for (int i = 0; i < IMGW; i++) {
 		if (r[i] != 0)count++;
 		else break;
@@ -3471,6 +3522,7 @@ void MainImage::find_far_zebra() {
 			if (r[j] != r[j + 1]) count++;
 			if ((r[j] != 0 && r[j + 1] == 0 && r[j + 2] != 0) || (r[j] != 0 && r[j + 1] == 0 && r[j + 2] == 0 && r[j + 3] != 0)) count = count - 2;
 		}
+		cout<<"zebra count"<<count<<endl;
 		if (count >= 10) {
 			r_count++;
 			if (r_count >= 3) {
@@ -3538,7 +3590,7 @@ void MainImage::judge_cone_side(){
 	int start_left, start_right = 0;
 	exist_right_cone = false;
 	exist_left_cone = false;
-	for(int i = IMGH-1; i > center_lost; i--){
+	for(int i = IMGH-Re.cone.judge_down_scope; i > (center_lost<Re.cone.judge_up_scope?Re.cone.judge_up_scope:center_lost); i--){
 		uchar* row_b = store.image_mat_cone.ptr<uchar>(i);
 		uchar* row_r = store.image_mat.ptr<uchar>(i);
 		// if(b_count>35){
@@ -3671,22 +3723,24 @@ void MainImage::judge_cone_side(){
 				}
 			}
 		}
-		if(left_b_count>28){
+		// cerr<<"left_b_count"<<left_b_count<<endl;
+		// cerr<<"right_b_count"<<right_b_count<<endl;
+		if(left_b_count>Re.cone.b_cone_count){
 			exist_left_cone = true;
 		}
-		if(right_b_count>28){
+		if(right_b_count>Re.cone.b_cone_count){
 			exist_right_cone = true;
 		}
 
 	}
 	// if(right_b_count>25&&left_b_count>25){
-	if((right_cone_y/right_b_count)>(left_cone_y/left_b_count)&&exist_right_cone){
+	if((right_cone_y/right_b_count)>(left_cone_y/left_b_count)&&exist_right_cone&&last_right_y<80){
 		right_cone_first = true;
 		left_cone_first = false;
 		// state_cone = first_right_cone;
 
 	}
-	else if((right_cone_y/right_b_count)<(left_cone_y/left_b_count)&&exist_left_cone){
+	else if((right_cone_y/right_b_count)<(left_cone_y/left_b_count)&&exist_left_cone&&last_left_y<80){
 		// state_cone = first_left_cone;
 		left_cone_first = true;
 		right_cone_first = false;
@@ -3715,23 +3769,25 @@ void MainImage::judge_cone_side(){
 		// cone_end_point.y = single_left_cone.y+10;
 		for(int i = IMGH-1; i >last_left_y ; i--){
 			exist_left_edge_point[i] = true;
-			left_edge_point[i] = center_point[i]+10;
+			left_edge_point[i] = center_point[i]+2;
 		}
 
-		// for(int i = start_right; i > last_right_y; i--){
+		// for(int i = last_left_y; i > last_left_y-20; i--){
+		// 	exist_right_edge_point[i] = true;
 		// 	right_edge_point[i] = center_point[i];
 		// 	// cerr<<"hey"<<endl;
 		// }
-	}else{
+	}else if(right_cone_first){
 		cone_edge_point.x = single_right_cone.x;
 		cone_edge_point.y = single_right_cone.y;
 		// cone_end_point.x = right_edge_point[single_left_cone.y+10];
 		// cone_end_point.y = single_left_cone.y+10;
 		for(int i = IMGH-1; i > last_right_y; i--){
 			exist_right_edge_point[i] = true;
-			right_edge_point[i] = center_point[i]-10;
+			right_edge_point[i] = center_point[i]-2;
 		}
-		// for(int i = start_left; i > last_left_y; i--){
+		// for(int i = last_right_y; i > last_right_y-20; i--){
+		// 	exist_left_edge_point[i] = true;
 		// 	left_edge_point[i] = center_point[i];
 		// }
 

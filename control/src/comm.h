@@ -9,8 +9,8 @@
 // CRC-8 polynomial: x^8 + x^2 + x^1 + 1 (0x07)
 #define POLYNOMIAL 0x07
 #define INITIAL_REMAINDER 0x00
-#define ANGLE_TRANS_COUNT 15
-#define SPEED_TRANS_COUNT 10
+#define ANGLE_TRANS_COUNT 20
+#define SPEED_TRANS_COUNT 20
 #define ENC_SPEED_COUNT 10
 #define BATCH_TRANS_BEGIN 0xf8
 // #define SPEED_TRANS_BEGIN 0xf3

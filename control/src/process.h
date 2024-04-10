@@ -68,6 +68,7 @@ public:
 
 	bool zebra_far_find;
 	bool zebra_near_find;
+	int stop_count;
 
 	Point single_left_cone;
 	Point single_right_cone;
@@ -141,6 +142,7 @@ public:
 	float speed_deviation_near;
 
 	int end_count;
+	int garage_inside_count;
 
 
 

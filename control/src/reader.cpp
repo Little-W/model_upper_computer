@@ -148,6 +148,7 @@ Reader::Reader(string path) {
     n_hill=root["hill"];
     n_turn=root["turn"];
     n_cone=root["cone"];
+    n_garage=root["garage"];
     //set
     set.video_save=n_set.get<bool>("video_save");
     set.color=n_set.get<bool>("color");
@@ -495,6 +496,25 @@ Reader::Reader(string path) {
     cone.up_scope = n_cone.get<int>("up_scope");
     cone.down_scope = n_cone.get<int>("down_scope");
     cone.garage_dist = n_cone.get<int>("garage_dist");
+    cone.judge_up_scope = n_cone.get<int>("judge_up_scope");
+    cone.judge_down_scope = n_cone.get<int>("judge_down_scope");
+    cone.b_cone_count = n_cone.get<int>("b_cone_count");
+    cone.cone_state_count = n_cone.get<int>("cone_state_count");
+
+
+    garage.slowdown_enhance_bezier_p0_ctrl_x = n_garage.get<float>("slowdown_enhance_bezier_p0_ctrl_x");
+    garage.slowdown_enhance_bezier_p0_ctrl_y = n_garage.get<float>("slowdown_enhance_bezier_p0_ctrl_y");
+    garage.slowdown_enhance_bezier_p1_ctrl_x = n_garage.get<float>("slowdown_enhance_bezier_p1_ctrl_x");
+    garage.slowdown_enhance_bezier_p1_ctrl_y = n_garage.get<float>("slowdown_enhance_bezier_p1_ctrl_y");
+    garage.slow_down_kd = n_garage.get<float>("slow_down_kd");
+    garage.find_speed = n_garage.get<int>("find_speed");
+    garage.out_speed = n_garage.get<int>("out_speed");
+    garage.right_out_angle = n_garage.get<int>("right_out_angle");
+    garage.left_out_angle = n_garage.get<int>("left_out_angle");
+    garage.into_thresh = n_garage.get<int>("into_thresh");
+    garage.top_y = n_garage.get<int>("top_y");
+    garage.into_speed = n_garage.get<int>("into_speed");
+
 }
 
 struct Reader::pidv Reader::get_pidv(int state_out, int state_in) {

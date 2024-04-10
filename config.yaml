@@ -11,10 +11,10 @@ set:
     cut_point_y: 70
     cut_w: 640
     cut_h: 350
-    ai_cut_x: 20
+    ai_cut_x: 10
     ai_cut_y: 30
-    ai_w: 600
-    ai_h: 400
+    ai_w: 630
+    ai_h: 430
 
 #    
 main:
@@ -65,7 +65,7 @@ main:
     dy_kp_max: 27
     dy_kp_threshold: 30 #10 #62
     dy_kp_coef: 2
-    dy_kp_exp: 2.8
+    dy_kp_exp: 1.5
     inc_dy_kp_threshold: 20 #30 #62
     inc_dy_kp_coef: 0.4
     inc_dy_kp_exp: 2
@@ -95,8 +95,8 @@ main:
     #-速度动态调整前瞻的阈值
     angle_enc_forward_threshold: 65 #120
     #-动态调整中线位置
-    angle_enc_forward_dist_coef: 8 #0.0015
-    angle_enc_forward_dist_exp: 1.87 #1
+    angle_enc_forward_dist_coef: 10 #0.0015
+    angle_enc_forward_dist_exp: 1.6 #1
     angle_max_enc_forward_dist: 100
     angle_dy_forward_dist_kp: 1
     angle_dy_forward_dist_kd: 0.1
@@ -136,7 +136,7 @@ main:
     v_right_circle: [60,90] #[60,70]
     v_left_circle: [175,90] #[175,70]
 
-    cone_speed: 2
+    cone_speed: 4
     cone_slowdown_thresh: 20
     cone_trapezium_long: 2
     cone_trapezium_slope: 0.7
@@ -148,9 +148,9 @@ turn:
     turn_slope_thresh: 0.7
     turn_out_slope_thresh : 0.55
     inside_centerlost_thresh: 90
-    speed_ground: 7
-    speed_ceiling: 14
-    speed_in: 7
+    speed_ground: 8.5 #7
+    speed_ceiling: 13
+    speed_in: 8.5
     motor_power: 25
     speed_ctrl_slope_coef: 15
     speed_ctrl_deviation_coef: 0.9
@@ -159,13 +159,13 @@ turn:
     sc_kp: 1
     sc_ki: 0
     sc_kd: 5
-    dy_speed_bezier_p0_ctrl_x: 16.6
-    dy_speed_bezier_p0_ctrl_y: 13.94
-    dy_speed_bezier_p1_ctrl_x: 13.95
-    dy_speed_bezier_p1_ctrl_y: 9.6
+    dy_speed_bezier_p0_ctrl_x: 15.8
+    dy_speed_bezier_p0_ctrl_y: 9.2
+    dy_speed_bezier_p1_ctrl_x: 56.7
+    dy_speed_bezier_p1_ctrl_y: 8.6
     max_v_diff: 80 #40
     min_v_diff: 5
-    slow_down_kd: 1.5
+    slow_down_kd: 1.1 #1.5
     slowdown_enhance_bezier_p0_ctrl_x: 227
     slowdown_enhance_bezier_p0_ctrl_y: 5
     slowdown_enhance_bezier_p1_ctrl_x: 97.9
@@ -182,7 +182,7 @@ right_circle:
     ki: 0
     kd: 20 #20 #4.54
     dv: 0
-    speed: 7.5
+    speed: 9
     circle_slow_down_kd: 0.6
     slowdown_enhance_bezier_p0_ctrl_x: 227
     slowdown_enhance_bezier_p0_ctrl_y: 5
@@ -206,7 +206,7 @@ right_circle:
         kd: 20 #4.54
         dv: 0
         ray_ag: 2
-        speed: 7.8
+        speed: 9.5
     in_strai:
         kp: 12 #1.6
         ki: 0
@@ -236,7 +236,7 @@ right_circle:
         kd: 45 #4.54
         dv: 0 #2
     out_find:
-        kp: 15 #1.6
+        kp: 19 #1.6
         ki: 0
         kd: 0 #4.54
         dv: 0 #2
@@ -416,7 +416,7 @@ hill:
     frame: 26
 #
 cone:
-    cone_kp: 20
+    cone_kp: 12.0
     cone_kd: 20
     cone_ki: 0
     dist: 20
@@ -424,8 +424,8 @@ cone:
     down_scope: 4
     garage_dist: 40
     judge_up_scope: 1
-    judge_down_scope: 45
-    b_cone_count: 25
+    judge_down_scope: 5
+    b_cone_count: 22
     cone_state_count: 50
 
 garage:
@@ -433,11 +433,11 @@ garage:
     slowdown_enhance_bezier_p0_ctrl_y: 430
     slowdown_enhance_bezier_p1_ctrl_x: 134
     slowdown_enhance_bezier_p1_ctrl_y: 169.6
-    slow_down_kd: 1
-    find_speed: 5
-    out_speed: 5
-    right_out_angle: -150
-    left_out_angle: 150
-    into_thresh: 45
-    top_y: 110
-    into_speed: 5
+    slow_down_kd: 0.5
+    find_speed: 6
+    out_speed: 9
+    right_out_angle: -100
+    left_out_angle: 100
+    into_thresh: 15
+    top_y: 42
+    into_speed: 6

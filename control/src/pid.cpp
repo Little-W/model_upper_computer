@@ -206,7 +206,8 @@ out_t SpeedControl::output(data_t input) {
 /// @return speed_result
 out_t SpeedControl::output_reduced(data_t speed_result,data_t real_speed_enc,float slow_down_kd){
 	// 非减速状态，返回原值
-	if(real_speed_enc <= speed_result * ENC_SPEED_SCALE){
+	if(real_speed_enc - (speed_result * ENC_SPEED_SCALE) < 20)
+	{
 		return speed_result;
 	} 
 	// 初始化边界值和控制点
@@ -216,8 +217,10 @@ out_t SpeedControl::output_reduced(data_t speed_result,data_t real_speed_enc,flo
 	float p1_ctrl_x = speed_slow_down_enhance_bezier_p1_ctrl_x ,p1_ctrl_y = speed_slow_down_enhance_bezier_p1_ctrl_y;
 
 	float bezier_x = abs(real_speed_enc) > p1_x ? p1_x : abs(real_speed_enc);
+	// cerr << "p1" << endl;
 	float bezier_t = bezier_get_t(bezier_x,0,1,p0_x,p0_ctrl_x,p1_ctrl_x,p1_x);
 
+	// cerr << "p2" << endl;
 	float bezier_out = (pow(1.0 - bezier_t, 3) * p0_y) + (3.0 * bezier_t * pow(1.0 - bezier_t, 2) * p0_ctrl_y) + (3.0 * pow(bezier_t, 2) * (1 - bezier_t) * p1_ctrl_y) + (pow(bezier_t, 3) * p1_y);
 
 	float speed_bias = bezier_out * slow_down_kd / 100.0 * (real_speed_enc - speed_result * ENC_SPEED_SCALE) / ENC_SPEED_SCALE;

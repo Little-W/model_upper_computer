@@ -36,6 +36,17 @@ SpeedControl SC_turn (Re.turn.min_v_diff, Re.turn.max_v_diff, Re.main.max_v, Re.
 						Re.turn.slowdown_enhance_bezier_p1_ctrl_x,Re.turn.slowdown_enhance_bezier_p1_ctrl_y									
 						);
 
+
+SpeedControl SC_garage (Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v,
+				Re.main.sc_kp,Re.main.sc_ki,Re.main.sc_kd,
+				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
+				Re.main.dy_speed_bezier_p1_ctrl_x,Re.main.dy_speed_bezier_p1_ctrl_y,
+				Re.garage.slowdown_enhance_bezier_p0_ctrl_x,Re.garage.slowdown_enhance_bezier_p0_ctrl_y,
+				Re.garage.slowdown_enhance_bezier_p1_ctrl_x,Re.garage.slowdown_enhance_bezier_p1_ctrl_y,
+				Re.main.slowdown_smooth_bezier_p0_ctrl_x,Re.main.slowdown_smooth_bezier_p0_ctrl_y,
+				Re.main.slowdown_enhance_bezier_p1_ctrl_x,Re.main.slowdown_enhance_bezier_p1_ctrl_y				
+				);
+
 SpeedControl SC_circel_r(Re.main.min_v_diff, Re.main.max_v_diff, Re.main.max_v, Re.main.min_v,
 				Re.main.sc_kp,Re.main.sc_ki,Re.main.sc_kd,
 				Re.main.dy_speed_bezier_p0_ctrl_x,Re.main.dy_speed_bezier_p0_ctrl_y,
@@ -164,8 +175,8 @@ int main()
 	//初始化保存的视频文件Open操作
 	if (Re.set.video_save)
 	{
-		if (Re.set.color)MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 60, cv::Size(300, 200));
-		else MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 60, cv::Size(320, 240));
+		if (Re.set.color)MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(300, 200));
+		else MI.store.wri.open("Word.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 30, cv::Size(320, 240));
 		MI.store.Writer_Exist = true;
 	}
 
@@ -188,13 +199,13 @@ int main()
 
 		//更新处理后的图像和特征点查询结果
 		MI.update_image();
-		if(ai_div)
-		{
+		// if(ai_div)
+		// {
 			semP(image_sem);
 			matWrite(image_addr, MI.store.image_BGR);
 			semV(image_sem);
-		}
-		ai_div = ~ai_div;
+		// }
+		// ai_div = ~ai_div;
 	
 		// // TEST 上位机通信测试代码
 		// for(int i = -1023; i <= 1023; i+=5)
@@ -237,10 +248,10 @@ int main()
 			MI.ai_bomb = false;
 			MI.ai_right_garage = false;
 			MI.ai_left_garage = false;
-			if (addr[0] == 'B') { addr[0] = 'N'; MI.ai_bridge = true; }
-			else if (addr[0] == 'O') { addr[0] = 'N'; MI.ai_bomb = true; }
-			else if (addr[0] == 'R') { addr[0] = 'N'; MI.ai_right_garage = true; }
-			else if (addr[0] == 'L') { addr[0] = 'N'; MI.ai_left_garage = true; }
+			if (addr[0] == 'B') { addr[0] = 'N'; MI.ai_bridge = true; cerr<<"get ai_bridge signal"<<endl;}
+			else if (addr[0] == 'O') { addr[0] = 'N'; MI.ai_bomb = true; cerr<<"get ai_bomb signal"<<endl;}
+			else if (addr[0] == 'R') { addr[0] = 'N'; MI.ai_right_garage = true; cerr<<"get ai_right_garage signal"<<endl;}
+			else if (addr[0] == 'L') { addr[0] = 'N'; MI.ai_left_garage = true; cerr<<"get ai_left_garage signal"<<endl;}
 			semV(result_sem);
 		}
 		else
@@ -320,7 +331,7 @@ int main()
 					Point record;
 					int cone_count = 0;
 					int cone_point = 0;
-					for(int i = IMGH-1; i >  IMGH-30; i--){
+					for(int i = IMGH-1; i >  IMGH-45; i--){
 						uchar* row_r = MI.store.image_mat.ptr<uchar>(i);
 						uchar* row_b = MI.store.image_mat_cone.ptr<uchar>(i);
 						int cone_flag = 0;
@@ -344,8 +355,8 @@ int main()
 							    // cout<<"r "<<r<<" g "<<g<<" b "<<b<<endl;	
 								// cout<<i<<endl;
 								// cout<< "cone flag" << cone_flag << endl;
-								if(cone_count>30){
-									if(i > IMGH-20){
+								if(cone_count>25){
+									if(i > IMGH-Re.garage.into_thresh){
 										MI.top_cone.x = j;
 										MI.top_cone.y = i;
 										
@@ -480,7 +491,7 @@ int main()
 						}
 					}
 					MI.find_center_in_garage(MI.top_cone);
-					if(MI.top_cone.y > 50){
+					if(MI.top_cone.y > Re.garage.top_y){
 						MI.state_right_garage = right_garage_stoped;
 						MI.garage_count = 0;
 						break;
@@ -526,7 +537,7 @@ int main()
 			
 				case right_garage_stoped: {
 					MI.garage_count++;
-					if(MI.garage_count>50){
+					if(MI.garage_count>1){
 						MI.state_right_garage = right_garage_try_out;
 						break;
 					}
@@ -597,7 +608,7 @@ int main()
 					Point record;
 					int cone_count = 0;
 					int cone_point = 0;
-					for(int i = IMGH-1; i >  IMGH-30; i--){
+					for(int i = IMGH-1; i >  IMGH-45; i--){
 						uchar* row_r = MI.store.image_mat.ptr<uchar>(i);
 						uchar* row_b = MI.store.image_mat_cone.ptr<uchar>(i);
 						int cone_flag = 0;
@@ -621,8 +632,8 @@ int main()
 									// cout<<"r "<<r<<" g "<<g<<" b "<<b<<endl;	
 									// cout<<i<<endl;
 									// cout<< "cone flag" << cone_flag << endl;
-									if(cone_count>30){
-										if(i > IMGH-40){
+									if(cone_count>25){
+										if(i > IMGH-Re.garage.into_thresh){
 											MI.top_cone.x = j;
 											MI.top_cone.y = i;
 											
@@ -726,7 +737,7 @@ int main()
 					MI.top_cone.y = IMGH-1;
 					Point record;
 					// int cone_point = 0;
-					for(int i = IMGH-1; i > IMGH/3; i--){
+					for(int i = IMGH-1; i > IMGH/3+5; i--){
 						uchar* row_r = MI.store.image_mat.ptr<uchar>(i);
 						uchar* row_b = MI.store.image_mat_cone.ptr<uchar>(i);
 						int cone_flag = 0;
@@ -759,7 +770,7 @@ int main()
 						}
 					}
 					MI.find_center_in_garage(MI.top_cone);
-					if(MI.top_cone.y > 50){
+					if(MI.top_cone.y > Re.garage.top_y){
 						MI.state_left_garage = left_garage_stoped;
 						MI.garage_count = 0;
 						break;
@@ -805,15 +816,17 @@ int main()
 			
 				case left_garage_stoped: {
 					MI.garage_count++;
-					if(MI.garage_count>50){
+					if(MI.garage_count>1){
 						MI.state_left_garage = left_garage_try_out;
 						break;
 					}
 					break;
 				}
 				case left_garage_try_out: {
-					if(MI.center_lost < 30&&MI.left_end_point[0].x > 100){
+					// MI.garage_inside_count++;
+					if(MI.center_lost < 30&&MI.left_end_point[0].x < 60){
 						MI.state_left_garage = left_garage_out;
+						// MI.garage_inside_count=0;
 						MI.state_out = straight;
 						break;
 					}
@@ -824,8 +837,60 @@ int main()
 			}
 			break;
 		}
-		case cone_find: {
+		case bomb_find: {
 			switch (MI.state_cone){
+				case cone_slowdown:
+				{
+				MI.judge_cone_side();
+				int b_count=0;
+				for(int i = IMGH-1; i > MI.center_lost-5; i--){
+					uchar* row_b = MI.store.image_mat_cone.ptr<uchar>(i);
+					uchar* row_r = MI.store.image_mat.ptr<uchar>(i);
+					if(MI.exist_left_edge_point[i]&& MI.exist_right_edge_point[i]){
+						for(int j = MI.left_edge_point[i]+2; j < MI.right_edge_point[i]-2; j++){
+							cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
+							
+							if(row_b[j] == 0&&row_r[j]!=0){//&&val[0]<140
+								Point p;
+								p.x = j;
+								p.y = i;
+								MI.right_cone_point.push_back(p);
+								// cv::Vec3b val = MI.store.image_BGR_small.at<cv::Vec3b>(i, j);
+								// int r = val[2];
+								// int g = val[1];
+								// int b = val[0];
+								// cerr<<"b"<<b<<"g"<<g<<"r"<<r<<endl;
+								b_count++;
+							}
+							// if(val[0]<=150 && val[1]>=120 && val[2]>=120){
+							// 	yellow_count++;
+							// }
+							// if(val[0]< 150){
+							// int r = val[2];
+							// int g = val[1];
+							// int b = val[0];
+							// cout<<"b"<<b<<"g"<<g<<"r"<<r<<endl;
+							// }
+
+							// if(b_count > 10){
+							// 	cout<<"cone ppint find"<<b_count<<endl;;
+							// 	state_out = cone_find;
+							// 	// break;
+							// }
+						}
+					}
+					// if(state_out == cone_find){
+					// 	break;
+					// }
+
+					}
+					cout<<"bcount"<<b_count<<endl;
+					if(b_count > Re.cone.cone_state_count){
+						cout<<"cone ppint find"<<b_count<<endl;;
+						MI.state_cone = judge_side;
+					}		
+					break;
+				}
 				case judge_side:
 				{
 					MI.judge_cone_side();
@@ -839,7 +904,7 @@ int main()
 					MI.find_end_point();
 					if(MI.right_end_point.size()<3){
 						MI.state_out = straight;
-						MI.state_cone = judge_side;
+						MI.state_cone = bomb_out;
 						break;
 					}
 					int right_edge_flag;
@@ -865,7 +930,7 @@ int main()
 					MI.find_end_point();
 					if(MI.left_end_point.size()<3){
 						MI.state_out = straight;
-						MI.state_cone = judge_side;
+						MI.state_cone = bomb_out;
 						break;
 					}
 					int left_edge_flag;
@@ -1162,12 +1227,16 @@ int main()
 			}
 			case right_circle_out_strai: {
 				//MI.mend_trunk();
-				Point p1, p2;
+				Point p1, p2, p3;
 				p1.x = (MI.left_end_point[0].x + MI.left_end_point[1].x) / 2;
 				p1.y = (MI.left_end_point[0].y + MI.left_end_point[1].y) / 2;
 				p2.x = 0;
 				p2.y = IMGH - 1;
+				p3.x = IMGW/2+20;
+				p3.y = IMGH-50;
+
 				line(MI.store.image_mat, p1, p2);
+				line(MI.store.image_mat, p3, p2);///////////////////////////////////////////
 				line(MI.store.image_mat, MI.right_end_point[0], MI.right_end_point[1]);
 				line(MI.store.image_mat, MI.right_end_point[1], MI.right_end_point[2]);
 				if (MI.left_end_point.size() != 0 && (MI.left_end_point[0].y > IMGH - 10 || MI.left_end_point[1].x < IMGW/2) && MI.left_end_point[1].y < IMGH - 40) {
@@ -1437,13 +1506,14 @@ int main()
 				else{
 					MI.end_count++;
 				}
-				if(MI.end_count > 5){
+				if(MI.end_count > 1){
 					MI.state_end_line = race_end;
 				}
 				break;
 			}
 			case race_end: {
-				stop = true;
+				MI.stop_count++;
+				if(MI.stop_count>500)stop = true;
 				break;
 			}
 			default:
@@ -1453,7 +1523,7 @@ int main()
 		}
 		}
 		//重补线
-		if (MI.state_out != right_garage_find && MI.state_out != left_garage_find && MI.state_out != hump_find && MI.state_out!=cone_find&&MI.state_out != state_end) {
+		if (MI.state_out != right_garage_find && MI.state_out != left_garage_find && MI.state_out != hump_find && MI.state_out!=bomb_find&&MI.state_out != state_end) {
 			MI.refind_edge_point();
 			MI.find_center();
 		}
@@ -1505,7 +1575,7 @@ int main()
 			if(MI.state_right_garage == right_garage_inside)
 			{
 				angle_result = AC.output(angle_deviation);
-				speed_result = (MI.top_cone.y - 50) / 2; //5;
+				speed_result = abs(50 - MI.top_cone.y) / 2; //5;
 				MI.garage_speed.push_back(speed_result);
 				MI.garage_angle.push_back(angle_result);	
 			}
@@ -1514,26 +1584,29 @@ int main()
 				speed_result = 0;				
 			}
 			else if(MI.state_right_garage == right_garage_try_out){
-				if(MI.garage_speed.size()==1||MI.garage_angle.size()==1){
-					angle_result = MI.garage_angle.back();
-					speed_result = -MI.garage_speed.back();						
-				}
-				else{
-					angle_result = MI.garage_angle.back();
-					speed_result = -MI.garage_speed.back();	
-					MI.garage_speed.pop_back();
-					MI.garage_angle.pop_back();	
-				}
+				// if(MI.garage_speed.size()==1||MI.garage_angle.size()==1){
+				// 	angle_result = MI.garage_angle.back();
+				// 	speed_result = -MI.garage_speed.back();						
+				// }
+				// else{
+				// 	angle_result = MI.garage_angle.back();
+				// 	speed_result = -MI.garage_speed.back();	
+				// 	MI.garage_speed.pop_back();
+				// 	MI.garage_angle.pop_back();	
+				// }
+				angle_result = Re.garage.right_out_angle;
+				speed_result = -Re.garage.into_speed;
 			}
 			else if(MI.state_right_garage == right_garage_into){
 			angle_result = AC.output(angle_deviation);
-			speed_result = 5; //SC.output(speed_deviation);
+			speed_result = Re.garage.into_speed;//SC.output(speed_deviation);//3; //
 			MI.garage_speed.push_back(speed_result);
-			MI.garage_angle.push_back(angle_result);		
+			MI.garage_angle.push_back(angle_result);	
+	
 			}
 			else if(MI.state_right_garage == right_garage_before){
 			angle_result = AC.output(angle_deviation);
-			speed_result = 5; //SC.output(speed_deviation);				
+			speed_result = Re.garage.find_speed;//SC.output(speed_deviation);	//3; //			
 			}
 			else{
 			angle_result = AC.output(angle_deviation);
@@ -1544,45 +1617,47 @@ int main()
 			if(MI.state_left_garage == left_garage_inside)
 			{
 				angle_result = AC.output(angle_deviation);
-				speed_result = (MI.top_cone.y - 50) / 2; //5;
+				speed_result = abs(50 - MI.top_cone.y); // 2; //5;
 				MI.garage_speed.push_back(speed_result);
-				MI.garage_angle.push_back(angle_result);	
+				MI.garage_angle.push_back(angle_result);		
 			}
 			else if(MI.state_left_garage == left_garage_stoped){
 				angle_result = 0;
 				speed_result = 0;				
 			}
 			else if(MI.state_left_garage == left_garage_try_out){
-				if(MI.garage_speed.size()==1||MI.garage_angle.size()==1){
-					angle_result = MI.garage_angle.back();
-					speed_result = -MI.garage_speed.back();						
-				}
-				else{
-					angle_result = MI.garage_angle.back();
-					speed_result = -MI.garage_speed.back();	
-					MI.garage_speed.pop_back();
-					MI.garage_angle.pop_back();	
-				}
+				// if(MI.garage_speed.size()==1||MI.garage_angle.size()==1){
+				// 	angle_result = MI.garage_angle.back();
+				// 	speed_result = -MI.garage_speed.back();						
+				// }
+				// else{
+				// 	angle_result = MI.garage_angle.back();
+				// 	speed_result = -MI.garage_speed.back();	
+				// 	MI.garage_speed.pop_back();
+				// 	MI.garage_angle.pop_back();	
+				// }
+				angle_result = Re.garage.left_out_angle;
+				speed_result = -Re.garage.into_speed;
 			}
 			else if(MI.state_left_garage == left_garage_into){
 			angle_result = AC.output(angle_deviation);
-			speed_result = 5; //SC.output(speed_deviation);
+			speed_result = Re.garage.into_speed;//5;//SC.output(speed_deviation); //3; //
 			MI.garage_speed.push_back(speed_result);
 			MI.garage_angle.push_back(angle_result);		
 			}
 			else if(MI.state_left_garage == left_garage_before){
 			angle_result = AC.output(angle_deviation);
-			speed_result = 5; //SC.output(speed_deviation);				
+			speed_result = Re.garage.find_speed;;//SC.output(speed_deviation);	//2; //			
 			}
 			else{
 			angle_result = AC.output(angle_deviation);
 			speed_result = SC.output(speed_deviation);		
 			}
 		}
-		else if (MI.state_out == cone_find){
+		else if (MI.state_out == bomb_find){
 			angle_result = AC.output(angle_deviation);
 			
-			if(MI.state_cone == cone_slowdown|| MI.state_cone == judge_side || MI.state_cone == right_block || MI.state_cone == left_block)
+			if(MI.state_cone == cone_slowdown|| MI.state_cone == judge_side || MI.state_cone == right_block || MI.state_cone == left_block || MI.state_cone == cone_slowdown)
 			{
 				speed_result = Re.main.cone_speed;
 			}
@@ -1639,6 +1714,10 @@ int main()
 			speed_result = Re.end.end_speed;//Re.end.v_left_garage.second;
 			// }
 		}
+		else if(MI.state_out == state_end && MI.state_end_line == race_end){
+			angle_result = AC.output(angle_deviation);;//Re.end.end_angle; // Re.end.v_left_garage.first;
+			speed_result = 0;//Re.end.v_left_garage.second;
+		}
 		// else if (MI.state_out == garage_find && MI.state_in_garage == garage_in) {
 		// 	// int start_left = Re.start.left;
 		// 	// if (start_left) {
@@ -1694,7 +1773,20 @@ int main()
 
 		//通过增量提升刹车性能
 		
-		speed_result = SC.output_reduced(speed_result,real_speed_enc,slow_down_kd);
+		if (speed_result==0 || MI.state_out == bomb_find)//MI.state_out == right_garage_find || MI.state_out == left_garage_find&&
+		{
+		
+			speed_result = SC_garage.output_reduced(speed_result,real_speed_enc,slow_down_kd);
+		}
+		else if(MI.state_out == turn_state)
+		{
+			speed_result = SC_turn.output_reduced(speed_result,real_speed_enc,slow_down_kd);
+		}
+		else
+		{
+			speed_result = SC.output_reduced(speed_result,real_speed_enc,slow_down_kd);
+		}
+		
 
 		if (!Re.set.motor_use)speed_result = 0;
 		//环岛计数
@@ -1772,14 +1864,14 @@ int main()
 			{
 				break;
 			}
-			case farm_find:
+			case bomb_find:
 			{
-				switch (MI.state_farm)
+				switch (MI.state_cone)
 				{
-				case farm_in_find: {cout << "farm_in_find" << endl; break; }
-				case farm_inside: {cout << "farm_inside" << endl; break; }
-				case farm_out_find: {cout << "farm_out_find" << endl; break; }
-				case farm_out: {cout << "farm_out" << endl; break; }
+				case cone_slowdown: {cout << "cone_slowdown" << endl; break; }
+				case judge_side: {cout << "judge_side" << endl; break; }
+				case right_block: {cout << "right_block" << endl; break; }
+				case left_block: {cout << "left_block" << endl; break; }
 				}
 				break;
 			}
